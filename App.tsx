@@ -30,9 +30,11 @@ const AppContent: React.FC = () => {
   
   useEffect(() => {
     // Carrega o estado do som do localStorage apenas no cliente
-    const stored = localStorage.getItem("soundEnabled")
-    if (stored !== null) {
-      setSoundEnabled(stored === "true")
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem("soundEnabled")
+      if (stored !== null) {
+        setSoundEnabled(stored === "true")
+      }
     }
   }, [])
 
