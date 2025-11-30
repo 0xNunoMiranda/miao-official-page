@@ -1,7 +1,10 @@
+"use client"
+
 import type React from "react"
 import { Send, Twitter, Instagram, BarChart3, Rocket, Wrench, Gamepad2, ArrowRight } from "lucide-react"
 import SnowCap from "./SnowCap"
 import SnowEffect from "./SnowEffect"
+import { useLanguage } from "../lib/language-context"
 
 interface HeroProps {
   onOpenGames?: () => void
@@ -10,11 +13,13 @@ interface HeroProps {
 }
 
 const Hero: React.FC<HeroProps> = ({ onOpenGames, onOpenTools, isChristmasMode = false }) => {
+  const { t } = useLanguage()
+
   const actionItems = [
     {
-      title: "Dexscreen",
-      desc: "Live Charts",
-      action: "VIEW",
+      title: t("hero.dexscreen"),
+      desc: t("hero.liveCharts"),
+      action: t("hero.view"),
       href: "#",
       type: "link",
       bgColor: "bg-[#8b5cf6]",
@@ -22,9 +27,9 @@ const Hero: React.FC<HeroProps> = ({ onOpenGames, onOpenTools, isChristmasMode =
       icon: <BarChart3 size={28} strokeWidth={2.5} />,
     },
     {
-      title: "PumpFun",
-      desc: "Fair Launch",
-      action: "APE IN",
+      title: t("hero.pumpfun"),
+      desc: t("hero.fairLaunch"),
+      action: t("hero.apeIn"),
       href: "#",
       type: "link",
       bgColor: "bg-[var(--brand)]",
@@ -32,9 +37,9 @@ const Hero: React.FC<HeroProps> = ({ onOpenGames, onOpenTools, isChristmasMode =
       icon: <Rocket size={28} strokeWidth={2.5} />,
     },
     {
-      title: "MIAO Tools",
-      desc: "Utilities",
-      action: "OPEN",
+      title: t("hero.tools"),
+      desc: t("hero.utilities"),
+      action: t("hero.open"),
       onClick: onOpenTools,
       type: "button",
       bgColor: "bg-[var(--duo-blue)]",
@@ -42,9 +47,9 @@ const Hero: React.FC<HeroProps> = ({ onOpenGames, onOpenTools, isChristmasMode =
       icon: <Wrench size={28} strokeWidth={2.5} />,
     },
     {
-      title: "MIAO Games",
-      desc: "Play & Earn",
-      action: "PLAY",
+      title: t("hero.games"),
+      desc: t("hero.playEarn"),
+      action: t("hero.play"),
       onClick: onOpenGames,
       type: "button",
       bgColor: "bg-[var(--duo-orange)]",
@@ -86,33 +91,34 @@ const Hero: React.FC<HeroProps> = ({ onOpenGames, onOpenTools, isChristmasMode =
 
             {/* Tagline */}
             <p className="text-xl md:text-2xl font-bold text-[var(--text-secondary)] leading-relaxed lg:pl-12">
-              Primeiro vieram os caes, depois os sapos...
+              {t("hero.tagline1")}
               <br />
-              Agora, as sombras pertencem ao{" "}
-              <span className="text-[var(--brand)] font-black text-2xl md:text-3xl">$MIAO</span>.
+              {t("hero.tagline2")} <span className="text-[var(--brand)] font-black text-2xl md:text-3xl">$MIAO</span>.
             </p>
 
             <div className="flex justify-center lg:justify-end gap-3">
               {[
-                { icon: <Send size={22} />, bg: "bg-[#229ED9]", border: "border-[#1a7fb0]" },
-                { icon: <Twitter size={22} />, bg: "bg-[#1DA1F2]", border: "border-[#1681bf]" },
-                { icon: <Instagram size={22} />, bg: "bg-[#E1306C]", border: "border-[#b01b4e]" },
+                { icon: <Send size={22} />, label: "Telegram" },
+                { icon: <Twitter size={22} />, label: "Twitter" },
+                { icon: <Instagram size={22} />, label: "Instagram" },
                 {
                   icon: (
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" />
                     </svg>
                   ),
-                  bg: "bg-[var(--text-primary)]",
-                  border: "border-[var(--text-secondary)]",
+                  label: "TikTok",
                 },
               ].map((social, i) => (
                 <a
                   key={i}
                   href="#"
-                  className={`w-12 h-12 rounded-xl flex items-center justify-center text-white border-b-4 active:border-b-0 active:translate-y-1 transition-all hover:brightness-110 ${social.bg} ${social.border}`}
+                  aria-label={social.label}
+                  className="w-12 h-12 rounded-xl flex items-center justify-center text-white bg-[var(--bg-tertiary)] border-b-4 border-[var(--border-color)] active:border-b-0 active:translate-y-1 transition-all hover:brightness-110 hover:bg-[var(--brand)] group"
                 >
-                  {social.icon}
+                  <span className="text-[var(--text-primary)] group-hover:text-white transition-colors">
+                    {social.icon}
+                  </span>
                 </a>
               ))}
             </div>

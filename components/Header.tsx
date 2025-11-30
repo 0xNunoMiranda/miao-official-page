@@ -2,12 +2,15 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { Menu, X, Sun, Moon, Wallet, Snowflake } from "lucide-react"
+import { Menu, X, Sun, Moon, Wallet, Snowflake, LogOut } from "lucide-react"
 import type { WalletState } from "../types"
+import { useLanguage } from "../lib/language-context"
+import LanguageSelector from "./LanguageSelector"
 
 interface HeaderProps {
   walletState?: WalletState
   onConnectClick?: () => void
+  onDisconnectClick?: () => void
   onSwapClick?: () => void
   isChristmasMode: boolean
   toggleChristmasMode: () => void
@@ -16,15 +19,16 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({
   walletState,
   onConnectClick,
+  onDisconnectClick,
   onSwapClick,
   isChristmasMode,
   toggleChristmasMode,
 }) => {
+  const { t } = useLanguage()
   const [isOpen, setIsOpen] = useState(false)
   const [isDark, setIsDark] = useState(false)
   const [scrolled, setScrolled] = useState(false)
 
-  // Sync state with DOM on mount
   useEffect(() => {
     const currentTheme = document.documentElement.getAttribute("data-theme")
     setIsDark(currentTheme === "dark")
@@ -44,11 +48,11 @@ const Header: React.FC<HeaderProps> = ({
   }
 
   const navLinks = [
-    { name: "Inicio", href: "#hero" },
-    { name: "Tokenomics", href: "#overview" },
-    { name: "Community", href: "#community" },
-    { name: "Miao AI", href: "#generator" },
-    { name: "NFT's", href: "#nfts" },
+    { name: t("nav.home"), href: "#hero" },
+    { name: t("nav.tokenomics"), href: "#overview" },
+    { name: t("nav.community"), href: "#community" },
+    { name: t("nav.miaoAi"), href: "#generator" },
+    { name: t("nav.nfts"), href: "#nfts" },
   ]
 
   return (
@@ -59,15 +63,12 @@ const Header: React.FC<HeaderProps> = ({
         <div className="max-w-[1400px] mx-auto px-4 md:px-8 lg:px-12">
           <div className="flex items-center justify-between h-20">
             {/* Logo */}
-            <a href="#hero" className="flex items-center gap-3 group">
-              <div className="w-12 h-12 rounded-2xl bg-[var(--brand)] flex items-center justify-center overflow-hidden border-b-4 border-[var(--brand-dark)] group-hover:border-b-2 group-active:border-b-0 transition-all">
-                <img
-                  src="https://miaotoken.vip/wp-content/uploads/2025/11/miao-1.png"
-                  alt="MIAO"
-                  className="w-10 h-10 object-contain"
-                />
-              </div>
-              <span className="hidden sm:block text-2xl font-black text-[var(--text-primary)]">MIAO</span>
+            <a href="#hero" className="flex items-center group">
+              <img
+                src="https://miaotoken.vip/wp-content/uploads/2025/11/miao-1.png"
+                alt="MIAO"
+                className="w-14 h-14 object-contain group-hover:scale-110 transition-transform"
+              />
             </a>
 
             {/* Desktop Nav Links */}
@@ -80,7 +81,10 @@ const Header: React.FC<HeaderProps> = ({
             </div>
 
             {/* Right Controls */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              {/* Language Selector */}
+              <LanguageSelector compact />
+
               {/* Theme Toggle */}
               <button
                 onClick={toggleTheme}
@@ -111,10 +115,19 @@ const Header: React.FC<HeaderProps> = ({
                       onClick={onSwapClick}
                       className="duo-btn duo-btn-green px-5 py-2.5 text-sm uppercase tracking-wide flex items-center gap-2"
                     >
-                      Buy $MIAO
+                      {t("header.buy")}
                     </button>
-                    <div className="px-4 py-2.5 rounded-xl bg-[var(--bg-secondary)] border-2 border-[var(--brand)] text-[var(--brand)] font-mono font-bold text-sm">
-                      {walletState.address?.slice(0, 4)}...{walletState.address?.slice(-4)}
+                    <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--bg-secondary)] border-2 border-[var(--brand)]">
+                      <span className="text-[var(--brand)] font-mono font-bold text-sm">
+                        {walletState.address?.slice(0, 4)}...{walletState.address?.slice(-4)}
+                      </span>
+                      <button
+                        onClick={onDisconnectClick}
+                        className="w-7 h-7 rounded-lg bg-[var(--bg-tertiary)] flex items-center justify-center text-[var(--text-secondary)] hover:text-red-500 hover:bg-red-500/10 transition-all"
+                        title={t("header.disconnect")}
+                      >
+                        <LogOut size={14} />
+                      </button>
                     </div>
                   </div>
                 ) : (
@@ -123,7 +136,7 @@ const Header: React.FC<HeaderProps> = ({
                     className="duo-btn duo-btn-green px-6 py-2.5 text-sm uppercase tracking-wide flex items-center gap-2"
                   >
                     <Wallet size={18} />
-                    Conectar
+                    {t("header.connect")}
                   </button>
                 )}
               </div>
@@ -148,14 +161,12 @@ const Header: React.FC<HeaderProps> = ({
             {/* Drawer Header */}
             <div className="flex items-center justify-between p-5 border-b-2 border-[var(--border-color)]">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[var(--brand)] flex items-center justify-center">
-                  <img
-                    src="https://miaotoken.vip/wp-content/uploads/2025/11/miao-1.png"
-                    alt="MIAO"
-                    className="w-8 h-8 object-contain"
-                  />
-                </div>
-                <span className="text-xl font-black text-[var(--text-primary)]">Menu</span>
+                <img
+                  src="https://miaotoken.vip/wp-content/uploads/2025/11/miao-1.png"
+                  alt="MIAO"
+                  className="w-10 h-10 object-contain"
+                />
+                <span className="text-xl font-black text-[var(--text-primary)]">{t("nav.menu")}</span>
               </div>
               <button
                 onClick={() => setIsOpen(false)}
@@ -180,6 +191,11 @@ const Header: React.FC<HeaderProps> = ({
 
               <hr className="my-4 border-[var(--border-color)]" />
 
+              {/* Language Selector in Mobile */}
+              <div className="px-4 py-3">
+                <LanguageSelector />
+              </div>
+
               {/* Christmas Toggle */}
               <button
                 onClick={() => {
@@ -193,7 +209,7 @@ const Header: React.FC<HeaderProps> = ({
                 }`}
               >
                 <Snowflake size={22} />
-                Modo Natal: {isChristmasMode ? "ON" : "OFF"}
+                {t("nav.christmasMode")}: {isChristmasMode ? "ON" : "OFF"}
               </button>
             </div>
 
@@ -201,21 +217,33 @@ const Header: React.FC<HeaderProps> = ({
             <div className="p-5 border-t-2 border-[var(--border-color)] space-y-3">
               {walletState?.isConnected ? (
                 <>
-                  <div className="p-4 rounded-xl bg-[var(--bg-secondary)] border-2 border-[var(--border-color)] text-center">
+                  <div className="p-4 rounded-xl bg-[var(--bg-secondary)] border-2 border-[var(--border-color)]">
                     <p className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wide mb-1">
-                      Conectado
+                      {t("header.connected")}
                     </p>
                     <p className="font-mono font-black text-[var(--brand)] truncate">{walletState.address}</p>
                   </div>
-                  <button
-                    onClick={() => {
-                      setIsOpen(false)
-                      onSwapClick?.()
-                    }}
-                    className="duo-btn duo-btn-green w-full py-4 text-base uppercase tracking-wide"
-                  >
-                    Buy $MIAO
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        setIsOpen(false)
+                        onSwapClick?.()
+                      }}
+                      className="duo-btn duo-btn-green flex-1 py-4 text-base uppercase tracking-wide"
+                    >
+                      {t("header.buy")}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setIsOpen(false)
+                        onDisconnectClick?.()
+                      }}
+                      className="w-14 rounded-xl bg-[var(--bg-secondary)] border-2 border-[var(--border-color)] flex items-center justify-center text-[var(--text-secondary)] hover:text-red-500 hover:bg-red-500/10 transition-all"
+                      title={t("header.disconnect")}
+                    >
+                      <LogOut size={20} />
+                    </button>
+                  </div>
                 </>
               ) : (
                 <button
@@ -226,7 +254,7 @@ const Header: React.FC<HeaderProps> = ({
                   className="duo-btn duo-btn-green w-full py-4 text-base uppercase tracking-wide flex items-center justify-center gap-2"
                 >
                   <Wallet size={20} />
-                  Conectar Carteira
+                  {t("header.connectWallet")}
                 </button>
               )}
             </div>

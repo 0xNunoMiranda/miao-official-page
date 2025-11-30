@@ -1,97 +1,292 @@
-import React, { useState } from 'react';
-import { WalletType } from '../types';
-import { X, Shield, Wallet, Zap } from 'lucide-react';
+"use client"
+
+import type React from "react"
+import { useState, useEffect } from "react"
+import type { WalletType } from "../types"
+import { X, Shield, Wallet, ExternalLink, CheckCircle, AlertCircle } from "lucide-react"
+import { isWalletInstalled, getWalletDownloadUrl, connectWallet } from "../lib/wallet-service"
 
 interface WalletModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onConnect: (type: WalletType) => void;
+  isOpen: boolean
+  onClose: () => void
+  onConnect: (type: WalletType, address: string) => void
 }
 
 const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, onConnect }) => {
-  const [connecting, setConnecting] = useState<WalletType | null>(null);
+  const [connecting, setConnecting] = useState<WalletType | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [countdown, setCountdown] = useState<number | null>(null)
+  const [installedWallets, setInstalledWallets] = useState<Record<WalletType, boolean>>({
+    phantom: false,
+    solflare: false,
+    metamask: false,
+    backpack: false,
+  })
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    if (isOpen) {
+      const timer = setTimeout(() => {
+        const detected = {
+          phantom: isWalletInstalled("phantom"),
+          solflare: isWalletInstalled("solflare"),
+          metamask: isWalletInstalled("metamask"),
+          backpack: isWalletInstalled("backpack"),
+        }
+        setInstalledWallets(detected)
+      }, 100)
+      return () => clearTimeout(timer)
+    }
+  }, [isOpen])
 
-  const handleConnect = (type: WalletType) => {
-    setConnecting(type);
-    // Simulate network delay
-    setTimeout(() => {
-      onConnect(type);
-      setConnecting(null);
-    }, 1500);
-  };
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null
+
+    if (connecting && countdown === null) {
+      setCountdown(30)
+    }
+
+    if (countdown !== null && countdown > 0) {
+      interval = setInterval(() => {
+        setCountdown((prev) => (prev !== null ? prev - 1 : null))
+      }, 1000)
+    }
+
+    if (!connecting) {
+      setCountdown(null)
+    }
+
+    return () => {
+      if (interval) clearInterval(interval)
+    }
+  }, [connecting, countdown])
+
+  if (!isOpen) return null
+
+  const handleConnect = async (type: WalletType) => {
+    setError(null)
+
+    if (!installedWallets[type]) {
+      window.open(getWalletDownloadUrl(type), "_blank")
+      return
+    }
+
+    setConnecting(type)
+    setCountdown(30)
+
+    try {
+      const result = await connectWallet(type)
+
+      if (result.success && result.address) {
+        onConnect(type, result.address)
+        setConnecting(null)
+      } else if (result.userRejected) {
+        setConnecting(null)
+      } else if (result.timeout) {
+        setError("Tempo limite excedido (30s). Verifique se a carteira esta aberta e tente novamente.")
+        setConnecting(null)
+      } else {
+        setError(result.error || "Connection failed")
+        setConnecting(null)
+      }
+    } catch (err: any) {
+      setError(err.message || "Connection failed")
+      setConnecting(null)
+    }
+  }
 
   const wallets = [
-    { id: 'phantom', name: 'Phantom', icon: '👻', color: '#AB9FF2' },
-    { id: 'solflare', name: 'Solflare', icon: '🌞', color: '#FC7227' },
-    { id: 'metamask', name: 'MetaMask', icon: '🦊', color: '#F6851B', sub: '(Solana Snap)' },
-    { id: 'backpack', name: 'Backpack', icon: '🎒', color: '#E33E3F' },
-  ];
+    {
+      id: "phantom" as WalletType,
+      name: "Phantom",
+      icon: "/assets/wallets/phantom.png",
+      color: "#AB9FF2",
+      recommended: true,
+      description: "Carteira Solana mais popular",
+      disabled: false,
+    },
+    {
+      id: "solflare" as WalletType,
+      name: "Solflare",
+      icon: "/assets/wallets/solflare.png",
+      color: "#FFE500",
+      description: "Carteira Solana avancada",
+      disabled: false,
+    },
+    {
+      id: "backpack" as WalletType,
+      name: "Backpack",
+      icon: "/assets/wallets/backpack.png",
+      color: "#E33E3F",
+      description: "Carteira multi-chain",
+      disabled: false,
+    },
+    {
+      id: "metamask" as WalletType,
+      name: "MetaMask",
+      icon: "/assets/wallets/metamask.png",
+      color: "#F6851B",
+      description: "Em breve - Solana nao suportado",
+      disabled: true,
+    },
+  ]
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
-      {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
-        onClick={onClose}
-      ></div>
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onClick={onClose} />
 
-      {/* Modal Content */}
-      <div className="relative w-full max-w-md bg-[var(--bg-secondary)] border-4 border-[var(--border-color)] rounded-3xl p-6 comic-shadow animate-float">
-        
-        <div className="flex justify-between items-center mb-6 border-b-2 border-[var(--border-color)] pb-4">
-          <h2 className="text-2xl font-black text-[var(--text-primary)] flex items-center gap-2">
-            <Wallet className="text-[var(--brand)]" /> Connect Wallet
+      <div className="relative w-full max-w-md bg-[var(--bg-primary)] border-2 border-[var(--border-color)] rounded-3xl overflow-hidden shadow-2xl animate-fade-up">
+        <div className="flex justify-between items-center p-5 border-b-2 border-[var(--border-color)] bg-[var(--bg-secondary)]">
+          <h2 className="text-xl font-black text-[var(--text-primary)] flex items-center gap-2">
+            <div className="w-10 h-10 rounded-xl bg-[var(--brand)] flex items-center justify-center">
+              <Wallet className="text-white" size={20} />
+            </div>
+            Conectar Carteira
           </h2>
-          <button 
+          <button
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-full bg-[var(--bg-tertiary)] hover:bg-red-500 hover:text-white transition-colors btn-icon-pop"
+            className="w-10 h-10 flex items-center justify-center rounded-xl bg-[var(--bg-tertiary)] border-2 border-[var(--border-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-red-500/10 hover:border-red-500 hover:text-red-500 transition-all"
           >
             <X size={20} />
           </button>
         </div>
 
-        <div className="space-y-3">
-          {wallets.map((wallet) => (
-            <button
-              key={wallet.id}
-              onClick={() => handleConnect(wallet.id as WalletType)}
-              disabled={connecting !== null}
-              className={`w-full flex items-center justify-between p-4 rounded-xl border-2 border-[var(--border-color)] transition-all group hover:bg-[var(--bg-tertiary)] btn-comic ${connecting === wallet.id ? 'opacity-50 cursor-wait' : ''}`}
-            >
-              <div className="flex items-center gap-4">
-                <div 
-                  className="w-12 h-12 rounded-full flex items-center justify-center text-2xl border-2 border-[var(--border-color)]"
-                  style={{ backgroundColor: wallet.color }}
-                >
-                  {wallet.icon}
+        {error && (
+          <div className="mx-5 mt-5 p-3 rounded-xl bg-red-500/10 border-2 border-red-500/30 flex items-center gap-2 text-red-500">
+            <AlertCircle size={18} />
+            <span className="text-sm font-bold">{error}</span>
+          </div>
+        )}
+
+        <div className="p-5 space-y-3">
+          {wallets.map((wallet) => {
+            const isInstalled = installedWallets[wallet.id]
+            const isConnecting = connecting === wallet.id
+            const isDisabled = wallet.disabled
+
+            return (
+              <button
+                key={wallet.id}
+                onClick={() => !isDisabled && handleConnect(wallet.id)}
+                disabled={connecting !== null || isDisabled}
+                className={`w-full flex items-center justify-between p-4 rounded-2xl border-2 transition-all group ${
+                  isDisabled
+                    ? "opacity-50 cursor-not-allowed border-[var(--border-color)] bg-[var(--bg-tertiary)]"
+                    : isConnecting
+                      ? "border-[var(--brand)] bg-[var(--brand)]/5"
+                      : "border-[var(--border-color)] hover:border-[var(--brand)] hover:bg-[var(--bg-secondary)]"
+                } ${connecting !== null && !isConnecting && !isDisabled ? "opacity-50 cursor-not-allowed" : ""}`}
+              >
+                <div className="flex items-center gap-4">
+                  <div
+                    className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl border-2 border-[var(--border-color)] overflow-hidden ${isDisabled ? "grayscale" : ""}`}
+                    style={{ backgroundColor: `${wallet.color}20` }}
+                  >
+                    <img
+                      src={wallet.icon || "/placeholder.svg"}
+                      alt={wallet.name}
+                      className={`w-7 h-7 object-contain ${isDisabled ? "grayscale" : ""}`}
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement
+                        target.style.display = "none"
+                        target.parentElement!.innerHTML =
+                          wallet.id === "phantom"
+                            ? "👻"
+                            : wallet.id === "solflare"
+                              ? "🌞"
+                              : wallet.id === "metamask"
+                                ? "🦊"
+                                : "🎒"
+                      }}
+                    />
+                  </div>
+
+                  <div className="text-left">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`font-bold text-lg ${isDisabled ? "text-[var(--text-tertiary)]" : "text-[var(--text-primary)]"}`}
+                      >
+                        {wallet.name}
+                      </span>
+                      {wallet.recommended && (
+                        <span className="px-2 py-0.5 text-xs font-bold bg-[var(--brand)] text-white rounded-full">
+                          Recomendado
+                        </span>
+                      )}
+                      {isDisabled && (
+                        <span className="px-2 py-0.5 text-xs font-bold bg-gray-500 text-white rounded-full">
+                          Em breve
+                        </span>
+                      )}
+                    </div>
+                    <div
+                      className={`text-xs ${isDisabled ? "text-[var(--text-tertiary)]" : "text-[var(--text-tertiary)]"}`}
+                    >
+                      {wallet.description}
+                    </div>
+                    {!isDisabled && (
+                      <div
+                        className={`text-xs font-bold flex items-center gap-1 ${isInstalled ? "text-[var(--brand)]" : "text-[var(--text-tertiary)]"}`}
+                      >
+                        {isInstalled ? (
+                          <>
+                            <CheckCircle size={12} />
+                            Detectado
+                          </>
+                        ) : (
+                          <>
+                            <ExternalLink size={12} />
+                            Instalar
+                          </>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
-                <div className="text-left">
-                  <div className="font-bold text-lg text-[var(--text-primary)]">{wallet.name}</div>
-                  {wallet.sub && <div className="text-xs font-bold text-[var(--text-secondary)]">{wallet.sub}</div>}
-                  <div className="text-xs text-[var(--text-secondary)]">Detected</div>
+
+                <div className="flex items-center gap-2">
+                  {isConnecting ? (
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-[var(--text-secondary)]">{countdown}s</span>
+                      <div className="w-6 h-6 border-2 border-[var(--brand)] border-t-transparent rounded-full animate-spin" />
+                    </div>
+                  ) : (
+                    <div
+                      className={`w-6 h-6 rounded-full border-2 transition-colors flex items-center justify-center ${
+                        isDisabled
+                          ? "border-gray-400 bg-gray-200"
+                          : isInstalled
+                            ? "border-[var(--brand)] group-hover:bg-[var(--brand)]"
+                            : "border-[var(--border-color)]"
+                      }`}
+                    >
+                      {isDisabled && (
+                        <svg className="w-3 h-3 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                          <path
+                            fillRule="evenodd"
+                            d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      )}
+                    </div>
+                  )}
                 </div>
-              </div>
-              
-              {connecting === wallet.id ? (
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[var(--brand)]"></div>
-              ) : (
-                <div className="w-6 h-6 rounded-full border-2 border-[var(--border-color)] group-hover:bg-[var(--brand)] transition-colors"></div>
-              )}
-            </button>
-          ))}
+              </button>
+            )
+          })}
         </div>
 
-        <div className="mt-6 text-center bg-[var(--bg-tertiary)] p-3 rounded-xl border-2 border-[var(--border-color)] border-dashed">
+        <div className="p-5 border-t-2 border-[var(--border-color)] bg-[var(--bg-secondary)]">
+          <div className="text-center p-3 rounded-xl bg-[var(--bg-tertiary)] border-2 border-dashed border-[var(--border-color)]">
             <p className="text-xs text-[var(--text-secondary)] font-bold flex items-center justify-center gap-2">
-                <Shield size={14} /> New to crypto? Get a wallet to start.
+              <Shield size={14} className="text-[var(--brand)]" />
+              Novo em crypto? Instale Phantom para comecar.
             </p>
+          </div>
         </div>
-
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default WalletModal;
+export default WalletModal

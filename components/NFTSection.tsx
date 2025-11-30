@@ -21,15 +21,45 @@ const NFT_ATTRIBUTES = [
   { trait: "Expression", values: ["Smirk", "Fierce", "Chill", "Mysterious"] },
 ]
 
+const ENTRANCE_ANIMATIONS = [
+  "fade-in",
+  "slide-left",
+  "slide-right",
+  "slide-up",
+  "slide-down",
+  "spin-in",
+  "flip-in",
+  "zoom-in",
+  "bounce-in",
+  "domino",
+  "spiral-in",
+  "elastic-in",
+]
+
+const EXIT_ANIMATIONS = [
+  "fade-out",
+  "slide-out-left",
+  "slide-out-right",
+  "slide-out-up",
+  "slide-out-down",
+  "spin-out",
+  "flip-out",
+  "zoom-out",
+  "bounce-out",
+  "spiral-out",
+]
+
 const CONTINUOUS_ANIMATIONS = [
-  "float", // gentle up/down floating
-  "pulse-glow", // pulsing with glow
-  "rotate-slow", // slow continuous rotation
-  "zoom-pulse", // zoom in and out
-  "swing", // swinging motion
-  "bounce-soft", // soft bouncing
-  "tilt-rock", // tilting back and forth
-  "drift", // drifting sideways
+  "float",
+  "pulse-glow",
+  "rotate-slow",
+  "zoom-pulse",
+  "swing",
+  "bounce-soft",
+  "tilt-rock",
+  "drift",
+  "orbit",
+  "shake-gentle",
 ]
 
 interface DisplayNFT {
@@ -41,6 +71,8 @@ interface DisplayNFT {
   scale: number
   delay: number
   continuousAnimation: string
+  entranceAnimation: string
+  exitAnimation: string
   initialRotation: number
   animationDuration: number
 }
@@ -48,12 +80,16 @@ interface DisplayNFT {
 const NFTSection: React.FC<NFTSectionProps> = ({ isChristmasMode = false }) => {
   const [displayNFTs, setDisplayNFTs] = useState<DisplayNFT[]>([])
   const [isVisible, setIsVisible] = useState(true)
+  const [currentExitAnim, setCurrentExitAnim] = useState("")
   const [bgAnimation, setBgAnimation] = useState(0)
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
 
   const generateRandomNFTs = useCallback(() => {
     const count = Math.floor(Math.random() * 4) + 1
     const selectedIds = [...NFT_IDS].sort(() => Math.random() - 0.5).slice(0, count)
+
+    const batchEntrance = ENTRANCE_ANIMATIONS[Math.floor(Math.random() * ENTRANCE_ANIMATIONS.length)]
+    const batchExit = EXIT_ANIMATIONS[Math.floor(Math.random() * EXIT_ANIMATIONS.length)]
 
     const getPositions = (count: number): { x: number; y: number }[] => {
       const randomOffset = () => (Math.random() - 0.5) * 10
@@ -98,26 +134,30 @@ const NFTSection: React.FC<NFTSectionProps> = ({ isChristmasMode = false }) => {
         attribute: showAttribute ? { trait: randomAttr.trait, value: randomValue } : undefined,
         position: positions[index],
         scale: count === 1 ? 1.15 : count === 2 ? 1 : 0.85,
-        delay: index * 0.15,
+        delay: index * 0.12,
         continuousAnimation,
+        entranceAnimation: batchEntrance,
+        exitAnimation: batchExit,
         initialRotation: (Math.random() - 0.5) * 8,
-        animationDuration: 2.5 + Math.random() * 2, // 2.5-4.5s random duration
+        animationDuration: 2.5 + Math.random() * 2,
       }
     })
   }, [])
 
   useEffect(() => {
-    setDisplayNFTs(generateRandomNFTs())
+    const initialNFTs = generateRandomNFTs()
+    setDisplayNFTs(initialNFTs)
 
     intervalRef.current = setInterval(() => {
+      setCurrentExitAnim(EXIT_ANIMATIONS[Math.floor(Math.random() * EXIT_ANIMATIONS.length)])
       setIsVisible(false)
       setBgAnimation((prev) => prev + 1)
 
       setTimeout(() => {
         setDisplayNFTs(generateRandomNFTs())
         setIsVisible(true)
-      }, 800) // Longer fade transition
-    }, 6000) // NFTs stay 6 seconds
+      }, 1000)
+    }, 7000)
 
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current)
@@ -125,6 +165,107 @@ const NFTSection: React.FC<NFTSectionProps> = ({ isChristmasMode = false }) => {
   }, [generateRandomNFTs])
 
   const animationStyles = `
+    /* Entrance Animations */
+    @keyframes nft-fade-in {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes nft-slide-left {
+      from { opacity: 0; transform: translateX(-100px) rotate(-15deg); }
+      to { opacity: 1; transform: translateX(0) rotate(0deg); }
+    }
+    @keyframes nft-slide-right {
+      from { opacity: 0; transform: translateX(100px) rotate(15deg); }
+      to { opacity: 1; transform: translateX(0) rotate(0deg); }
+    }
+    @keyframes nft-slide-up {
+      from { opacity: 0; transform: translateY(80px) scale(0.8); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @keyframes nft-slide-down {
+      from { opacity: 0; transform: translateY(-80px) scale(0.8); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @keyframes nft-spin-in {
+      from { opacity: 0; transform: rotate(-360deg) scale(0.3); }
+      to { opacity: 1; transform: rotate(0deg) scale(1); }
+    }
+    @keyframes nft-flip-in {
+      from { opacity: 0; transform: perspective(400px) rotateY(-90deg); }
+      to { opacity: 1; transform: perspective(400px) rotateY(0deg); }
+    }
+    @keyframes nft-zoom-in {
+      from { opacity: 0; transform: scale(0.1); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    @keyframes nft-bounce-in {
+      0% { opacity: 0; transform: scale(0.3); }
+      50% { opacity: 1; transform: scale(1.15); }
+      70% { transform: scale(0.9); }
+      100% { transform: scale(1); }
+    }
+    @keyframes nft-domino {
+      0% { opacity: 0; transform: rotateX(-90deg) translateY(-30px); }
+      60% { transform: rotateX(20deg); }
+      80% { transform: rotateX(-10deg); }
+      100% { opacity: 1; transform: rotateX(0deg) translateY(0); }
+    }
+    @keyframes nft-spiral-in {
+      from { opacity: 0; transform: rotate(-540deg) scale(0) translateY(-50px); }
+      to { opacity: 1; transform: rotate(0deg) scale(1) translateY(0); }
+    }
+    @keyframes nft-elastic-in {
+      0% { opacity: 0; transform: scale(0.3); }
+      40% { transform: scale(1.2); }
+      60% { transform: scale(0.85); }
+      80% { transform: scale(1.05); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    /* Exit Animations */
+    @keyframes nft-fade-out {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
+    @keyframes nft-slide-out-left {
+      from { opacity: 1; transform: translateX(0) rotate(0deg); }
+      to { opacity: 0; transform: translateX(-100px) rotate(-15deg); }
+    }
+    @keyframes nft-slide-out-right {
+      from { opacity: 1; transform: translateX(0) rotate(0deg); }
+      to { opacity: 0; transform: translateX(100px) rotate(15deg); }
+    }
+    @keyframes nft-slide-out-up {
+      from { opacity: 1; transform: translateY(0) scale(1); }
+      to { opacity: 0; transform: translateY(-80px) scale(0.8); }
+    }
+    @keyframes nft-slide-out-down {
+      from { opacity: 1; transform: translateY(0) scale(1); }
+      to { opacity: 0; transform: translateY(80px) scale(0.8); }
+    }
+    @keyframes nft-spin-out {
+      from { opacity: 1; transform: rotate(0deg) scale(1); }
+      to { opacity: 0; transform: rotate(360deg) scale(0.3); }
+    }
+    @keyframes nft-flip-out {
+      from { opacity: 1; transform: perspective(400px) rotateY(0deg); }
+      to { opacity: 0; transform: perspective(400px) rotateY(90deg); }
+    }
+    @keyframes nft-zoom-out {
+      from { opacity: 1; transform: scale(1); }
+      to { opacity: 0; transform: scale(0.1); }
+    }
+    @keyframes nft-bounce-out {
+      0% { transform: scale(1); }
+      25% { transform: scale(1.15); }
+      100% { opacity: 0; transform: scale(0.3); }
+    }
+    @keyframes nft-spiral-out {
+      from { opacity: 1; transform: rotate(0deg) scale(1) translateY(0); }
+      to { opacity: 0; transform: rotate(540deg) scale(0) translateY(-50px); }
+    }
+
+    /* Continuous Animations */
     @keyframes nft-float {
       0%, 100% { transform: translateY(0px); }
       50% { transform: translateY(-12px); }
@@ -134,21 +275,21 @@ const NFTSection: React.FC<NFTSectionProps> = ({ isChristmasMode = false }) => {
       50% { transform: scale(1.08); filter: drop-shadow(0 0 20px var(--brand)); }
     }
     @keyframes nft-rotate-slow {
-      0% { transform: rotate(-5deg); }
-      50% { transform: rotate(5deg); }
-      100% { transform: rotate(-5deg); }
+      0% { transform: rotate(-8deg); }
+      50% { transform: rotate(8deg); }
+      100% { transform: rotate(-8deg); }
     }
     @keyframes nft-zoom-pulse {
       0%, 100% { transform: scale(1); }
       50% { transform: scale(1.12); }
     }
     @keyframes nft-swing {
-      0%, 100% { transform: rotate(-8deg); }
-      50% { transform: rotate(8deg); }
+      0%, 100% { transform: rotate(-10deg); }
+      50% { transform: rotate(10deg); }
     }
     @keyframes nft-bounce-soft {
       0%, 100% { transform: translateY(0) scale(1); }
-      50% { transform: translateY(-8px) scale(1.03); }
+      50% { transform: translateY(-10px) scale(1.04); }
     }
     @keyframes nft-tilt-rock {
       0%, 100% { transform: rotate(-6deg) scale(1.02); }
@@ -156,11 +297,57 @@ const NFTSection: React.FC<NFTSectionProps> = ({ isChristmasMode = false }) => {
     }
     @keyframes nft-drift {
       0%, 100% { transform: translateX(0) translateY(0); }
-      25% { transform: translateX(8px) translateY(-4px); }
-      50% { transform: translateX(0) translateY(-8px); }
-      75% { transform: translateX(-8px) translateY(-4px); }
+      25% { transform: translateX(10px) translateY(-5px); }
+      50% { transform: translateX(0) translateY(-10px); }
+      75% { transform: translateX(-10px) translateY(-5px); }
+    }
+    @keyframes nft-orbit {
+      0% { transform: translateX(0) translateY(0) rotate(0deg); }
+      25% { transform: translateX(8px) translateY(-8px) rotate(5deg); }
+      50% { transform: translateX(0) translateY(-12px) rotate(0deg); }
+      75% { transform: translateX(-8px) translateY(-8px) rotate(-5deg); }
+      100% { transform: translateX(0) translateY(0) rotate(0deg); }
+    }
+    @keyframes nft-shake-gentle {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-4px) rotate(-2deg); }
+      75% { transform: translateX(4px) rotate(2deg); }
     }
   `
+
+  const getEntranceAnimation = (animation: string, delay: number) => {
+    const animMap: Record<string, string> = {
+      "fade-in": `nft-fade-in 0.8s ease-out ${delay}s both`,
+      "slide-left": `nft-slide-left 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) ${delay}s both`,
+      "slide-right": `nft-slide-right 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) ${delay}s both`,
+      "slide-up": `nft-slide-up 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) ${delay}s both`,
+      "slide-down": `nft-slide-down 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) ${delay}s both`,
+      "spin-in": `nft-spin-in 1s cubic-bezier(0.34, 1.56, 0.64, 1) ${delay}s both`,
+      "flip-in": `nft-flip-in 0.8s ease-out ${delay}s both`,
+      "zoom-in": `nft-zoom-in 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) ${delay}s both`,
+      "bounce-in": `nft-bounce-in 1s ease-out ${delay}s both`,
+      domino: `nft-domino 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) ${delay}s both`,
+      "spiral-in": `nft-spiral-in 1.1s cubic-bezier(0.34, 1.56, 0.64, 1) ${delay}s both`,
+      "elastic-in": `nft-elastic-in 1s ease-out ${delay}s both`,
+    }
+    return animMap[animation] || animMap["fade-in"]
+  }
+
+  const getExitAnimation = (animation: string, delay: number) => {
+    const animMap: Record<string, string> = {
+      "fade-out": `nft-fade-out 0.8s ease-in ${delay}s both`,
+      "slide-out-left": `nft-slide-out-left 0.8s ease-in ${delay}s both`,
+      "slide-out-right": `nft-slide-out-right 0.8s ease-in ${delay}s both`,
+      "slide-out-up": `nft-slide-out-up 0.8s ease-in ${delay}s both`,
+      "slide-out-down": `nft-slide-out-down 0.8s ease-in ${delay}s both`,
+      "spin-out": `nft-spin-out 0.9s ease-in ${delay}s both`,
+      "flip-out": `nft-flip-out 0.7s ease-in ${delay}s both`,
+      "zoom-out": `nft-zoom-out 0.7s ease-in ${delay}s both`,
+      "bounce-out": `nft-bounce-out 0.8s ease-in ${delay}s both`,
+      "spiral-out": `nft-spiral-out 1s ease-in ${delay}s both`,
+    }
+    return animMap[animation] || animMap["fade-out"]
+  }
 
   const getContinuousAnimationStyle = (animation: string, duration: number) => {
     const animationMap: Record<string, string> = {
@@ -172,6 +359,8 @@ const NFTSection: React.FC<NFTSectionProps> = ({ isChristmasMode = false }) => {
       "bounce-soft": `nft-bounce-soft ${duration}s ease-in-out infinite`,
       "tilt-rock": `nft-tilt-rock ${duration}s ease-in-out infinite`,
       drift: `nft-drift ${duration * 1.5}s ease-in-out infinite`,
+      orbit: `nft-orbit ${duration * 1.3}s ease-in-out infinite`,
+      "shake-gentle": `nft-shake-gentle ${duration * 0.8}s ease-in-out infinite`,
     }
     return animationMap[animation] || animationMap["float"]
   }
@@ -217,7 +406,7 @@ const NFTSection: React.FC<NFTSectionProps> = ({ isChristmasMode = false }) => {
                 in the streets.
               </p>
 
-              <div className="flex flex-col sm:flex-row gap-2.5 mb-4">
+              <div className="flex flex-col sm:flex-row gap-2.5">
                 <a
                   href="https://launchmynft.io/sol/20841"
                   target="_blank"
@@ -235,36 +424,9 @@ const NFTSection: React.FC<NFTSectionProps> = ({ isChristmasMode = false }) => {
                   MINT V2
                 </a>
               </div>
-
-              <div className="pt-3 border-t grid grid-cols-3 gap-2" style={{ borderColor: "var(--border-color)" }}>
-                <div className="text-center">
-                  <p className="text-lg md:text-xl font-black" style={{ color: "var(--brand)" }}>
-                    999
-                  </p>
-                  <p className="text-[10px] font-semibold" style={{ color: "var(--text-secondary)" }}>
-                    Total Supply
-                  </p>
-                </div>
-                <div className="text-center">
-                  <p className="text-lg md:text-xl font-black" style={{ color: "var(--brand)" }}>
-                    0.5
-                  </p>
-                  <p className="text-[10px] font-semibold" style={{ color: "var(--text-secondary)" }}>
-                    SOL Price
-                  </p>
-                </div>
-                <div className="text-center">
-                  <p className="text-lg md:text-xl font-black" style={{ color: "var(--brand)" }}>
-                    100+
-                  </p>
-                  <p className="text-[10px] font-semibold" style={{ color: "var(--text-secondary)" }}>
-                    Holders
-                  </p>
-                </div>
-              </div>
             </div>
 
-            {/* Column 2: NFT Showcase with continuous animations */}
+            {/* Column 2: NFT Showcase with varied animations */}
             <div
               className="relative rounded-xl overflow-hidden min-h-[260px] md:min-h-[300px]"
               style={{
@@ -289,9 +451,9 @@ const NFTSection: React.FC<NFTSectionProps> = ({ isChristmasMode = false }) => {
                     style={{
                       left: `${nft.position.x}%`,
                       top: `${nft.position.y}%`,
-                      opacity: isVisible ? 1 : 0,
-                      transform: `translate(-50%, -50%) scale(${isVisible ? 1 : 0.7})`,
-                      transition: `opacity 0.8s ease-out ${nft.delay}s, transform 0.8s ease-out ${nft.delay}s`,
+                      animation: isVisible
+                        ? getEntranceAnimation(nft.entranceAnimation, nft.delay)
+                        : getExitAnimation(currentExitAnim || nft.exitAnimation, nft.delay),
                     }}
                   >
                     <div

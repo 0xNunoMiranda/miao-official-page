@@ -3,19 +3,21 @@
 import type React from "react"
 import { useState } from "react"
 import type { GeneratedCat } from "../types"
-import { Sparkles, RefreshCw, Zap, Send } from "lucide-react"
+import { Sparkles, RefreshCw, Zap, Send, Download } from "lucide-react"
 import SnowCap from "./SnowCap"
 
 interface CatGeneratorProps {
   isChristmasMode?: boolean
 }
 
+const CAT_REFERENCE_IMAGE = "/images/cat.png"
+
 const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false }) => {
   const [cats, setCats] = useState<GeneratedCat[]>([])
   const [loading, setLoading] = useState(false)
   const [prompt, setPrompt] = useState("")
-  const [model, setModel] = useState("stabilityai/stable-diffusion-3-medium")
-  const [quality, setQuality] = useState("medium")
+  const [model, setModel] = useState("dall-e-3")
+  const [quality, setQuality] = useState("high")
 
   const TELEGRAM_BOT_TOKEN = "YOUR_BOT_TOKEN_HERE"
   const TELEGRAM_CHAT_ID = "-1002345678901"
@@ -30,10 +32,21 @@ const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false }) 
 
     try {
       if (window.puter && window.puter.ai) {
-        const baseCharacteristics = "a cute green cat mascot named Miao, big black eyes, comic style, vibrant colors"
-        const finalPrompt = `${baseCharacteristics}, ${prompt}`
+        const basePrompt = `Generate an image of a green cartoon cat character. The cat must have these EXACT characteristics from the reference:
+- Bright green colored body (like a mint/emerald green)
+- Big round black eyes with white highlights/reflections
+- Cute cartoon/comic style appearance
+- Sharp white teeth showing in a happy smile
+- Pink tongue visible
+- Black whiskers on both sides of face
+- Playful and friendly expression
+- Simple clean cartoon art style
 
-        const imgElement = await window.puter.ai.txt2img(finalPrompt, { model, quality })
+The user wants this green cat character: ${prompt}
+
+Keep the cat's core design and green color consistent. Make it fun and vibrant.`
+
+        const imgElement = await window.puter.ai.txt2img(basePrompt, { model, quality })
 
         if (imgElement && imgElement.src) {
           const newCat: GeneratedCat = {
@@ -50,6 +63,24 @@ const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false }) 
       alert("Failed to generate image. Try again.")
     } finally {
       setLoading(false)
+    }
+  }
+
+  const downloadImage = async (cat: GeneratedCat) => {
+    try {
+      const response = await fetch(cat.imageUrl)
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = `miao-${cat.id}.png`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      window.URL.revokeObjectURL(url)
+    } catch (e) {
+      console.error(e)
+      alert("Failed to download image.")
     }
   }
 
@@ -94,6 +125,20 @@ const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false }) 
         <div className="max-w-3xl mx-auto bg-[var(--bg-secondary)] border-b-8 border-[var(--border-color)] rounded-[2.5rem] p-8 md:p-10 relative overflow-hidden text-left shadow-lg">
           <SnowCap className="h-12" visible={isChristmasMode} />
 
+          <div className="mb-6 relative z-10 flex items-center gap-4 p-4 bg-[var(--bg-tertiary)] rounded-2xl border-2 border-[var(--border-color)]">
+            <img
+              src={CAT_REFERENCE_IMAGE || "/placeholder.svg"}
+              alt="Miao Reference"
+              className="w-20 h-20 object-contain rounded-xl bg-white"
+            />
+            <div className="flex-1">
+              <p className="font-black text-sm uppercase text-[var(--brand)] tracking-wide">Base Character</p>
+              <p className="text-[var(--text-secondary)] text-sm">
+                All generations will be based on this green cat character. Just describe what you want it to do or wear!
+              </p>
+            </div>
+          </div>
+
           {/* Prompt Input */}
           <div className="mb-6 relative z-10">
             <label className="block font-black text-sm uppercase text-[var(--text-secondary)] mb-3 tracking-widest">
@@ -103,9 +148,12 @@ const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false }) 
               type="text"
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
-              placeholder="e.g., wearing a space suit, eating pizza..."
+              placeholder="e.g., wearing a space suit, eating pizza, as a superhero..."
               className="w-full bg-[var(--bg-tertiary)] border-2 border-[var(--border-color)] rounded-2xl p-5 font-bold text-lg text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-none focus:border-[var(--brand)] focus:ring-4 focus:ring-[var(--brand)]/20 transition-all"
             />
+            <p className="mt-2 text-sm text-[var(--text-secondary)]">
+              Tip: Describe actions, costumes, or scenarios for the green cat!
+            </p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-6 mb-8 relative z-10">
@@ -118,9 +166,9 @@ const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false }) 
                 onChange={(e) => setModel(e.target.value)}
                 className="w-full bg-[var(--bg-tertiary)] border-2 border-[var(--border-color)] rounded-2xl p-4 font-bold text-[var(--text-primary)] appearance-none"
               >
-                <option value="stabilityai/stable-diffusion-3-medium">Stable Diffusion 3</option>
-                <option value="dall-e-3">DALL-E 3 (Premium)</option>
+                <option value="dall-e-3">DALL-E 3 (Recommended)</option>
                 <option value="gpt-image-1">GPT Image-1</option>
+                <option value="stabilityai/stable-diffusion-3-medium">Stable Diffusion 3</option>
               </select>
             </div>
 
@@ -133,8 +181,8 @@ const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false }) 
                 onChange={(e) => setQuality(e.target.value)}
                 className="w-full bg-[var(--bg-tertiary)] border-2 border-[var(--border-color)] rounded-2xl p-4 font-bold text-[var(--text-primary)] appearance-none"
               >
-                <option value="medium">Medium (Fast)</option>
-                <option value="high">High (Slower)</option>
+                <option value="high">High (Best Quality)</option>
+                <option value="medium">Medium (Faster)</option>
               </select>
             </div>
           </div>
@@ -177,13 +225,22 @@ const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false }) 
                   <span className="font-bold text-sm text-[var(--text-secondary)] uppercase tracking-wide">
                     #{cat.id.slice(-4)}
                   </span>
-                  <button
-                    onClick={() => shareToTelegram(cat)}
-                    className="bg-[#229ED9] text-white p-3 rounded-xl border-b-4 border-[#1b7db0] active:border-b-0 active:translate-y-1 transition-all"
-                    title="Send to Telegram"
-                  >
-                    <Send size={18} fill="currentColor" />
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => downloadImage(cat)}
+                      className="bg-[var(--brand)] text-white p-3 rounded-xl border-b-4 border-[#2a9d6a] active:border-b-0 active:translate-y-1 transition-all"
+                      title="Download Image"
+                    >
+                      <Download size={18} />
+                    </button>
+                    <button
+                      onClick={() => shareToTelegram(cat)}
+                      className="bg-[#229ED9] text-white p-3 rounded-xl border-b-4 border-[#1b7db0] active:border-b-0 active:translate-y-1 transition-all"
+                      title="Send to Telegram"
+                    >
+                      <Send size={18} fill="currentColor" />
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
