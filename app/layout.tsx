@@ -1,0 +1,62 @@
+import type React from "react"
+import type { Metadata } from "next"
+import { Geist, Geist_Mono, Nunito } from "next/font/google"
+import { Analytics } from "@vercel/analytics/next"
+import "./globals.css"
+
+const _geist = Geist({ subsets: ["latin"] })
+const _geistMono = Geist_Mono({ subsets: ["latin"] })
+const nunito = Nunito({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800", "900"],
+})
+
+export const metadata: Metadata = {
+  title: "MIAO - The Green Cat Token",
+  description: "Primeiro vieram os cães, depois os sapos... Agora, as sombras pertencem ao $MIAO",
+  generator: "v0.app",
+  icons: {
+    icon: [
+      {
+        url: "/icon-light-32x32.png",
+        media: "(prefers-color-scheme: light)",
+      },
+      {
+        url: "/icon-dark-32x32.png",
+        media: "(prefers-color-scheme: dark)",
+      },
+      {
+        url: "/icon.svg",
+        type: "image/svg+xml",
+      },
+    ],
+    apple: "/apple-icon.png",
+  },
+}
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode
+}>) {
+  return (
+    <html lang="pt" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                const theme = localStorage.getItem('theme') || 'light';
+                document.documentElement.setAttribute('data-theme', theme);
+              })();
+            `,
+          }}
+        />
+      </head>
+      <body className={`${nunito.className} antialiased`}>
+        {children}
+        <Analytics />
+      </body>
+    </html>
+  )
+}

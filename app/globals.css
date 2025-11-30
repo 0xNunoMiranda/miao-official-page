@@ -1,0 +1,431 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/* Using data-theme attribute for theme switching */
+@custom-variant dark (&:is([data-theme="dark"] *));
+
+:root,
+[data-theme="light"] {
+  /* Updated to recommended color palette - Light Mode */
+  /* PRIMARY */
+  --primary: #34d18d;
+  --primary-hover: #23a86e;
+  --primary-light: #7ee8b7;
+  --primary-foreground: #ffffff;
+
+  /* BACKGROUNDS */
+  --background: #f5f7f6;
+  --foreground: #1a1a1a;
+  --card: #ffffff;
+  --card-foreground: #1a1a1a;
+  --popover: #ffffff;
+  --popover-foreground: #1a1a1a;
+
+  /* SECONDARY/MUTED */
+  --secondary: #e8e8e8;
+  --secondary-foreground: #1a1a1a;
+  --muted: #f5f7f6;
+  --muted-foreground: #5a5a5a;
+  --accent: #e8f5ee;
+  --accent-foreground: #23a86e;
+
+  /* DESTRUCTIVE/ALERTS */
+  --destructive: #ff6b6b;
+  --destructive-foreground: #ffffff;
+  --warning: #ffd93d;
+  --info: #4d96ff;
+
+  /* BORDERS/INPUT */
+  --border: #dddddd;
+  --input: #ffffff;
+  --ring: #34d18d;
+
+  /* CHARTS */
+  --chart-1: #34d18d;
+  --chart-2: #4d96ff;
+  --chart-3: #ffd93d;
+  --chart-4: #ff6b6b;
+  --chart-5: #a855f7;
+
+  --radius: 1rem;
+
+  /* SIDEBAR */
+  --sidebar: #ffffff;
+  --sidebar-foreground: #1a1a1a;
+  --sidebar-primary: #34d18d;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f5f7f6;
+  --sidebar-accent-foreground: #1a1a1a;
+  --sidebar-border: #dddddd;
+  --sidebar-ring: #34d18d;
+
+  /* Brand tokens - Light Mode */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f5f7f6;
+  --bg-tertiary: #e8e8e8;
+  --bg-elevated: #ffffff;
+  --text-primary: #1a1a1a;
+  --text-secondary: #5a5a5a;
+  --brand: #34d18d;
+  --brand-dark: #23a86e;
+  --brand-light: #7ee8b7;
+  --border-color: #dddddd;
+
+  /* Added card and accent colors for NFT section */
+  --card-purple: #7f3fbf;
+  --card-purple-border: #5e2d8f;
+  --accent-color: #34d18d;
+
+  /* Accent colors */
+  --duo-blue: #4d96ff;
+  --duo-blue-dark: #3b7fe0;
+  --duo-orange: #ff9600;
+  --duo-orange-dark: #e68a00;
+  --duo-red: #ff6b6b;
+  --duo-red-dark: #e85555;
+  --duo-purple: #a855f7;
+  --duo-purple-dark: #9333ea;
+}
+
+[data-theme="dark"] {
+  /* Updated to recommended color palette - Dark Mode */
+  /* PRIMARY */
+  --primary: #34d18d;
+  --primary-hover: #41eca0;
+  --primary-light: #3ef0a2;
+  --primary-foreground: #111315;
+
+  /* BACKGROUNDS */
+  --background: #111315;
+  --foreground: #e8e8e8;
+  --card: #1a1d1f;
+  --card-foreground: #e8e8e8;
+  --popover: #1a1d1f;
+  --popover-foreground: #e8e8e8;
+
+  /* SECONDARY/MUTED */
+  --secondary: #222629;
+  --secondary-foreground: #e8e8e8;
+  --muted: #1a1d1f;
+  --muted-foreground: #a5a5a5;
+  --accent: #222629;
+  --accent-foreground: #41eca0;
+
+  /* DESTRUCTIVE/ALERTS */
+  --destructive: #ff7070;
+  --destructive-foreground: #111315;
+  --warning: #e8c547;
+  --info: #4dabff;
+
+  /* BORDERS/INPUT */
+  --border: #2d3235;
+  --input: #1a1d1f;
+  --ring: #34d18d;
+
+  /* CHARTS */
+  --chart-1: #34d18d;
+  --chart-2: #4dabff;
+  --chart-3: #e8c547;
+  --chart-4: #ff7070;
+  --chart-5: #c084fc;
+
+  /* SIDEBAR */
+  --sidebar: #1a1d1f;
+  --sidebar-foreground: #e8e8e8;
+  --sidebar-primary: #34d18d;
+  --sidebar-primary-foreground: #111315;
+  --sidebar-accent: #222629;
+  --sidebar-accent-foreground: #e8e8e8;
+  --sidebar-border: #2d3235;
+  --sidebar-ring: #34d18d;
+
+  /* Brand tokens - Dark Mode */
+  --bg-primary: #111315;
+  --bg-secondary: #1a1d1f;
+  --bg-tertiary: #222629;
+  --bg-elevated: #222629;
+  --text-primary: #e8e8e8;
+  --text-secondary: #a5a5a5;
+  --brand: #34d18d;
+  --brand-dark: #23a86e;
+  --brand-light: #41eca0;
+  --border-color: #2d3235;
+
+  /* Added card and accent colors for NFT section - Dark Mode */
+  --card-purple: #6b32a8;
+  --card-purple-border: #4a2378;
+  --accent-color: #41eca0;
+
+  /* Accent colors - Dark Mode adjusted */
+  --duo-blue: #4dabff;
+  --duo-blue-dark: #3b9ae8;
+  --duo-orange: #ff9600;
+  --duo-orange-dark: #e68a00;
+  --duo-red: #ff7070;
+  --duo-red-dark: #e85555;
+  --duo-purple: #c084fc;
+  --duo-purple-dark: #a855f7;
+}
+
+@theme inline {
+  --font-sans: "Nunito", "Geist", sans-serif;
+  --font-mono: "Geist Mono", monospace;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+}
+
+/* Updated button styles with new color palette */
+.duo-btn {
+  position: relative;
+  font-weight: 700;
+  border-radius: 16px;
+  transition: all 0.1s ease;
+  transform: translateY(0);
+}
+
+.duo-btn:active {
+  transform: translateY(4px);
+}
+
+.duo-btn-green {
+  background: var(--brand);
+  border-bottom: 4px solid var(--brand-dark);
+  color: white;
+}
+
+.duo-btn-green:hover {
+  background: var(--brand-light);
+}
+
+.duo-btn-green:active {
+  border-bottom-width: 0;
+}
+
+.duo-btn-blue {
+  background: var(--duo-blue);
+  border-bottom: 4px solid var(--duo-blue-dark);
+  color: white;
+}
+
+.duo-btn-blue:hover {
+  background: #5eb0ff;
+}
+
+.duo-btn-blue:active {
+  border-bottom-width: 0;
+}
+
+.duo-btn-orange {
+  background: var(--duo-orange);
+  border-bottom: 4px solid var(--duo-orange-dark);
+  color: white;
+}
+
+.duo-btn-orange:hover {
+  background: #ffa726;
+}
+
+.duo-btn-orange:active {
+  border-bottom-width: 0;
+}
+
+.duo-btn-purple {
+  background: var(--duo-purple);
+  border-bottom: 4px solid var(--duo-purple-dark);
+  color: white;
+}
+
+.duo-btn-purple:hover {
+  background: #b97efc;
+}
+
+.duo-btn-purple:active {
+  border-bottom-width: 0;
+}
+
+/* Added secondary button style */
+.duo-btn-secondary {
+  background: var(--bg-elevated);
+  border: 2px solid var(--border-color);
+  border-bottom: 4px solid var(--border-color);
+  color: var(--text-primary);
+}
+
+.duo-btn-secondary:hover {
+  background: var(--bg-tertiary);
+}
+
+.duo-btn-secondary:active {
+  border-bottom-width: 2px;
+}
+
+/* Soft card style */
+.duo-card {
+  background: var(--bg-secondary);
+  border: 2px solid var(--border-color);
+  border-radius: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+/* Nav link hover effect */
+.duo-nav-link {
+  position: relative;
+  padding: 8px 16px;
+  border-radius: 12px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  transition: all 0.2s ease;
+}
+
+.duo-nav-link:hover {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.duo-nav-link.active {
+  background: var(--brand);
+  color: white;
+}
+
+/* Section and card transitions for smooth theme switching */
+section,
+.card {
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+/* Custom scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  height: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: var(--bg-tertiary);
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--brand);
+  border-radius: 4px;
+}
+
+/* Animations */
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.6s ease-out;
+}
+
+@keyframes fade-left {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-fade-left {
+  animation: fade-left 0.3s ease-out;
+}
+
+@keyframes bounce-soft {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.animate-bounce-soft:hover {
+  animation: bounce-soft 0.3s ease;
+}
+
+/* Legacy comic styles for backward compatibility */
+.comic-border {
+  border: 2px solid var(--border-color);
+}
+
+.comic-shadow {
+  box-shadow: 0 4px 0 0 var(--border-color);
+}
+
+.btn-comic:active {
+  box-shadow: none;
+  transform: translateY(4px);
+}
+
+.btn-icon-pop:hover {
+  transform: scale(1.1);
+}
