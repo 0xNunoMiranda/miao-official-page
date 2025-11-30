@@ -113,22 +113,41 @@ export default function TamagotchiCat() {
   }) => (
     <button
       onClick={onClick}
-      className="w-10 h-10 rounded-full bg-[#2DD188] hover:bg-[#25b876] border-2 border-[#1a6b4a] border-b-4 active:border-b-2 active:translate-y-[2px] flex items-center justify-center transition-all"
+      className="w-14 h-14 md:w-16 md:h-16 lg:w-18 lg:h-18 rounded-full bg-[#2DD188] hover:bg-[#25b876] border-2 border-[#1a6b4a] border-b-4 active:border-b-2 active:translate-y-[2px] flex items-center justify-center transition-all"
       title={label}
     >
-      <Icon size={18} className="text-white" />
+      <Icon size={20} className="text-white md:w-5 md:h-5 lg:w-6 lg:h-6" />
     </button>
   )
 
   return (
     <div
-      className={`flex flex-col items-center gap-4 transition-all duration-700 ease-out ${
+      className={`flex flex-row items-start gap-2 md:gap-3 transition-all duration-700 ease-out relative ${
         isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
       }`}
     >
+      {/* Botões verticais à esquerda */}
+      <div className="flex flex-col items-center gap-3 md:gap-4 relative z-10 flex-shrink-0">
+        <ActionButton icon={Utensils} onClick={handleFeed} label="Feed" />
+        <ActionButton icon={Moon} onClick={handleSleep} label="Sleep" />
+        <ActionButton icon={Gamepad2} onClick={handlePlay} label="Play" />
+        <ActionButton icon={BookOpen} onClick={handleStudy} label="Study" />
+        <button
+          onClick={() => setShowStats(!showStats)}
+          className={`w-14 h-14 md:w-16 md:h-16 lg:w-18 lg:h-18 rounded-full border-2 border-b-4 active:border-b-2 active:translate-y-[2px] flex items-center justify-center transition-all ${
+            showStats
+              ? "bg-[var(--duo-green)] text-white border-[#1a6b4a]"
+              : "bg-[var(--bg-secondary)] text-[var(--text-primary)] border-[var(--border-color)]"
+          }`}
+          title="Stats"
+        >
+          <BarChart3 size={20} className="md:w-5 md:h-5 lg:w-6 lg:h-6" />
+        </button>
+      </div>
+
       {/* Cat image */}
       <div
-        className="relative cursor-pointer select-none"
+        className="relative cursor-pointer select-none flex-shrink-0"
         style={{
           animation: "tamagotchi-float 3s ease-in-out infinite",
         }}
@@ -139,34 +158,16 @@ export default function TamagotchiCat() {
         <img
           src={catEmotions[currentEmotion].src || "/placeholder.svg"}
           alt={`Miao ${catEmotions[currentEmotion].name}`}
-          className={`w-full max-w-[400px] h-auto object-contain transition-all duration-300 ease-in-out ${
+          className={`w-full max-w-[380px] md:max-w-[480px] lg:max-w-[580px] h-auto object-contain transition-all duration-300 ease-in-out ${
             isTransitioning ? "opacity-0 scale-95" : "opacity-100 scale-100"
           }`}
           draggable={false}
         />
       </div>
 
-      <div className="flex items-center gap-2">
-        <ActionButton icon={Utensils} onClick={handleFeed} label="Feed" />
-        <ActionButton icon={Moon} onClick={handleSleep} label="Sleep" />
-        <ActionButton icon={Gamepad2} onClick={handlePlay} label="Play" />
-        <ActionButton icon={BookOpen} onClick={handleStudy} label="Study" />
-        <button
-          onClick={() => setShowStats(!showStats)}
-          className={`w-10 h-10 rounded-full border-2 border-b-4 active:border-b-2 active:translate-y-[2px] flex items-center justify-center transition-all ${
-            showStats
-              ? "bg-[var(--duo-green)] text-white border-[#1a6b4a]"
-              : "bg-[var(--bg-secondary)] text-[var(--text-primary)] border-[var(--border-color)]"
-          }`}
-          title="Stats"
-        >
-          <BarChart3 size={18} />
-        </button>
-      </div>
-
       {showStats && (
-        <div className="bg-[var(--bg-secondary)] border-2 border-[var(--border-color)] border-b-4 rounded-2xl p-4 w-full max-w-[280px]">
-          <div className="space-y-3">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[var(--bg-secondary)] border-2 border-[var(--border-color)] border-b-4 rounded-2xl p-6 md:p-8 w-full max-w-[400px] md:max-w-[450px] shadow-2xl z-50">
+          <div className="space-y-4 md:space-y-5">
             <StatBar label="Hunger" value={stats.hunger} color="#FF6B6B" />
             <StatBar label="Energy" value={stats.energy} color="#4ECDC4" />
             <StatBar label="Happy" value={stats.happiness} color="#FFE66D" />
@@ -180,15 +181,15 @@ export default function TamagotchiCat() {
 
 function StatBar({ label, value, color }: { label: string; value: number; color: string }) {
   return (
-    <div className="flex items-center gap-2">
-      <span className="text-xs font-bold w-14 text-[var(--text-primary)]">{label}</span>
-      <div className="flex-1 h-3 bg-[var(--bg-tertiary)] rounded-full overflow-hidden border-2 border-[var(--border-color)]">
+    <div className="flex items-center gap-3">
+      <span className="text-sm md:text-base font-bold w-16 md:w-20 text-[var(--text-primary)]">{label}</span>
+      <div className="flex-1 h-4 md:h-5 bg-[var(--bg-tertiary)] rounded-full overflow-hidden border-2 border-[var(--border-color)]">
         <div
           className="h-full rounded-full transition-all duration-500"
           style={{ width: `${value}%`, backgroundColor: color }}
         />
       </div>
-      <span className="text-xs font-bold w-8 text-right text-[var(--text-primary)]">{value}%</span>
+      <span className="text-sm md:text-base font-bold w-10 md:w-12 text-right text-[var(--text-primary)]">{value}%</span>
     </div>
   )
 }

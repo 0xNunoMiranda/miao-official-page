@@ -49,73 +49,88 @@ const TypewriterText = ({ text }: { text: string }) => {
 
 const Hero: React.FC = () => {
   return (
-    <section id="hero" className="relative min-h-screen pt-28 pb-12 flex items-center">
-      <div className="max-w-[1400px] mx-auto px-6 md:px-12 lg:px-24 w-full">
-        <div className="grid lg:grid-cols-2 gap-8 items-center">
+    <section id="hero" className="relative min-h-screen pt-28 pb-12 flex items-center overflow-hidden">
+      {/* Video Background */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="absolute inset-0 w-full h-full object-cover z-0"
+        style={{ objectFit: 'cover' }}
+      >
+        <source src="/assets/page/bg_video_home_section.mp4" type="video/mp4" />
+      </video>
+      
+      {/* Overlay para melhorar legibilidade */}
+      <div className="absolute inset-0 bg-[var(--bg-primary)]/30 z-[1]"></div>
+      
+      <div className="max-w-[1400px] mx-auto px-6 md:px-12 lg:px-24 w-full relative z-10">
+        <div className="grid lg:grid-cols-2 gap-12 md:gap-16 items-center">
           {/* Cat Image - Left */}
           <div className="order-2 lg:order-1 flex justify-center lg:justify-start">
             <TamagotchiCat />
           </div>
 
           {/* Content - Right */}
-          <div className="order-1 lg:order-2 space-y-6 text-center lg:text-right">
+          <div className="order-1 lg:order-2 space-y-8 md:space-y-10 text-center lg:text-right">
             {/* Logo */}
             <div className="flex justify-center lg:justify-end">
               <img
                 src="https://miaotoken.vip/wp-content/uploads/2025/11/miao-1.png"
                 alt="$MIAO"
-                className="w-48 md:w-56 h-auto"
+                className="w-64 md:w-80 lg:w-96 h-auto"
               />
             </div>
 
-            <div className="bg-[var(--bg-secondary)]/95 backdrop-blur-sm rounded-2xl p-6 border-2 border-[var(--border-color)] border-b-4 ml-auto mr-auto lg:mr-0 max-w-md">
-              <p className="text-sm text-[var(--text-secondary)] font-medium leading-relaxed">
+            <div className="bg-[var(--bg-secondary)]/95 backdrop-blur-sm rounded-2xl p-8 md:p-10 border-2 border-[var(--border-color)] border-b-4 ml-auto mr-auto lg:mr-0 max-w-lg">
+              <p className="text-base md:text-lg text-[var(--text-secondary)] font-medium leading-relaxed">
                 First came the dogs, then the frogs, but the streets were never safe from the shadows. Behind every
                 bark, there's a <span className="text-[var(--duo-green)] font-bold">$MIAO</span> answered back.
               </p>
             </div>
 
-            <div className="flex justify-center lg:justify-end gap-3">
+            <div className="flex justify-center lg:justify-end gap-4">
               <a
                 href="https://t.me/miaotokensol"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-12 h-12 rounded-2xl flex items-center justify-center bg-[#2DD188] text-white border-2 border-b-4 border-[#1fa068] hover:brightness-110 active:border-b-2 active:translate-y-[2px] transition-all"
+                className="w-16 h-16 md:w-20 md:h-20 rounded-2xl flex items-center justify-center bg-[#2DD188] text-white border-2 border-b-4 border-[#1fa068] hover:brightness-110 active:border-b-2 active:translate-y-[2px] transition-all"
               >
-                <Send size={20} />
+                <Send size={28} />
               </a>
               <a
                 href="https://x.com/miaoonsol"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-12 h-12 rounded-2xl flex items-center justify-center bg-[#2DD188] text-white border-2 border-b-4 border-[#1fa068] hover:brightness-110 active:border-b-2 active:translate-y-[2px] transition-all"
+                className="w-16 h-16 md:w-20 md:h-20 rounded-2xl flex items-center justify-center bg-[#2DD188] text-white border-2 border-b-4 border-[#1fa068] hover:brightness-110 active:border-b-2 active:translate-y-[2px] transition-all"
               >
-                <Twitter size={20} />
+                <Twitter size={28} />
               </a>
               <a
                 href="https://www.instagram.com/miaotoken/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-12 h-12 rounded-2xl flex items-center justify-center bg-[#2DD188] text-white border-2 border-b-4 border-[#1fa068] hover:brightness-110 active:border-b-2 active:translate-y-[2px] transition-all"
+                className="w-16 h-16 md:w-20 md:h-20 rounded-2xl flex items-center justify-center bg-[#2DD188] text-white border-2 border-b-4 border-[#1fa068] hover:brightness-110 active:border-b-2 active:translate-y-[2px] transition-all"
               >
-                <Instagram size={20} />
+                <Instagram size={28} />
               </a>
               <a
                 href="https://www.tiktok.com/@miaoonsol"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-12 h-12 rounded-2xl flex items-center justify-center bg-[#2DD188] text-white border-2 border-b-4 border-[#1fa068] hover:brightness-110 active:border-b-2 active:translate-y-[2px] transition-all"
+                className="w-16 h-16 md:w-20 md:h-20 rounded-2xl flex items-center justify-center bg-[#2DD188] text-white border-2 border-b-4 border-[#1fa068] hover:brightness-110 active:border-b-2 active:translate-y-[2px] transition-all"
               >
-                <TikTokIcon size={20} />
+                <TikTokIcon size={28} />
               </a>
             </div>
 
-            <div className="flex flex-wrap justify-center lg:justify-end gap-3">
+            <div className="flex flex-wrap justify-center lg:justify-end gap-4">
               <a
                 href="https://dexscreener.com/solana/87nramn14jjty4nqw847rczwggkeitnwaljn28jmif1t"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-6 py-3 rounded-2xl font-bold uppercase tracking-wide bg-[var(--duo-green)] text-white border-2 border-b-4 border-[var(--btn-shadow)] hover:brightness-105 active:border-b-2 active:translate-y-[2px] transition-all"
+                className="px-8 py-4 md:px-10 md:py-5 rounded-2xl font-bold uppercase tracking-wide text-lg md:text-xl bg-[var(--duo-green)] text-white border-2 border-b-4 border-[var(--btn-shadow)] hover:brightness-105 active:border-b-2 active:translate-y-[2px] transition-all"
               >
                 DexScreener
               </a>
@@ -123,7 +138,7 @@ const Hero: React.FC = () => {
                 href="https://pump.fun/coin/8xpdiZ5GrnAdxpf7DSyZ1YXZxx6itvvoXPHZ4K2Epump"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-6 py-3 rounded-2xl font-bold uppercase tracking-wide bg-[var(--duo-orange)] text-white border-2 border-b-4 border-[var(--btn-shadow-orange)] hover:brightness-105 active:border-b-2 active:translate-y-[2px] transition-all"
+                className="px-8 py-4 md:px-10 md:py-5 rounded-2xl font-bold uppercase tracking-wide text-lg md:text-xl bg-[var(--duo-orange)] text-white border-2 border-b-4 border-[var(--btn-shadow-orange)] hover:brightness-105 active:border-b-2 active:translate-y-[2px] transition-all"
               >
                 Pump.fun
               </a>

@@ -22,6 +22,72 @@ interface TokenomicsProps {
   isChristmasMode?: boolean
 }
 
+// Componente de ícone 3D de chama para Liquidity Burned
+const Flame3DIcon: React.FC<{ className?: string }> = ({ className = "w-5 h-5" }) => {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      style={{ transform: 'translateZ(8px)', filter: 'drop-shadow(0 3px 6px rgba(0, 0, 0, 0.4))' }}
+    >
+      {/* Chama principal - camada de trás (mais escura) */}
+      <path
+        d="M12 2C10 4 8 6 7 8C6 10 5.5 12 6 14C6.5 16 8 17 10 18C12 19 14 18.5 15 17C16 15.5 16.5 13.5 16 12C15.5 10.5 14.5 9 13 8C11.5 7 10.5 6.5 10 7C9.5 7.5 9 8.5 9 10C9 11.5 10 12.5 11 12C12 11.5 12.5 10 12 9C11.5 8 10.5 7.5 10 8C9.5 8.5 9 9.5 9 11C9 12.5 10 13.5 11 13C12 12.5 12.5 11 12 10C11.5 9 10.5 8.5 10 9C9.5 9.5 9 10.5 9 12C9 13.5 10 14.5 11 14C12 13.5 12.5 12 12 11C11.5 10 10.5 9.5 10 10C9.5 10.5 9 11.5 9 13C9 14.5 10 15.5 11 15C12 14.5 12.5 13 12 12Z"
+        fill="url(#flame-gradient-dark)"
+        opacity="0.6"
+        style={{ transform: 'translateZ(-2px)' }}
+      />
+      {/* Chama média */}
+      <path
+        d="M12 3C10.5 4.5 9 6.5 8.5 8.5C8 10.5 8.5 12.5 9.5 14C10.5 15.5 12 16 13.5 15.5C15 15 16 13.5 15.5 12C15 10.5 13.5 9.5 12.5 9C11.5 8.5 11 9 11 10C11 11 11.5 11.5 12 11C12.5 10.5 12.5 9.5 12 9C11.5 8.5 11 9 11 10C11 11 11.5 11.5 12 11C12.5 10.5 12.5 9.5 12 9C11.5 8.5 11 9 11 10C11 11 11.5 11.5 12 11C12.5 10.5 12.5 9.5 12 9Z"
+        fill="url(#flame-gradient-medium)"
+        opacity="0.8"
+        style={{ transform: 'translateZ(2px)' }}
+      />
+      {/* Chama frontal (mais brilhante) */}
+      <path
+        d="M12 4C11 5.5 10.5 7 10.5 8.5C10.5 10 11 11.5 12 12.5C13 13.5 14 13.5 14.5 12.5C15 11.5 14.5 10.5 13.5 10C12.5 9.5 12 10 12 11C12 11.5 12.5 11.5 13 11C13.5 10.5 13.5 10 13 9.5C12.5 9 12 9.5 12 10.5C12 11 12.5 11 13 10.5C13.5 10 13.5 9.5 13 9C12.5 8.5 12 9 12 10C12 10.5 12.5 10.5 13 10C13.5 9.5 13.5 9 13 8.5C12.5 8 12 8.5 12 9.5Z"
+        fill="url(#flame-gradient-light)"
+        style={{ transform: 'translateZ(6px)' }}
+      />
+      {/* Brilho no topo */}
+      <ellipse
+        cx="12"
+        cy="5"
+        rx="2"
+        ry="1.5"
+        fill="url(#flame-highlight)"
+        opacity="0.9"
+        style={{ transform: 'translateZ(8px)' }}
+      />
+      {/* Gradientes */}
+      <defs>
+        <linearGradient id="flame-gradient-dark" x1="12" y1="2" x2="12" y2="18" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#ff6b35" />
+          <stop offset="50%" stopColor="#f7931e" />
+          <stop offset="100%" stopColor="#ff4b4b" />
+        </linearGradient>
+        <linearGradient id="flame-gradient-medium" x1="12" y1="3" x2="12" y2="16" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#ff9500" />
+          <stop offset="50%" stopColor="#ff6b35" />
+          <stop offset="100%" stopColor="#ff4b4b" />
+        </linearGradient>
+        <linearGradient id="flame-gradient-light" x1="12" y1="4" x2="12" y2="13" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#ffc800" />
+          <stop offset="50%" stopColor="#ff9500" />
+          <stop offset="100%" stopColor="#ff6b35" />
+        </linearGradient>
+        <radialGradient id="flame-highlight" cx="12" cy="5" r="2" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.9" />
+          <stop offset="100%" stopColor="#ffc800" stopOpacity="0.5" />
+        </radialGradient>
+      </defs>
+    </svg>
+  )
+}
+
 const CONTRACT_ADDRESS = "8xpdiZ5GrnAdxpf7DSyZ1YXZxx6itvvoXPHZ4K2Epump"
 
 const Tokenomics: React.FC<TokenomicsProps> = ({ isChristmasMode = false }) => {
@@ -43,6 +109,7 @@ const Tokenomics: React.FC<TokenomicsProps> = ({ isChristmasMode = false }) => {
       v: "100% Community",
       color: "bg-[var(--duo-orange)]",
       shadow: "border-[var(--btn-shadow-orange)]",
+      iconColor: "text-[var(--duo-orange)]",
       icon: Rocket,
     },
     {
@@ -50,6 +117,7 @@ const Tokenomics: React.FC<TokenomicsProps> = ({ isChristmasMode = false }) => {
       v: "1B MIAO",
       color: "bg-[var(--duo-yellow)]",
       shadow: "border-[var(--btn-shadow-orange)]",
+      iconColor: "text-[var(--duo-yellow)]",
       icon: Coins,
     },
     {
@@ -57,6 +125,7 @@ const Tokenomics: React.FC<TokenomicsProps> = ({ isChristmasMode = false }) => {
       v: "Pumpfun",
       color: "bg-[var(--duo-pink)]",
       shadow: "border-[var(--duo-pink-dark)]",
+      iconColor: "text-[var(--duo-pink)]",
       icon: Target,
     },
     {
@@ -64,6 +133,7 @@ const Tokenomics: React.FC<TokenomicsProps> = ({ isChristmasMode = false }) => {
       v: "No rug pulls",
       color: "bg-[var(--duo-red)]",
       shadow: "border-[var(--btn-shadow-red)]",
+      iconColor: "text-[var(--duo-red)]",
       icon: Flame,
     },
     {
@@ -71,6 +141,7 @@ const Tokenomics: React.FC<TokenomicsProps> = ({ isChristmasMode = false }) => {
       v: "Can't change it",
       color: "bg-[var(--duo-blue)]",
       shadow: "border-[var(--btn-shadow-blue)]",
+      iconColor: "text-[var(--duo-blue)]",
       icon: ShieldCheck,
     },
     {
@@ -78,6 +149,7 @@ const Tokenomics: React.FC<TokenomicsProps> = ({ isChristmasMode = false }) => {
       v: "Pure chaos",
       color: "bg-[var(--duo-purple)]",
       shadow: "border-[var(--btn-shadow-purple)]",
+      iconColor: "text-[var(--duo-purple)]",
       icon: FileX,
     },
   ]
@@ -178,22 +250,44 @@ const Tokenomics: React.FC<TokenomicsProps> = ({ isChristmasMode = false }) => {
         {/* Tokenomics + How to Buy Grid */}
         <div className="grid lg:grid-cols-2 gap-6 mb-8">
           {/* Tokenomics Card */}
-          <div className="bg-[var(--bg-secondary)]/95 backdrop-blur-sm rounded-3xl p-6 border-2 border-[var(--border-color)] border-b-4 relative">
+          <div className="bg-[var(--bg-secondary)]/95 backdrop-blur-sm rounded-3xl p-6 border-2 border-[var(--border-color)] border-b-4 relative overflow-hidden">
             <SnowCap className="h-10" visible={isChristmasMode} />
             <h2 className="text-2xl md:text-3xl font-black text-[var(--text-primary)] mb-6">Tokenomics</h2>
 
             <div className="grid grid-cols-3 gap-3">
               {tokenomicsItems.map((item, i) => {
                 const IconComponent = item.icon
+                const isLiquidityBurned = item.k === "Liquidity Burned"
                 return (
                   <div
                     key={i}
                     className="aspect-square bg-[var(--bg-primary)] rounded-2xl p-2 flex flex-col items-center justify-center text-center cursor-pointer border-2 border-b-4 border-[var(--border-color)] hover:scale-105 active:border-b-2 active:translate-y-[2px] transition-all"
                   >
                     <div
-                      className={`w-10 h-10 ${item.color} rounded-xl flex items-center justify-center mb-2 border-2 ${item.shadow}`}
+                      className={`w-10 h-10 rounded-xl flex items-center justify-center mb-2 border-2 ${item.shadow} icon-3d relative`}
+                      style={{
+                        transform: 'perspective(1000px) rotateX(8deg) rotateY(-8deg)',
+                        transformStyle: 'preserve-3d',
+                        backgroundColor: item.k === "Fair Launch" ? "var(--duo-orange)" : 
+                                        item.k === "Supply" ? "var(--duo-yellow)" : 
+                                        item.k === "Launchpad" ? "var(--duo-pink)" : 
+                                        item.k === "Liquidity Burned" ? "var(--duo-red)" : 
+                                        item.k === "Contract Renounced" ? "var(--duo-blue)" : 
+                                        "var(--duo-purple)",
+                      }}
                     >
-                      <IconComponent className="w-5 h-5 text-white" strokeWidth={2.5} />
+                      {isLiquidityBurned ? (
+                        <Flame3DIcon className="w-5 h-5 relative z-10" />
+                      ) : (
+                        <IconComponent 
+                          className="w-5 h-5 text-white relative z-10" 
+                          strokeWidth={2.5}
+                          style={{ 
+                            transform: 'translateZ(8px)',
+                            filter: 'drop-shadow(0 3px 6px rgba(0, 0, 0, 0.4))'
+                          }}
+                        />
+                      )}
                     </div>
                     <span className="font-bold text-[var(--text-secondary)] text-[10px] uppercase tracking-tight leading-tight">
                       {item.k}
@@ -239,7 +333,7 @@ const Tokenomics: React.FC<TokenomicsProps> = ({ isChristmasMode = false }) => {
             <img
               src="/images/miao-asking.png"
               alt="MIAO asking"
-              className="absolute bottom-0 right-0 w-28 h-28 object-contain opacity-90 pointer-events-none"
+              className="absolute bottom-0 right-0 w-40 h-40 md:w-48 md:h-48 object-contain opacity-90 pointer-events-none"
             />
           </div>
         </div>
@@ -272,8 +366,18 @@ const Tokenomics: React.FC<TokenomicsProps> = ({ isChristmasMode = false }) => {
           <h2 className="text-3xl md:text-4xl font-black text-[var(--text-primary)] mb-10">Roadmap</h2>
 
           <div className="w-full overflow-x-auto pb-6 custom-scrollbar">
-            <div className="min-w-[1000px] w-full max-w-[1200px] mx-auto bg-[var(--bg-tertiary)]/95 backdrop-blur-sm rounded-3xl p-8 border-2 border-[var(--border-color)] border-b-4">
-              <div className="relative" style={{ height: "400px" }}>
+            <div 
+              className="min-w-[1000px] w-full max-w-[1200px] mx-auto rounded-3xl p-8 border-2 border-[var(--border-color)] border-b-4 relative overflow-hidden"
+              style={{
+                backgroundImage: `url('/assets/${isChristmasMode ? 'bg_roadmap_christmas.jpg' : 'bg_roadmap.jpg'}')`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                backgroundRepeat: "no-repeat"
+              }}
+            >
+              {/* Overlay sutil para melhorar legibilidade */}
+              <div className="absolute inset-0 bg-[var(--bg-tertiary)]/30 backdrop-blur-[2px] pointer-events-none"></div>
+              <div className="relative z-10" style={{ height: "400px" }}>
                 <svg
                   className="absolute inset-0 w-full h-full"
                   viewBox="0 0 1000 400"

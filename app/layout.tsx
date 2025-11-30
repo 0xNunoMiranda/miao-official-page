@@ -49,6 +49,7 @@ export default function RootLayout({
             `,
           }}
         />
+        <script src="https://js.puter.com/v2/"></script>
       </head>
       <body className={`${fredoka.className} antialiased`}>{children}</body>
     </html>

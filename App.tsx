@@ -98,7 +98,7 @@ const AppContent: React.FC = () => {
           {currentView === "home" && (
             <>
               <Hero />
-              <About />
+              <About isChristmasMode={isChristmasMode} />
               <Tokenomics isChristmasMode={isChristmasMode} />
               <Community />
               <CatGenerator isChristmasMode={isChristmasMode} />

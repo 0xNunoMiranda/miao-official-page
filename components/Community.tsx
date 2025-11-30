@@ -29,21 +29,142 @@ const Community: React.FC = () => {
               },
             ].map((item, i) => (
               <div key={i} className="flex flex-col items-center group">
-                <div
-                  className={`w-16 h-16 ${item.color} rounded-2xl flex items-center justify-center mb-4 border-2 border-b-4 ${item.shadow} group-hover:scale-105 transition-transform`}
-                />
+                {item.title === "Liquidity Burned" ? (
+                  <div className="relative w-24 h-24 md:w-28 md:h-28 rounded-2xl flex items-center justify-center mb-4 border-2 border-b-4 border-[var(--btn-shadow-red)]/60 group-hover:scale-105 transition-all overflow-hidden animate-subtle-float">
+                    <div className="absolute inset-0 animate-shimmer rounded-2xl pointer-events-none"></div>
+                    <img 
+                      src="/images/icons/miao-burns.png" 
+                      alt="Burned" 
+                      className="w-full h-full object-contain p-2 relative z-10"
+                    />
+                  </div>
+                ) : item.title === "Contract Renounced" ? (
+                  <div className="relative w-24 h-24 md:w-28 md:h-28 rounded-2xl flex items-center justify-center mb-4 border-2 border-b-4 border-[var(--btn-shadow-blue)]/60 group-hover:scale-105 transition-all overflow-hidden animate-subtle-float" style={{ animationDelay: `${i * 0.2}s` }}>
+                    <div className="absolute inset-0 animate-shimmer rounded-2xl pointer-events-none"></div>
+                    <img 
+                      src="/images/icons/miao-renouces.png" 
+                      alt="Renounced" 
+                      className="w-full h-full object-contain p-2 relative z-10"
+                    />
+                  </div>
+                ) : item.title === "No Treasury" ? (
+                  <div className="relative w-24 h-24 md:w-28 md:h-28 rounded-2xl flex items-center justify-center mb-4 border-2 border-b-4 border-[var(--btn-shadow-orange)]/60 group-hover:scale-105 transition-all overflow-hidden animate-subtle-float" style={{ animationDelay: `${i * 0.2}s` }}>
+                    <div className="absolute inset-0 animate-shimmer rounded-2xl pointer-events-none"></div>
+                    <img 
+                      src="/images/icons/miao-caos.png" 
+                      alt="Chaos" 
+                      className="w-full h-full object-contain p-2 relative z-10"
+                    />
+                  </div>
+                ) : (
+                  <div
+                    className={`w-16 h-16 ${item.color} rounded-2xl flex items-center justify-center mb-4 border-2 border-b-4 ${item.shadow} group-hover:scale-105 transition-transform`}
+                  />
+                )}
                 <h3 className="text-lg font-black text-[var(--text-primary)]">{item.title}</h3>
                 <p className="text-sm text-[var(--text-secondary)] mt-2 font-medium">{item.desc}</p>
               </div>
             ))}
           </div>
 
-          <div className="mt-12 bg-[var(--bg-secondary)] p-6 rounded-2xl border-2 border-dashed border-[var(--border-color)]">
-            <p className="text-base font-bold text-[var(--text-primary)] italic">
-              "This token belongs to everyone. There is no team allocation. Just a green cat and the internet. Good
-              luck."
-            </p>
-            <p className="text-right text-[var(--duo-green)] font-black mt-2">- The Shadows</p>
+          <div className="mt-12 relative">
+            {/* Interface do Telegram - fundo azul escuro */}
+            <div className="bg-[#0e1621] rounded-2xl p-6 shadow-2xl min-h-[200px]">
+              {/* Mensagem anterior (fade X) - como contexto */}
+              <div className="mb-4 opacity-60">
+                <div className="flex gap-3">
+                  <div className="flex-shrink-0 self-end mb-1">
+                    <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-[#1e2a35]">
+                      <img 
+                        src="/assets/tg_avatar_fade.jpg" 
+                        alt="fade X" 
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-[#8e98a3] font-semibold text-xs">fade X</span>
+                    </div>
+                    <div className="bg-[#182533] rounded-2xl rounded-tl-none p-3 relative">
+                      <div className="absolute -left-[6px] top-0">
+                        <svg width="6" height="13" viewBox="0 0 6 13">
+                          <path d="M0 0L6 0L0 13Z" fill="#182533"/>
+                        </svg>
+                      </div>
+                      <p className="text-[#8e98a3] text-xs leading-relaxed">
+                        Chill man. I heard you said "0xMiranda was right about"...
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Balão de mensagem - 0xmiranda */}
+              <div className="relative flex gap-3">
+                {/* Avatar */}
+                <div className="flex-shrink-0 self-end mb-1">
+                  <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-[#1e2a35]">
+                    <img 
+                      src="/assets/tg_avatar.jpg" 
+                      alt="0xmiranda" 
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </div>
+                
+                {/* Mensagem */}
+                <div className="flex-1">
+                  {/* Nome do remetente */}
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-white font-semibold text-sm">0xmiranda</span>
+                    <button className="text-[#8e98a3] hover:text-white transition-colors">
+                      <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
+                        <path d="M7 0C3.134 0 0 3.134 0 7s3.134 7 7 7 7-3.134 7-7S10.866 0 7 0zm3.5 9.625L9.625 11 7 8.375 4.375 11 3.5 10.125 6.125 7.5 3.5 4.875 4.375 4 7 6.625 9.625 4 10.5 4.875 7.875 7.5 10.5 9.625z"/>
+                      </svg>
+                    </button>
+                  </div>
+                  
+                  {/* Balão de mensagem */}
+                  <div className="bg-[#182533] rounded-2xl rounded-tl-none p-4 shadow-lg relative">
+                    {/* Cauda do balão */}
+                    <div className="absolute -left-[6px] top-0">
+                      <svg width="6" height="13" viewBox="0 0 6 13">
+                        <path d="M0 0L6 0L0 13Z" fill="#182533"/>
+                      </svg>
+                    </div>
+                    
+                    {/* Texto da mensagem */}
+                    <p className="text-white text-sm leading-relaxed mb-3">
+                      I admit that initially I was skeptical about the project given the behavior of certain members here, but I continued to observe the token. If this were meant to be a rug pull, I'd say it would have already happened. Now, you might consider it hypocrisy, but I'm even developing mini-games as a way to enrich the community. It's all about the value you give to something, and that value is built. Let's do it together.
+                    </p>
+                    
+                    {/* Reações */}
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="flex items-center gap-1 bg-[#0e1621]/50 rounded-full px-2 py-1">
+                        <span className="text-base">🔥</span>
+                        <span className="text-[#8e98a3] text-xs">3</span>
+                      </div>
+                      <div className="flex items-center gap-1 bg-[#0e1621]/50 rounded-full px-2 py-1">
+                        <span className="text-base">❤️</span>
+                        <span className="text-[#8e98a3] text-xs">2</span>
+                      </div>
+                    </div>
+                    
+                    {/* Timestamp e checkmarks */}
+                    <div className="flex items-center justify-end gap-1">
+                      <span className="text-[#8e98a3] text-xs">7:18 PM</span>
+                      <svg width="14" height="14" viewBox="0 0 14 14" fill="#8e98a3">
+                        <path d="M7 0C3.134 0 0 3.134 0 7s3.134 7 7 7 7-3.134 7-7S10.866 0 7 0zm4.5 5.25L6.25 10.5l-2.75-2.75 1.06-1.06L6.25 8.38l4.19-4.19L11.5 5.25z"/>
+                      </svg>
+                      <svg width="14" height="14" viewBox="0 0 14 14" fill="#8e98a3">
+                        <path d="M7 0C3.134 0 0 3.134 0 7s3.134 7 7 7 7-3.134 7-7S10.866 0 7 0zm4.5 5.25L6.25 10.5l-2.75-2.75 1.06-1.06L6.25 8.38l4.19-4.19L11.5 5.25z"/>
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
