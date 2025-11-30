@@ -43,8 +43,12 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
-                const theme = localStorage.getItem('theme') || 'light';
-                document.documentElement.setAttribute('data-theme', theme);
+                try {
+                  const theme = typeof localStorage !== 'undefined' ? localStorage.getItem('theme') || 'light' : 'light';
+                  document.documentElement.setAttribute('data-theme', theme);
+                } catch (e) {
+                  document.documentElement.setAttribute('data-theme', 'light');
+                }
               })();
             `,
           }}
