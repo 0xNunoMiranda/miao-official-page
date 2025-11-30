@@ -2,6 +2,14 @@ import { experimental_generateImage } from "ai"
 
 export async function POST(request: Request) {
   try {
+    // Verificar se a API key está configurada
+    if (!process.env.OPENAI_API_KEY) {
+      return Response.json(
+        { error: "OpenAI API key is not configured" },
+        { status: 503 },
+      )
+    }
+
     const { prompt } = await request.json()
 
     if (!prompt) {
