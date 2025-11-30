@@ -1,7 +1,6 @@
 import type React from "react"
 import type { Metadata } from "next"
 import { Fredoka } from "next/font/google"
-import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 
 const fredoka = Fredoka({
@@ -51,10 +50,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${fredoka.className} antialiased`}>
-        {children}
-        <Analytics />
-      </body>
+      <body className={`${fredoka.className} antialiased`}>{children}</body>
     </html>
   )
 }

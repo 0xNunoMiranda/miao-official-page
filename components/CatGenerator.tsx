@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useState } from "react"
-import type { GeneratedCat } from "../types"
+import type { GeneratedCat } from "@/types"
 import { Sparkles, RefreshCw, Zap, Send, Download } from "lucide-react"
 import SnowCap from "./SnowCap"
 
@@ -16,8 +16,7 @@ const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false }) 
   const [cats, setCats] = useState<GeneratedCat[]>([])
   const [loading, setLoading] = useState(false)
   const [prompt, setPrompt] = useState("")
-  const [model, setModel] = useState("dall-e-3")
-  const [quality, setQuality] = useState("high")
+  const [error, setError] = useState<string | null>(null)
 
   const TELEGRAM_BOT_TOKEN = "YOUR_BOT_TOKEN_HERE"
   const TELEGRAM_CHAT_ID = "-1002345678901"
@@ -29,38 +28,37 @@ const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false }) 
     }
 
     setLoading(true)
+    setError(null)
 
     try {
-      if (window.puter && window.puter.ai) {
-        const basePrompt = `Generate an image of a green cartoon cat character. The cat must have these EXACT characteristics from the reference:
-- Bright green colored body (like a mint/emerald green)
-- Big round black eyes with white highlights/reflections
-- Cute cartoon/comic style appearance
-- Sharp white teeth showing in a happy smile
-- Pink tongue visible
-- Black whiskers on both sides of face
-- Playful and friendly expression
-- Simple clean cartoon art style
+      const response = await fetch("/api/generate-image", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          prompt: prompt.trim(),
+        }),
+      })
 
-The user wants this green cat character: ${prompt}
+      const data = await response.json()
 
-Keep the cat's core design and green color consistent. Make it fun and vibrant.`
-
-        const imgElement = await window.puter.ai.txt2img(basePrompt, { model, quality })
-
-        if (imgElement && imgElement.src) {
-          const newCat: GeneratedCat = {
-            id: Date.now().toString(),
-            imageUrl: imgElement.src,
-          }
-          setCats((prev) => [newCat, ...prev])
-        }
-      } else {
-        alert("Puter.js AI service not available.")
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to generate image")
       }
-    } catch (error) {
-      console.error("Generation error:", error)
-      alert("Failed to generate image. Try again.")
+
+      if (data.success && data.imageUrl) {
+        const newCat: GeneratedCat = {
+          id: Date.now().toString(),
+          imageUrl: data.imageUrl,
+        }
+        setCats((prev) => [newCat, ...prev])
+      } else {
+        throw new Error("No image returned from API")
+      }
+    } catch (err) {
+      console.error("Generation error:", err)
+      setError(err instanceof Error ? err.message : "Failed to generate image. Try again.")
     } finally {
       setLoading(false)
     }
@@ -68,16 +66,25 @@ Keep the cat's core design and green color consistent. Make it fun and vibrant.`
 
   const downloadImage = async (cat: GeneratedCat) => {
     try {
-      const response = await fetch(cat.imageUrl)
-      const blob = await response.blob()
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement("a")
-      a.href = url
-      a.download = `miao-${cat.id}.png`
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      window.URL.revokeObjectURL(url)
+      if (cat.imageUrl.startsWith("data:")) {
+        const a = document.createElement("a")
+        a.href = cat.imageUrl
+        a.download = `miao-${cat.id}.png`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+      } else {
+        const response = await fetch(cat.imageUrl)
+        const blob = await response.blob()
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement("a")
+        a.href = url
+        a.download = `miao-${cat.id}.png`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        window.URL.revokeObjectURL(url)
+      }
     } catch (e) {
       console.error(e)
       alert("Failed to download image.")
@@ -90,8 +97,20 @@ Keep the cat's core design and green color consistent. Make it fun and vibrant.`
       return
     }
     try {
-      const response = await fetch(cat.imageUrl)
-      const blob = await response.blob()
+      let blob: Blob
+      if (cat.imageUrl.startsWith("data:")) {
+        const base64Data = cat.imageUrl.split(",")[1]
+        const binaryString = atob(base64Data)
+        const bytes = new Uint8Array(binaryString.length)
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i)
+        }
+        blob = new Blob([bytes], { type: "image/png" })
+      } else {
+        const response = await fetch(cat.imageUrl)
+        blob = await response.blob()
+      }
+
       const formData = new FormData()
       formData.append("chat_id", TELEGRAM_CHAT_ID)
       formData.append("photo", blob, "miao-generated.png")
@@ -139,7 +158,12 @@ Keep the cat's core design and green color consistent. Make it fun and vibrant.`
             </div>
           </div>
 
-          {/* Prompt Input */}
+          {error && (
+            <div className="mb-6 p-4 bg-red-100 dark:bg-red-900/30 border-2 border-red-300 dark:border-red-700 rounded-2xl">
+              <p className="text-red-600 dark:text-red-400 font-bold text-sm">{error}</p>
+            </div>
+          )}
+
           <div className="mb-6 relative z-10">
             <label className="block font-black text-sm uppercase text-[var(--text-secondary)] mb-3 tracking-widest">
               Your Prompt
@@ -148,43 +172,13 @@ Keep the cat's core design and green color consistent. Make it fun and vibrant.`
               type="text"
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && !loading && handleGenerate()}
               placeholder="e.g., wearing a space suit, eating pizza, as a superhero..."
               className="w-full bg-[var(--bg-tertiary)] border-2 border-[var(--border-color)] rounded-2xl p-5 font-bold text-lg text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-none focus:border-[var(--brand)] focus:ring-4 focus:ring-[var(--brand)]/20 transition-all"
             />
             <p className="mt-2 text-sm text-[var(--text-secondary)]">
               Tip: Describe actions, costumes, or scenarios for the green cat!
             </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-6 mb-8 relative z-10">
-            <div>
-              <label className="block font-black text-sm uppercase text-[var(--text-secondary)] mb-3 tracking-widest">
-                Model
-              </label>
-              <select
-                value={model}
-                onChange={(e) => setModel(e.target.value)}
-                className="w-full bg-[var(--bg-tertiary)] border-2 border-[var(--border-color)] rounded-2xl p-4 font-bold text-[var(--text-primary)] appearance-none"
-              >
-                <option value="dall-e-3">DALL-E 3 (Recommended)</option>
-                <option value="gpt-image-1">GPT Image-1</option>
-                <option value="stabilityai/stable-diffusion-3-medium">Stable Diffusion 3</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block font-black text-sm uppercase text-[var(--text-secondary)] mb-3 tracking-widest">
-                Quality
-              </label>
-              <select
-                value={quality}
-                onChange={(e) => setQuality(e.target.value)}
-                className="w-full bg-[var(--bg-tertiary)] border-2 border-[var(--border-color)] rounded-2xl p-4 font-bold text-[var(--text-primary)] appearance-none"
-              >
-                <option value="high">High (Best Quality)</option>
-                <option value="medium">Medium (Faster)</option>
-              </select>
-            </div>
           </div>
 
           <button
