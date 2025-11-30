@@ -16,8 +16,7 @@ View your app in AI Studio: https://ai.studio/apps/temp/1
 1. Install dependencies:
    `npm install`
 2. Set the `OPENAI_API_KEY` in `.env.local` to your OpenAI API key (required for image generation)
-3. Optionally set `GEMINI_API_KEY` if using Gemini features
-4. Run the app:
+3. Run the app:
    `npm run dev`
 
 ## Deploy to Vercel
@@ -26,7 +25,6 @@ View your app in AI Studio: https://ai.studio/apps/temp/1
 2. Import your repository in Vercel
 3. **Important:** Add the following environment variables in Vercel project settings:
    - `OPENAI_API_KEY` - Your OpenAI API key (required for `/api/generate-image` endpoint)
-   - `GEMINI_API_KEY` - Optional, only if using Gemini features
 4. Deploy!
 
 **Note:** If you get a 404 error after deployment, make sure:

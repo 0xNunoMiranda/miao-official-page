@@ -28,6 +28,7 @@ export const metadata: Metadata = {
       },
     ],
     apple: "/apple-icon.png",
+    shortcut: "/icon-light-32x32.png",
   },
 }
 
@@ -39,6 +40,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <link rel="icon" href="/icon-light-32x32.png" sizes="32x32" type="image/png" />
+        <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+        <link rel="apple-touch-icon" href="/apple-icon.png" />
         <script
           dangerouslySetInnerHTML={{
             __html: `

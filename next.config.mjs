@@ -7,13 +7,20 @@ const nextConfig = {
     unoptimized: true,
   },
   reactStrictMode: true,
-  // Desabilitar output estático
-  output: undefined,
   // Garantir que não há problemas com a estrutura
   experimental: {
     serverActions: {
       bodySizeLimit: '2mb',
     },
+  },
+  // Adicionar rewrites para servir favicon.ico
+  async rewrites() {
+    return [
+      {
+        source: '/favicon.ico',
+        destination: '/icon-light-32x32.png',
+      },
+    ]
   },
 }
 
