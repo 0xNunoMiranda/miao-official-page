@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import App from "../App"
+import App from "@/App"
 
 export default function Page() {
   const [mounted, setMounted] = useState(false)
