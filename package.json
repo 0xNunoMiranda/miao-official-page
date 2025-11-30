@@ -1,12 +1,13 @@
 {
-  "name": "$miao---the-green-cat",
+  "name": "miao-the-green-cat",
   "version": "0.0.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "vite build",
-    "dev": "vite",
-    "preview": "vite preview"
+    "build": "next build",
+    "dev": "next dev",
+    "lint": "next lint",
+    "start": "next start"
   },
   "dependencies": {
     "@vercel/analytics": "latest",
@@ -14,7 +15,6 @@
     "clsx": "^2.1.1",
     "lucide-react": "^0.454.0",
     "next": "16.0.5",
-    "path": "0.12.7",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "tailwind-merge": "^2.5.5",
@@ -25,10 +25,8 @@
     "@types/node": "^22",
     "@types/react": "19.2.7",
     "@types/react-dom": "19.2.3",
-    "@vitejs/plugin-react": "^5.0.0",
     "postcss": "^8.5",
     "tailwindcss": "^4.1.9",
-    "typescript": "^5",
-    "vite": "^6.2.0"
+    "typescript": "^5"
   }
 }

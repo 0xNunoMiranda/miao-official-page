@@ -8,7 +8,6 @@ export interface WalletConnectionResult {
   timeout?: boolean
 }
 
-// Check if wallet is installed
 export const isWalletInstalled = (type: WalletType): boolean => {
   if (typeof window === "undefined") return false
 
@@ -26,7 +25,6 @@ export const isWalletInstalled = (type: WalletType): boolean => {
   }
 }
 
-// Get wallet download URL
 export const getWalletDownloadUrl = (type: WalletType): string => {
   switch (type) {
     case "phantom":
@@ -167,7 +165,6 @@ export const connectWallet = async (type: WalletType): Promise<WalletConnectionR
   }
 }
 
-// Disconnect wallet
 export const disconnectWallet = async (type: WalletType): Promise<void> => {
   try {
     switch (type) {
@@ -188,7 +185,6 @@ export const disconnectWallet = async (type: WalletType): Promise<void> => {
   }
 }
 
-// Get SOL balance (for Solana wallets)
 export const getSolBalance = async (address: string): Promise<number> => {
   try {
     const response = await fetch("https://api.mainnet-beta.solana.com", {
@@ -212,7 +208,6 @@ export const getSolBalance = async (address: string): Promise<number> => {
   }
 }
 
-// Get connected Solana wallet provider
 export const getSolanaProvider = () => {
   if (window.solana?.isPhantom) return window.solana
   if (window.solflare?.isSolflare) return window.solflare
