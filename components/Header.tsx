@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { Menu, X, Sun, Moon, Wallet, Snowflake, LogOut, FileText, Gamepad2, Wrench } from "lucide-react"
+import { Menu, X, Sun, Moon, Wallet, Snowflake, LogOut, FileText, Gamepad2, Wrench, Volume2, VolumeX } from "lucide-react"
 import type { WalletState } from "../types"
 import { useLanguage } from "../lib/language-context"
 import LanguageSelector from "./LanguageSelector"
@@ -14,6 +14,8 @@ interface HeaderProps {
   onSwapClick?: () => void
   isChristmasMode: boolean
   toggleChristmasMode: () => void
+  soundEnabled: boolean
+  toggleSound: () => void
   onToolsClick?: () => void
   onGamesClick?: () => void
 }
@@ -25,6 +27,8 @@ const Header: React.FC<HeaderProps> = ({
   onSwapClick,
   isChristmasMode,
   toggleChristmasMode,
+  soundEnabled,
+  toggleSound,
   onToolsClick,
   onGamesClick,
 }) => {
@@ -134,6 +138,18 @@ const Header: React.FC<HeaderProps> = ({
                 aria-label="Toggle Christmas Mode"
               >
                 <Snowflake size={20} />
+              </button>
+
+              <button
+                onClick={toggleSound}
+                className={`hidden md:flex w-11 h-11 rounded-2xl border-2 border-b-4 items-center justify-center transition-all active:border-b-2 active:translate-y-[2px] ${
+                  soundEnabled
+                    ? "bg-[var(--bg-secondary)] border-[var(--border-color)] text-[var(--text-secondary)] hover:text-[var(--duo-green)]"
+                    : "bg-[var(--bg-tertiary)] border-[var(--border-color)] text-[var(--text-muted)]"
+                }`}
+                aria-label="Toggle Sound"
+              >
+                {soundEnabled ? <Volume2 size={20} /> : <VolumeX size={20} />}
               </button>
 
               <div className="hidden md:block">
@@ -265,6 +281,21 @@ const Header: React.FC<HeaderProps> = ({
               >
                 <Snowflake size={22} />
                 {t("nav.christmasMode")}: {isChristmasMode ? "ON" : "OFF"}
+              </button>
+
+              <button
+                onClick={() => {
+                  toggleSound()
+                  setIsOpen(false)
+                }}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-lg font-bold transition-all ${
+                  soundEnabled
+                    ? "text-[var(--text-primary)] hover:bg-[var(--bg-secondary)]"
+                    : "bg-[var(--bg-tertiary)] text-[var(--text-muted)]"
+                }`}
+              >
+                {soundEnabled ? <Volume2 size={22} /> : <VolumeX size={22} />}
+                Sound: {soundEnabled ? "ON" : "OFF"}
               </button>
             </div>
 

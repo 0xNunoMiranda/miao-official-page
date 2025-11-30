@@ -35,7 +35,7 @@ const Community: React.FC = () => {
                     <img 
                       src="/images/icons/miao-burns.png" 
                       alt="Burned" 
-                      className="w-full h-full object-contain p-2 relative z-10"
+                      className="w-full h-full object-cover relative z-10"
                     />
                   </div>
                 ) : item.title === "Contract Renounced" ? (
@@ -44,7 +44,7 @@ const Community: React.FC = () => {
                     <img 
                       src="/images/icons/miao-renouces.png" 
                       alt="Renounced" 
-                      className="w-full h-full object-contain p-2 relative z-10"
+                      className="w-full h-full object-cover relative z-10"
                     />
                   </div>
                 ) : item.title === "No Treasury" ? (
@@ -53,7 +53,7 @@ const Community: React.FC = () => {
                     <img 
                       src="/images/icons/miao-caos.png" 
                       alt="Chaos" 
-                      className="w-full h-full object-contain p-2 relative z-10"
+                      className="w-full h-full object-cover relative z-10"
                     />
                   </div>
                 ) : (

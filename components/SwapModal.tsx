@@ -239,15 +239,15 @@ const SwapModal: React.FC<SwapModalProps> = ({ isOpen, onClose, walletBalance, w
       <div className="relative">
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="flex items-center gap-2 bg-[var(--bg-secondary)] px-3 py-2 rounded-xl border-2 border-[var(--border-color)] hover:bg-[var(--bg-tertiary)] transition-colors min-w-[140px]"
+          className="flex items-center gap-3 bg-[var(--bg-secondary)] px-4 py-3 rounded-xl border-2 border-[var(--border-color)] hover:bg-[var(--bg-tertiary)] transition-colors min-w-[200px]"
         >
           <img
             src={token.logo || "/placeholder.svg"}
             alt={token.symbol}
-            className="w-6 h-6 rounded-full object-cover flex-shrink-0"
+            className="w-8 h-8 rounded-full object-cover flex-shrink-0"
           />
-          <span className="font-black text-[var(--text-primary)] text-sm truncate max-w-[60px]">{token.symbol}</span>
-          <ChevronDown size={16} className="text-[var(--text-secondary)] flex-shrink-0" />
+          <span className="font-black text-[var(--text-primary)] text-base truncate flex-1 text-left">{token.symbol}</span>
+          <ChevronDown size={18} className="text-[var(--text-secondary)] flex-shrink-0" />
         </button>
 
         {isOpen && (
@@ -339,7 +339,7 @@ const SwapModal: React.FC<SwapModalProps> = ({ isOpen, onClose, walletBalance, w
     <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose}></div>
 
-      <div className="relative w-full max-w-md bg-[var(--bg-secondary)] border-4 border-[var(--border-color)] rounded-3xl p-6 shadow-[6px_6px_0_0_var(--border-color)]">
+      <div className="relative w-full max-w-2xl bg-[var(--bg-secondary)] border-4 border-[var(--border-color)] rounded-3xl p-6 shadow-[6px_6px_0_0_var(--border-color)]">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-black text-[var(--text-primary)]">Swap</h2>
           <div className="flex gap-2">

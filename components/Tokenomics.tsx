@@ -20,6 +20,7 @@ import SnowCap from "./SnowCap"
 
 interface TokenomicsProps {
   isChristmasMode?: boolean
+  onSwapClick?: () => void
 }
 
 // Componente de ícone 3D de chama para Liquidity Burned
@@ -90,8 +91,9 @@ const Flame3DIcon: React.FC<{ className?: string }> = ({ className = "w-5 h-5" }
 
 const CONTRACT_ADDRESS = "8xpdiZ5GrnAdxpf7DSyZ1YXZxx6itvvoXPHZ4K2Epump"
 
-const Tokenomics: React.FC<TokenomicsProps> = ({ isChristmasMode = false }) => {
+const Tokenomics: React.FC<TokenomicsProps> = ({ isChristmasMode = false, onSwapClick }) => {
   const [copied, setCopied] = useState(false)
+  const [swapCardClicked, setSwapCardClicked] = useState(false)
 
   const copyToClipboard = async () => {
     try {
@@ -178,7 +180,7 @@ const Tokenomics: React.FC<TokenomicsProps> = ({ isChristmasMode = false }) => {
     },
     {
       title: "Swap to $MIAO",
-      desc: "Use Raydium DEX",
+      desc: "Use our Swap",
       color: "bg-[var(--duo-green)]",
       shadow: "border-[var(--btn-shadow)]",
       icon: ArrowRightLeft,
@@ -250,21 +252,34 @@ const Tokenomics: React.FC<TokenomicsProps> = ({ isChristmasMode = false }) => {
         {/* Tokenomics + How to Buy Grid */}
         <div className="grid lg:grid-cols-2 gap-6 mb-8">
           {/* Tokenomics Card */}
-          <div className="bg-[var(--bg-secondary)]/95 backdrop-blur-sm rounded-3xl p-6 border-2 border-[var(--border-color)] border-b-4 relative overflow-hidden">
+          <div className="bg-[var(--bg-secondary)]/95 backdrop-blur-sm rounded-3xl p-6 border-2 border-[var(--border-color)] border-b-4 relative overflow-visible">
             <SnowCap className="h-10" visible={isChristmasMode} />
-            <h2 className="text-2xl md:text-3xl font-black text-[var(--text-primary)] mb-6">Tokenomics</h2>
+            <div className="absolute -top-3 right-0 w-32 h-32 md:w-40 md:h-40 z-0 pointer-events-none">
+              <img
+                src="/images/miao-confident.png"
+                alt="MIAO confident"
+                className="w-full h-full object-cover object-top opacity-90"
+                style={{ 
+                  clipPath: 'inset(0 0 30% 0)',
+                  objectPosition: 'top',
+                  maskImage: 'linear-gradient(to bottom, black 0%, black 50%, rgba(0,0,0,0.8) 60%, rgba(0,0,0,0.4) 75%, transparent 100%)',
+                  WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 50%, rgba(0,0,0,0.8) 60%, rgba(0,0,0,0.4) 75%, transparent 100%)'
+                }}
+              />
+            </div>
+            <h2 className="text-2xl md:text-3xl font-black text-[var(--text-primary)] mb-6 relative z-10">Tokenomics</h2>
 
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-3 gap-2.5 relative z-10">
               {tokenomicsItems.map((item, i) => {
                 const IconComponent = item.icon
                 const isLiquidityBurned = item.k === "Liquidity Burned"
                 return (
                   <div
                     key={i}
-                    className="aspect-square bg-[var(--bg-primary)] rounded-2xl p-2 flex flex-col items-center justify-center text-center cursor-pointer border-2 border-b-4 border-[var(--border-color)] hover:scale-105 active:border-b-2 active:translate-y-[2px] transition-all"
+                    className="aspect-square bg-[var(--bg-primary)] rounded-xl p-2.5 flex flex-col items-center justify-center text-center cursor-pointer border-2 border-b-4 border-[var(--border-color)] hover:scale-105 active:border-b-2 active:translate-y-[2px] transition-all"
                   >
                     <div
-                      className={`w-10 h-10 rounded-xl flex items-center justify-center mb-2 border-2 ${item.shadow} icon-3d relative`}
+                      className={`w-12 h-12 rounded-xl flex items-center justify-center mb-2 border-2 ${item.shadow} icon-3d relative`}
                       style={{
                         transform: 'perspective(1000px) rotateX(8deg) rotateY(-8deg)',
                         transformStyle: 'preserve-3d',
@@ -277,10 +292,10 @@ const Tokenomics: React.FC<TokenomicsProps> = ({ isChristmasMode = false }) => {
                       }}
                     >
                       {isLiquidityBurned ? (
-                        <Flame3DIcon className="w-5 h-5 relative z-10" />
+                        <Flame3DIcon className="w-7 h-7 relative z-10" />
                       ) : (
                         <IconComponent 
-                          className="w-5 h-5 text-white relative z-10" 
+                          className="w-7 h-7 text-white relative z-10" 
                           strokeWidth={2.5}
                           style={{ 
                             transform: 'translateZ(8px)',
@@ -289,10 +304,10 @@ const Tokenomics: React.FC<TokenomicsProps> = ({ isChristmasMode = false }) => {
                         />
                       )}
                     </div>
-                    <span className="font-bold text-[var(--text-secondary)] text-[10px] uppercase tracking-tight leading-tight">
+                    <span className="font-bold text-[var(--text-secondary)] text-xs uppercase tracking-tight leading-tight">
                       {item.k}
                     </span>
-                    <span className="font-black text-[var(--duo-green)] text-xs leading-tight">{item.v}</span>
+                    <span className="font-black text-[var(--duo-green)] text-sm leading-tight">{item.v}</span>
                   </div>
                 )
               })}
@@ -300,29 +315,68 @@ const Tokenomics: React.FC<TokenomicsProps> = ({ isChristmasMode = false }) => {
           </div>
 
           {/* How to Buy Card */}
-          <div className="bg-[var(--bg-secondary)]/95 backdrop-blur-sm rounded-3xl p-6 border-2 border-[var(--border-color)] border-b-4 relative overflow-hidden">
+          <div className="bg-[var(--bg-secondary)]/95 backdrop-blur-sm rounded-3xl p-6 border-2 border-[var(--border-color)] border-b-4 relative overflow-visible">
             <SnowCap className="h-10" visible={isChristmasMode} />
-            <h2 className="text-2xl md:text-3xl font-black text-[var(--text-primary)] mb-6">How to Buy</h2>
+            <div className="absolute -top-3 right-0 w-32 h-32 md:w-40 md:h-40 z-0 pointer-events-none">
+              <img
+                src="/images/miao-asking.png"
+                alt="MIAO asking"
+                className="w-full h-full object-cover object-top opacity-90"
+                style={{ 
+                  clipPath: 'inset(0 0 30% 0)',
+                  objectPosition: 'top',
+                  maskImage: 'linear-gradient(to bottom, black 0%, black 50%, rgba(0,0,0,0.8) 60%, rgba(0,0,0,0.4) 75%, transparent 100%)',
+                  WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 50%, rgba(0,0,0,0.8) 60%, rgba(0,0,0,0.4) 75%, transparent 100%)'
+                }}
+              />
+            </div>
+            <h2 className="text-2xl md:text-3xl font-black text-[var(--text-primary)] mb-6 relative z-10">How to Buy</h2>
 
             <div className="grid grid-cols-2 gap-3 relative z-10">
               {howToBuySteps.map((step, i) => {
                 const IconComponent = step.icon
+                const numberImage = `/assets/numbers/${i + 1}.png`
+                const isSwapStep = i === 3 // 4th step (index 3)
                 return (
                   <div
                     key={i}
-                    className="bg-[var(--bg-primary)] p-4 rounded-2xl cursor-pointer border-2 border-b-4 border-[var(--border-color)] hover:scale-[1.02] active:border-b-2 active:translate-y-[2px] transition-all"
+                    onClick={
+                      isSwapStep && onSwapClick
+                        ? () => {
+                            setSwapCardClicked(true)
+                            onSwapClick()
+                            setTimeout(() => setSwapCardClicked(false), 300)
+                          }
+                        : undefined
+                    }
+                    className={`bg-[var(--bg-primary)]/70 backdrop-blur-sm p-4 rounded-2xl border-2 border-b-4 transition-all ${
+                      isSwapStep && onSwapClick
+                        ? `cursor-pointer hover:scale-[1.02] active:border-b-2 active:translate-y-[2px] ${
+                            swapCardClicked
+                              ? "bg-[var(--duo-green)]/30 border-[var(--duo-green)] border-b-[var(--btn-shadow)]"
+                              : "border-[var(--duo-green)] border-b-[var(--btn-shadow)] shadow-[0_4px_0_var(--btn-shadow)] hover:shadow-[0_6px_0_var(--btn-shadow)]"
+                          }`
+                        : "border-[var(--border-color)] hover:scale-[1.02] active:border-b-2 active:translate-y-[2px]"
+                    }`}
                   >
                     <div className="flex items-start gap-3">
-                      <div
-                        className={`flex-shrink-0 w-10 h-10 ${step.color} rounded-xl text-white flex items-center justify-center font-black text-lg border-2 ${step.shadow}`}
-                      >
-                        <IconComponent className="w-5 h-5" strokeWidth={2.5} />
+                      <div className="flex-shrink-0 relative">
+                        <img
+                          src={numberImage}
+                          alt={`Step ${i + 1}`}
+                          className="w-12 h-12 object-contain"
+                        />
                       </div>
-                      <div className="min-w-0 pt-1">
-                        <h4 className="font-black text-sm text-[var(--text-primary)] leading-tight">{step.title}</h4>
-                        <p className="text-[var(--text-secondary)] font-medium text-xs leading-tight mt-0.5">
+                      <div className="flex-1 min-w-0 pt-1">
+                        <h4 className="font-black text-base text-[var(--text-primary)] leading-tight mb-1">{step.title}</h4>
+                        <p className="text-[var(--text-secondary)] font-medium text-sm leading-tight">
                           {step.desc}
                         </p>
+                      </div>
+                      <div
+                        className={`flex-shrink-0 w-10 h-10 ${step.color} rounded-xl text-white flex items-center justify-center border-2 ${step.shadow}`}
+                      >
+                        <IconComponent className="w-5 h-5" strokeWidth={2.5} />
                       </div>
                     </div>
                   </div>
@@ -330,11 +384,6 @@ const Tokenomics: React.FC<TokenomicsProps> = ({ isChristmasMode = false }) => {
               })}
             </div>
 
-            <img
-              src="/images/miao-asking.png"
-              alt="MIAO asking"
-              className="absolute bottom-0 right-0 w-40 h-40 md:w-48 md:h-48 object-contain opacity-90 pointer-events-none"
-            />
           </div>
         </div>
 
@@ -409,14 +458,14 @@ const Tokenomics: React.FC<TokenomicsProps> = ({ isChristmasMode = false }) => {
                   >
                     {/* Label above for items at y=200 or y=60, below for y=280 */}
                     {(item.y === 200 || item.y === 60) && (
-                      <span className="font-black text-xs text-[var(--text-primary)] bg-[var(--bg-primary)] px-3 py-1 rounded-full border-2 border-[var(--border-color)] whitespace-nowrap mb-1">
+                      <span className="font-black text-sm text-[var(--text-primary)] bg-[var(--bg-primary)] px-4 py-1.5 rounded-full border-2 border-[var(--border-color)] whitespace-nowrap mb-1.5">
                         {item.label}
                       </span>
                     )}
 
                     {/* Avatar */}
                     <div
-                      className="w-14 h-14 rounded-full border-4 overflow-hidden bg-[var(--bg-primary)] shadow-lg"
+                      className="w-16 h-16 rounded-full border-4 overflow-hidden bg-[var(--bg-primary)] shadow-lg"
                       style={{ borderColor: item.color }}
                     >
                       <img
@@ -428,7 +477,7 @@ const Tokenomics: React.FC<TokenomicsProps> = ({ isChristmasMode = false }) => {
 
                     {/* Label below for items at y=280 */}
                     {item.y === 280 && (
-                      <span className="font-black text-xs text-[var(--text-primary)] bg-[var(--bg-primary)] px-3 py-1 rounded-full border-2 border-[var(--border-color)] whitespace-nowrap mt-1">
+                      <span className="font-black text-sm text-[var(--text-primary)] bg-[var(--bg-primary)] px-4 py-1.5 rounded-full border-2 border-[var(--border-color)] whitespace-nowrap mt-1.5">
                         {item.label}
                       </span>
                     )}

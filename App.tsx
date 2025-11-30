@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { LanguageProvider } from "@/lib/language-context"
 import Header from "@/components/Header"
 import Hero from "@/components/Hero"
@@ -15,6 +15,7 @@ import GamesPage from "@/components/GamesPage"
 import ToolsPage from "@/components/ToolsPage"
 import WalletModal from "@/components/WalletModal"
 import SwapModal from "@/components/SwapModal"
+import SwapChartModal from "@/components/SwapChartModal"
 import SnowEffect from "@/components/SnowEffect"
 import type { WalletState, WalletType } from "@/types"
 import { getSolBalance, disconnectWallet } from "@/lib/wallet-service"
@@ -25,10 +26,20 @@ const BG_CHRISTMAS = "/images/grass3d-christmas.png"
 const AppContent: React.FC = () => {
   const [currentView, setCurrentView] = useState<"home" | "games" | "tools">("home")
   const [isChristmasMode, setIsChristmasMode] = useState(false)
+  const [soundEnabled, setSoundEnabled] = useState(true)
+  
+  useEffect(() => {
+    // Carrega o estado do som do localStorage apenas no cliente
+    const stored = localStorage.getItem("soundEnabled")
+    if (stored !== null) {
+      setSoundEnabled(stored === "true")
+    }
+  }, [])
 
   // Wallet State
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false)
   const [isSwapModalOpen, setIsSwapModalOpen] = useState(false)
+  const [isSwapChartModalOpen, setIsSwapChartModalOpen] = useState(false)
   const [walletState, setWalletState] = useState<WalletState>({
     isConnected: false,
     address: null,
@@ -90,6 +101,12 @@ const AppContent: React.FC = () => {
           onSwapClick={() => setIsSwapModalOpen(true)}
           isChristmasMode={isChristmasMode}
           toggleChristmasMode={() => setIsChristmasMode(!isChristmasMode)}
+          soundEnabled={soundEnabled}
+          toggleSound={() => {
+            const newValue = !soundEnabled
+            setSoundEnabled(newValue)
+            localStorage.setItem("soundEnabled", String(newValue))
+          }}
           onToolsClick={() => setCurrentView("tools")}
           onGamesClick={() => setCurrentView("games")}
         />
@@ -97,9 +114,20 @@ const AppContent: React.FC = () => {
         <main>
           {currentView === "home" && (
             <>
-              <Hero />
+              <Hero 
+                onSwapChartClick={() => setIsSwapChartModalOpen(true)} 
+                isChristmasMode={isChristmasMode}
+                soundEnabled={soundEnabled}
+                onDisableSound={() => {
+                  setSoundEnabled(false)
+                  localStorage.setItem("soundEnabled", "false")
+                }}
+              />
               <About isChristmasMode={isChristmasMode} />
-              <Tokenomics isChristmasMode={isChristmasMode} />
+              <Tokenomics 
+                isChristmasMode={isChristmasMode} 
+                onSwapClick={() => setIsSwapChartModalOpen(true)}
+              />
               <Community />
               <CatGenerator isChristmasMode={isChristmasMode} />
               <NFTSection isChristmasMode={isChristmasMode} />
@@ -119,6 +147,13 @@ const AppContent: React.FC = () => {
       <SwapModal
         isOpen={isSwapModalOpen}
         onClose={() => setIsSwapModalOpen(false)}
+        walletBalance={walletState.balance}
+        walletAddress={walletState.address || undefined}
+      />
+
+      <SwapChartModal
+        isOpen={isSwapChartModalOpen}
+        onClose={() => setIsSwapChartModalOpen(false)}
         walletBalance={walletState.balance}
         walletAddress={walletState.address || undefined}
       />

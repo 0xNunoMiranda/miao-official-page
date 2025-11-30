@@ -41,7 +41,8 @@ const Footer: React.FC = () => {
       <img
         src="/images/clouds3.png"
         alt="Miao cats relaxing on a tropical island"
-        className="absolute bottom-0 right-0 w-[300px] md:w-[400px] lg:w-[500px] h-auto pointer-events-none select-none"
+        className="absolute bottom-0 right-0 w-[300px] md:w-[400px] lg:w-[500px] h-auto pointer-events-none select-none rounded-[50%]"
+        style={{ borderRadius: '50%' }}
       />
     </footer>
   )

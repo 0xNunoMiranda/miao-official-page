@@ -536,6 +536,26 @@
   animation: subtle-float 4s ease-in-out infinite;
 }
 
+/* Animação suave de nuvem flutuando */
+@keyframes cloud-float {
+  0%, 100% {
+    transform: translateY(0px) translateX(0px);
+    opacity: 0.7;
+  }
+  33% {
+    transform: translateY(-5px) translateX(3px);
+    opacity: 0.75;
+  }
+  66% {
+    transform: translateY(-3px) translateX(-2px);
+    opacity: 0.7;
+  }
+}
+
+.animate-cloud-float {
+  animation: cloud-float 6s ease-in-out infinite;
+}
+
 .animate-blink-main {
   animation: blink-main 5.2s step-end infinite;
 }

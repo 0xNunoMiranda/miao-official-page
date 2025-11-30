@@ -1,9 +1,17 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
-import { Send, Twitter, Instagram } from "lucide-react"
+import { useState, useEffect, useRef } from "react"
+import { Send, Twitter, Instagram, ArrowDownUp } from "lucide-react"
 import TamagotchiCat from "./TamagotchiCat"
+import { useVideoSound } from "@/lib/use-video-sound"
+
+interface HeroProps {
+  onSwapChartClick?: () => void
+  isChristmasMode?: boolean
+  soundEnabled?: boolean
+  onDisableSound?: () => void
+}
 
 const TikTokIcon = ({ size = 20 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
@@ -47,28 +55,154 @@ const TypewriterText = ({ text }: { text: string }) => {
   )
 }
 
-const Hero: React.FC = () => {
+const Hero: React.FC<HeroProps> = ({ onSwapChartClick, isChristmasMode = false, soundEnabled = true, onDisableSound }) => {
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const videoRefChristmas = useRef<HTMLVideoElement>(null)
+  const [isDark, setIsDark] = useState(false)
+  const [videoOpacity, setVideoOpacity] = useState(() => ({
+    normal: isChristmasMode ? 0 : 1,
+    christmas: isChristmasMode ? 1 : 0
+  }))
+  
+  // Usar o hook de som para reprodução aleatória - usar o vídeo ativo
+  const activeVideoRef = isChristmasMode ? videoRefChristmas : videoRef
+  useVideoSound({ videoRef: activeVideoRef, soundEnabled, isChristmasMode, onDisableSound })
+  
+  // Garantir que os vídeos estejam sempre muted (o hook controla o unmute quando necessário)
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.muted = true
+    }
+    if (videoRefChristmas.current) {
+      videoRefChristmas.current.muted = true
+    }
+  }, [])
+
+  useEffect(() => {
+    // Verificar tema inicial
+    const checkTheme = () => {
+      const theme = document.documentElement.getAttribute("data-theme")
+      setIsDark(theme === "dark")
+    }
+    
+    checkTheme()
+    
+    // Observar mudanças no tema
+    const observer = new MutationObserver(checkTheme)
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-theme"],
+    })
+    
+    return () => observer.disconnect()
+  }, [])
+
+  // Transição suave entre vídeos
+  useEffect(() => {
+    const transitionDuration = 2000 // 2 segundos para transição suave
+    const steps = 60
+    const stepTime = transitionDuration / steps
+    let currentStep = 0
+
+    if (isChristmasMode) {
+      // Fade in Christmas, fade out normal
+      const interval = setInterval(() => {
+        currentStep++
+        const progress = Math.min(currentStep / steps, 1)
+        setVideoOpacity({
+          normal: 1 - progress,
+          christmas: progress
+        })
+        if (currentStep >= steps) {
+          // Garantir valores finais exatos
+          setVideoOpacity({
+            normal: 0,
+            christmas: 1
+          })
+          clearInterval(interval)
+        }
+      }, stepTime)
+      return () => clearInterval(interval)
+    } else {
+      // Fade in normal, fade out Christmas
+      const interval = setInterval(() => {
+        currentStep++
+        const progress = Math.min(currentStep / steps, 1)
+        setVideoOpacity({
+          normal: progress,
+          christmas: 1 - progress
+        })
+        if (currentStep >= steps) {
+          // Garantir valores finais exatos
+          setVideoOpacity({
+            normal: 1,
+            christmas: 0
+          })
+          clearInterval(interval)
+        }
+      }, stepTime)
+      return () => clearInterval(interval)
+    }
+  }, [isChristmasMode])
+
+  // Garantir que os vídeos estejam sempre reproduzindo
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.play().catch(() => {})
+    }
+    if (videoRefChristmas.current) {
+      videoRefChristmas.current.play().catch(() => {})
+    }
+  }, [])
+
   return (
     <section id="hero" className="relative min-h-screen pt-28 pb-12 flex items-center overflow-hidden">
-      {/* Video Background */}
+      {/* Video Background - Normal */}
       <video
+        ref={videoRef}
         autoPlay
         loop
-        muted
+        muted={true}
         playsInline
-        className="absolute inset-0 w-full h-full object-cover z-0"
-        style={{ objectFit: 'cover' }}
+        className="absolute inset-0 w-full h-full object-cover z-0 transition-opacity duration-[2000ms] ease-in-out"
+        style={{ 
+          objectFit: 'cover', 
+          objectPosition: 'left top',
+          opacity: videoOpacity.normal,
+          pointerEvents: videoOpacity.normal === 0 ? 'none' : 'auto'
+        }}
       >
-        <source src="/assets/page/bg_video_home_section.mp4" type="video/mp4" />
+        <source 
+          src="/assets/page/bg_video_home_section.mp4"
+          type="video/mp4" 
+        />
       </video>
       
-      {/* Overlay para melhorar legibilidade */}
-      <div className="absolute inset-0 bg-[var(--bg-primary)]/30 z-[1]"></div>
+      {/* Video Background - Christmas */}
+      <video
+        ref={videoRefChristmas}
+        autoPlay
+        loop
+        muted={true}
+        playsInline
+        className="absolute inset-0 w-full h-full object-cover z-0 transition-opacity duration-[2000ms] ease-in-out"
+        style={{ 
+          objectFit: 'cover', 
+          objectPosition: 'left top',
+          opacity: videoOpacity.christmas,
+          pointerEvents: videoOpacity.christmas === 0 ? 'none' : 'auto'
+        }}
+      >
+        <source 
+          src="/assets/page/bg_video_home_section_christmas.mp4"
+          type="video/mp4" 
+        />
+      </video>
       
       <div className="max-w-[1400px] mx-auto px-6 md:px-12 lg:px-24 w-full relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 md:gap-16 items-center">
           {/* Cat Image - Left */}
-          <div className="order-2 lg:order-1 flex justify-center lg:justify-start">
+          <div className="order-2 lg:order-1 flex justify-center lg:justify-start lg:items-start">
             <TamagotchiCat />
           </div>
 
@@ -83,57 +217,66 @@ const Hero: React.FC = () => {
               />
             </div>
 
-            <div className="bg-[var(--bg-secondary)]/95 backdrop-blur-sm rounded-2xl p-8 md:p-10 border-2 border-[var(--border-color)] border-b-4 ml-auto mr-auto lg:mr-0 max-w-lg">
-              <p className="text-base md:text-lg text-[var(--text-secondary)] font-medium leading-relaxed">
+            <div 
+              className={`backdrop-blur-md p-8 md:p-10 ml-auto mr-auto lg:mr-0 max-w-lg animate-cloud-float relative ${
+                isDark ? 'bg-black/30' : 'bg-white/25'
+              }`}
+              style={{
+                clipPath: 'polygon(15% 5%, 25% 0%, 40% 2%, 55% 0%, 70% 3%, 85% 0%, 100% 8%, 100% 25%, 98% 40%, 100% 55%, 95% 70%, 100% 85%, 90% 100%, 75% 98%, 60% 100%, 45% 98%, 30% 100%, 15% 95%, 5% 85%, 0% 70%, 2% 55%, 0% 40%, 3% 25%, 0% 10%)',
+                borderRadius: '50px',
+                border: isDark ? '2px solid rgba(0, 0, 0, 0.4)' : '2px solid rgba(255, 255, 255, 0.3)',
+                opacity: isDark ? 0.8 : 0.65,
+              }}
+            >
+              <p className="text-base md:text-lg text-white font-medium leading-relaxed drop-shadow-lg">
                 First came the dogs, then the frogs, but the streets were never safe from the shadows. Behind every
-                bark, there's a <span className="text-[var(--duo-green)] font-bold">$MIAO</span> answered back.
+                bark, there's a <span className="text-[var(--duo-green)] font-bold drop-shadow-md">$MIAO</span> answered back.
               </p>
             </div>
 
-            <div className="flex justify-center lg:justify-end gap-4">
+            <div className="flex justify-center lg:justify-end gap-3">
               <a
                 href="https://t.me/miaotokensol"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-16 h-16 md:w-20 md:h-20 rounded-2xl flex items-center justify-center bg-[#2DD188] text-white border-2 border-b-4 border-[#1fa068] hover:brightness-110 active:border-b-2 active:translate-y-[2px] transition-all"
+                className="w-12 h-12 md:w-14 md:h-14 rounded-xl flex items-center justify-center bg-[#2DD188] text-white border-2 border-b-4 border-[#1fa068] hover:brightness-110 active:border-b-2 active:translate-y-[2px] transition-all"
               >
-                <Send size={28} />
+                <Send size={20} />
               </a>
               <a
                 href="https://x.com/miaoonsol"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-16 h-16 md:w-20 md:h-20 rounded-2xl flex items-center justify-center bg-[#2DD188] text-white border-2 border-b-4 border-[#1fa068] hover:brightness-110 active:border-b-2 active:translate-y-[2px] transition-all"
+                className="w-12 h-12 md:w-14 md:h-14 rounded-xl flex items-center justify-center bg-[#2DD188] text-white border-2 border-b-4 border-[#1fa068] hover:brightness-110 active:border-b-2 active:translate-y-[2px] transition-all"
               >
-                <Twitter size={28} />
+                <Twitter size={20} />
               </a>
               <a
                 href="https://www.instagram.com/miaotoken/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-16 h-16 md:w-20 md:h-20 rounded-2xl flex items-center justify-center bg-[#2DD188] text-white border-2 border-b-4 border-[#1fa068] hover:brightness-110 active:border-b-2 active:translate-y-[2px] transition-all"
+                className="w-12 h-12 md:w-14 md:h-14 rounded-xl flex items-center justify-center bg-[#2DD188] text-white border-2 border-b-4 border-[#1fa068] hover:brightness-110 active:border-b-2 active:translate-y-[2px] transition-all"
               >
-                <Instagram size={28} />
+                <Instagram size={20} />
               </a>
               <a
                 href="https://www.tiktok.com/@miaoonsol"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-16 h-16 md:w-20 md:h-20 rounded-2xl flex items-center justify-center bg-[#2DD188] text-white border-2 border-b-4 border-[#1fa068] hover:brightness-110 active:border-b-2 active:translate-y-[2px] transition-all"
+                className="w-12 h-12 md:w-14 md:h-14 rounded-xl flex items-center justify-center bg-[#2DD188] text-white border-2 border-b-4 border-[#1fa068] hover:brightness-110 active:border-b-2 active:translate-y-[2px] transition-all"
               >
-                <TikTokIcon size={28} />
+                <TikTokIcon size={20} />
               </a>
             </div>
 
             <div className="flex flex-wrap justify-center lg:justify-end gap-4">
-              <a
-                href="https://dexscreener.com/solana/87nramn14jjty4nqw847rczwggkeitnwaljn28jmif1t"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-8 py-4 md:px-10 md:py-5 rounded-2xl font-bold uppercase tracking-wide text-lg md:text-xl bg-[var(--duo-green)] text-white border-2 border-b-4 border-[var(--btn-shadow)] hover:brightness-105 active:border-b-2 active:translate-y-[2px] transition-all"
+              <button
+                onClick={onSwapChartClick}
+                className="px-8 py-4 md:px-10 md:py-5 rounded-2xl font-bold uppercase tracking-wide text-lg md:text-xl bg-[var(--duo-green)] text-white border-2 border-b-4 border-[var(--btn-shadow)] hover:brightness-105 active:border-b-2 active:translate-y-[2px] transition-all flex items-center gap-2"
               >
-                DexScreener
-              </a>
+                <ArrowDownUp size={20} />
+                Swap / Chart
+              </button>
               <a
                 href="https://pump.fun/coin/8xpdiZ5GrnAdxpf7DSyZ1YXZxx6itvvoXPHZ4K2Epump"
                 target="_blank"
