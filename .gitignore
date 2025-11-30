@@ -40,5 +40,5 @@ next-env.d.ts
 
 # Lock files (opcional - descomenta se não quiseres commitá-los)
 # package-lock.json
-# pnpm-lock.yaml
+pnpm-lock.yaml
 # yarn.lock
