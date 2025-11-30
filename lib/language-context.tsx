@@ -17,6 +17,8 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
   const [language, setLanguageState] = useState<Language>("en")
 
   useEffect(() => {
+    if (typeof window === "undefined") return
+    
     const savedLang = localStorage.getItem("language") as Language
     if (savedLang && languages.some((l) => l.code === savedLang)) {
       setLanguageState(savedLang)
@@ -30,13 +32,17 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
   }, [])
 
   useEffect(() => {
+    if (typeof window === "undefined") return
+    
     const langConfig = languages.find((l) => l.code === language)
     document.documentElement.setAttribute("dir", langConfig?.dir || "ltr")
   }, [language])
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang)
-    localStorage.setItem("language", lang)
+    if (typeof window !== "undefined") {
+      localStorage.setItem("language", lang)
+    }
   }
 
   const t = (key: string) => getTranslation(language, key)
