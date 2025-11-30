@@ -20,6 +20,9 @@ export const translations: Record<Language, Record<string, string>> = {
     "nav.nfts": "NFT's",
     "nav.menu": "Menu",
     "nav.christmasMode": "Modo Natal",
+    "nav.tools": "Tools",
+    "nav.games": "Games",
+    "nav.whitepaper": "Whitepaper",
 
     // Header
     "header.connect": "Conectar",
@@ -31,6 +34,9 @@ export const translations: Record<Language, Record<string, string>> = {
     // Hero
     "hero.tagline1": "Primeiro vieram os cães, depois os sapos...",
     "hero.tagline2": "Agora, as sombras pertencem ao",
+    "hero.subtitle":
+      "Quando os cães ladravam e os sapos saltavam, todos pensavam que as guerras dos memes tinham acabado. Mas nas sombras, algo paciente espreitava. Atrás de cada latido ou coaxar vinha um afiado e perspicaz $MIAO que ninguém conseguia ignorar.",
+    "hero.typewriter": "The streets aren't safe... $MIAO is already watching.",
     "hero.dexscreen": "Dexscreen",
     "hero.liveCharts": "Live Charts",
     "hero.view": "VER",
@@ -44,16 +50,15 @@ export const translations: Record<Language, Record<string, string>> = {
     "hero.playEarn": "Jogar & Ganhar",
     "hero.play": "JOGAR",
 
-    // About
-    "about.text":
-      "Quando os cães ladravam e os sapos saltavam, todos pensavam que as guerras dos memes tinham acabado. Mas nas sombras, algo paciente espreitava. Atrás de cada latido ou coaxar vinha um afiado e perspicaz",
-    "about.text2": "que ninguém conseguia ignorar. As ruas não são seguras",
-
     // Tokenomics
     "tokenomics.title": "Tokenomics",
     "tokenomics.totalSupply": "Fornecimento Total",
-    "tokenomics.liquidity": "Liquidez",
-    "tokenomics.locked": "Bloqueada",
+    "tokenomics.liquidity": "Liquidez Queimada",
+    "tokenomics.liquidityDesc": "Sem rug pulls. A pool desapareceu para sempre.",
+    "tokenomics.contract": "Contrato Renunciado",
+    "tokenomics.contractDesc": "Não podemos alterá-lo mesmo que quiséssemos.",
+    "tokenomics.treasury": "Sem Tesouraria",
+    "tokenomics.treasuryDesc": "Sem carteira dev. Sem taxa de marketing. Puro caos.",
     "tokenomics.tax": "Taxa",
     "tokenomics.noTax": "Sem Taxas",
     "tokenomics.community": "Comunidade",
@@ -61,6 +66,25 @@ export const translations: Record<Language, Record<string, string>> = {
     "tokenomics.contractAddress": "Endereço do Contrato",
     "tokenomics.copied": "Copiado!",
     "tokenomics.clickToCopy": "Clique para copiar",
+    "tokenomics.howToBuy": "Como Comprar",
+    "tokenomics.step1": "Cria uma Carteira",
+    "tokenomics.step1Desc": "Descarrega Phantom ou Solflare",
+    "tokenomics.step2": "Adiciona SOL",
+    "tokenomics.step2Desc": "Compra ou transfere SOL",
+    "tokenomics.step3": "Conecta ao DEX",
+    "tokenomics.step3Desc": "Vai a Raydium ou Jupiter",
+    "tokenomics.step4": "Troca por $MIAO",
+    "tokenomics.step4Desc": "Cola o endereço do contrato",
+    "tokenomics.roadmap": "Roadmap",
+    "tokenomics.phase1": "Fase 1",
+    "tokenomics.phase1Title": "Lançamento",
+    "tokenomics.phase2": "Fase 2",
+    "tokenomics.phase2Title": "Comunidade",
+    "tokenomics.phase3": "Fase 3",
+    "tokenomics.phase3Title": "Expansão",
+    "tokenomics.phase4": "Fase 4",
+    "tokenomics.phase4Title": "Utilidade",
+    "tokenomics.more": "Mais...",
 
     // Community
     "community.title": "Junte-se à Comunidade",
@@ -68,28 +92,6 @@ export const translations: Record<Language, Record<string, string>> = {
     "community.telegram": "Telegram",
     "community.twitter": "Twitter",
     "community.discord": "Discord",
-
-    // Cat Generator
-    "generator.title": "Gerador de Gatos IA",
-    "generator.subtitle": "Crie o seu próprio gato MIAO único",
-    "generator.placeholder": "Descreva o seu gato dos sonhos...",
-    "generator.generate": "Gerar Gato",
-    "generator.generating": "A gerar...",
-    "generator.download": "Descarregar",
-
-    // NFT Section
-    "nft.title": "Mint MIAO NFT",
-    "nft.description":
-      "Nascidos das sombras das guerras dos memes, os NFTs $MIAO incorporam furtividade e energia. Possua um símbolo de poder nas ruas.",
-    "nft.mintV1": "MINT V1",
-    "nft.mintV2": "MINT V2",
-
-    // Footer
-    "footer.disclaimer": "Aviso Legal",
-    "footer.disclaimerText":
-      "Miao Token é uma meme coin criada puramente para entretenimento e propósitos comunitários. Não representa um contrato de investimento, título ou garantia de lucro. Por favor, invista apenas o que pode perder. Ao participar, reconhece a natureza de alto risco das meme coins, incluindo a potencial perda total do seu investimento.",
-    "footer.rights": "Todos os direitos reservados © Miao Token. 2025",
-    "footer.sendEmail": "Enviar Email",
 
     // Wallet Modal
     "wallet.title": "Conectar Carteira",
@@ -101,31 +103,35 @@ export const translations: Record<Language, Record<string, string>> = {
     "wallet.notSupported": "Solana não suportado",
     "wallet.timeout": "Tempo limite excedido. Verifique se a carteira está aberta.",
     "wallet.error": "Erro ao conectar. Tente novamente.",
+    "wallet.phantomDesc": "Carteira Solana mais popular",
+    "wallet.solflareDesc": "Carteira Solana avançada",
+    "wallet.backpackDesc": "Carteira multi-chain",
+    "wallet.recommended": "Recomendado",
+    "wallet.detected": "Detectado",
+    "wallet.newToCrypto": "Novo em crypto? Instale Phantom para começar.",
 
-    // Swap Modal
-    "swap.title": "Swap Tokens",
-    "swap.from": "De",
-    "swap.to": "Para",
-    "swap.balance": "Saldo",
-    "swap.max": "MAX",
-    "swap.searchToken": "Pesquisar token ou colar endereço",
-    "swap.rate": "Taxa",
-    "swap.priceImpact": "Impacto no Preço",
-    "swap.minReceived": "Mínimo Recebido",
-    "swap.connectFirst": "Conecte a carteira primeiro",
-    "swap.swapNow": "Trocar Agora",
-    "swap.swapping": "A trocar...",
+    // Tamagotchi
+    "tamagotchi.feed": "Alimentar",
+    "tamagotchi.sleep": "Dormir",
+    "tamagotchi.play": "Jogar",
+    "tamagotchi.study": "Estudar",
+    "tamagotchi.stats": "Stats",
+    "tamagotchi.hunger": "Fome",
+    "tamagotchi.energy": "Energia",
+    "tamagotchi.happiness": "Felicidade",
+    "tamagotchi.intelligence": "Inteligência",
 
-    // Games Page
+    // Footer
+    "footer.disclaimer": "Aviso Legal",
+    "footer.disclaimerText":
+      "Miao Token é uma meme coin criada puramente para entretenimento e propósitos comunitários. Não representa um contrato de investimento, título ou garantia de lucro. Por favor, invista apenas o que pode perder.",
+    "footer.rights": "Todos os direitos reservados © Miao Token. 2025",
+    "footer.sendEmail": "Enviar Email",
+
+    // Games & Tools
     "games.title": "MIAO Games",
     "games.subtitle": "Jogue e divirta-se com o MIAO",
     "games.back": "Voltar",
-    "games.featured": "Destaque",
-    "games.playNow": "Jogar Agora",
-    "games.close": "Fechar",
-    "games.fullscreen": "Ecrã Inteiro",
-
-    // Tools Page
     "tools.title": "MIAO Tools",
     "tools.subtitle": "Utilitários para a comunidade",
     "tools.back": "Voltar",
@@ -147,6 +153,9 @@ export const translations: Record<Language, Record<string, string>> = {
     "nav.nfts": "NFT's",
     "nav.menu": "Menu",
     "nav.christmasMode": "Christmas Mode",
+    "nav.tools": "Tools",
+    "nav.games": "Games",
+    "nav.whitepaper": "Whitepaper",
 
     // Header
     "header.connect": "Connect",
@@ -158,6 +167,9 @@ export const translations: Record<Language, Record<string, string>> = {
     // Hero
     "hero.tagline1": "First came the dogs, then the frogs...",
     "hero.tagline2": "Now, the shadows belong to",
+    "hero.subtitle":
+      "When dogs barked and frogs leapt, everyone thought the meme wars were done. Yet in the shadows, something patient lingered. Behind every bark or croak came a sharp, knowing $MIAO that no one could ignore.",
+    "hero.typewriter": "The streets aren't safe... $MIAO is already watching.",
     "hero.dexscreen": "Dexscreen",
     "hero.liveCharts": "Live Charts",
     "hero.view": "VIEW",
@@ -171,16 +183,15 @@ export const translations: Record<Language, Record<string, string>> = {
     "hero.playEarn": "Play & Earn",
     "hero.play": "PLAY",
 
-    // About
-    "about.text":
-      "When dogs barked and frogs leapt, everyone thought the meme wars were done. Yet in the shadows, something patient lingered. Behind every bark or croak came a sharp, knowing",
-    "about.text2": "that no one could ignore. The streets aren't safe",
-
     // Tokenomics
     "tokenomics.title": "Tokenomics",
     "tokenomics.totalSupply": "Total Supply",
-    "tokenomics.liquidity": "Liquidity",
-    "tokenomics.locked": "Locked",
+    "tokenomics.liquidity": "Liquidity Burned",
+    "tokenomics.liquidityDesc": "No rug pulls. The pool is gone forever.",
+    "tokenomics.contract": "Contract Renounced",
+    "tokenomics.contractDesc": "We can't change it even if we tried.",
+    "tokenomics.treasury": "No Treasury",
+    "tokenomics.treasuryDesc": "No dev wallet. No marketing tax. Pure chaos.",
     "tokenomics.tax": "Tax",
     "tokenomics.noTax": "No Tax",
     "tokenomics.community": "Community",
@@ -188,6 +199,25 @@ export const translations: Record<Language, Record<string, string>> = {
     "tokenomics.contractAddress": "Contract Address",
     "tokenomics.copied": "Copied!",
     "tokenomics.clickToCopy": "Click to copy",
+    "tokenomics.howToBuy": "How to Buy",
+    "tokenomics.step1": "Create a Wallet",
+    "tokenomics.step1Desc": "Download Phantom or Solflare",
+    "tokenomics.step2": "Add SOL",
+    "tokenomics.step2Desc": "Buy or transfer SOL",
+    "tokenomics.step3": "Connect to DEX",
+    "tokenomics.step3Desc": "Go to Raydium or Jupiter",
+    "tokenomics.step4": "Swap for $MIAO",
+    "tokenomics.step4Desc": "Paste the contract address",
+    "tokenomics.roadmap": "Roadmap",
+    "tokenomics.phase1": "Phase 1",
+    "tokenomics.phase1Title": "Launch",
+    "tokenomics.phase2": "Phase 2",
+    "tokenomics.phase2Title": "Community",
+    "tokenomics.phase3": "Phase 3",
+    "tokenomics.phase3Title": "Expansion",
+    "tokenomics.phase4": "Phase 4",
+    "tokenomics.phase4Title": "Utility",
+    "tokenomics.more": "More...",
 
     // Community
     "community.title": "Join the Community",
@@ -195,28 +225,6 @@ export const translations: Record<Language, Record<string, string>> = {
     "community.telegram": "Telegram",
     "community.twitter": "Twitter",
     "community.discord": "Discord",
-
-    // Cat Generator
-    "generator.title": "AI Cat Generator",
-    "generator.subtitle": "Create your own unique MIAO cat",
-    "generator.placeholder": "Describe your dream cat...",
-    "generator.generate": "Generate Cat",
-    "generator.generating": "Generating...",
-    "generator.download": "Download",
-
-    // NFT Section
-    "nft.title": "Mint MIAO NFT",
-    "nft.description":
-      "Born from the shadows of the meme wars, the $MIAO NFTs embody stealth and energy. Own a symbol of power in the streets.",
-    "nft.mintV1": "MINT V1",
-    "nft.mintV2": "MINT V2",
-
-    // Footer
-    "footer.disclaimer": "Disclaimer",
-    "footer.disclaimerText":
-      "Miao Token is a meme coin created purely for entertainment and community purposes. It does not represent an investment contract, security, or guarantee of profit. Please invest only what you can afford to lose. By participating, you acknowledge the high-risk nature of meme coins, including potential loss of your entire investment.",
-    "footer.rights": "All rights reserved © Miao Token. 2025",
-    "footer.sendEmail": "Send Email",
 
     // Wallet Modal
     "wallet.title": "Connect Wallet",
@@ -228,31 +236,35 @@ export const translations: Record<Language, Record<string, string>> = {
     "wallet.notSupported": "Solana not supported",
     "wallet.timeout": "Connection timed out. Check if wallet is open.",
     "wallet.error": "Connection error. Please try again.",
+    "wallet.phantomDesc": "Most popular Solana wallet",
+    "wallet.solflareDesc": "Advanced Solana wallet",
+    "wallet.backpackDesc": "Multi-chain wallet",
+    "wallet.recommended": "Recommended",
+    "wallet.detected": "Detected",
+    "wallet.newToCrypto": "New to crypto? Install Phantom to get started.",
 
-    // Swap Modal
-    "swap.title": "Swap Tokens",
-    "swap.from": "From",
-    "swap.to": "To",
-    "swap.balance": "Balance",
-    "swap.max": "MAX",
-    "swap.searchToken": "Search token or paste address",
-    "swap.rate": "Rate",
-    "swap.priceImpact": "Price Impact",
-    "swap.minReceived": "Minimum Received",
-    "swap.connectFirst": "Connect wallet first",
-    "swap.swapNow": "Swap Now",
-    "swap.swapping": "Swapping...",
+    // Tamagotchi
+    "tamagotchi.feed": "Feed",
+    "tamagotchi.sleep": "Sleep",
+    "tamagotchi.play": "Play",
+    "tamagotchi.study": "Study",
+    "tamagotchi.stats": "Stats",
+    "tamagotchi.hunger": "Hunger",
+    "tamagotchi.energy": "Energy",
+    "tamagotchi.happiness": "Happiness",
+    "tamagotchi.intelligence": "Intelligence",
 
-    // Games Page
+    // Footer
+    "footer.disclaimer": "Disclaimer",
+    "footer.disclaimerText":
+      "Miao Token is a meme coin created purely for entertainment and community purposes. It does not represent an investment contract, security, or guarantee of profit. Please invest only what you can afford to lose.",
+    "footer.rights": "All rights reserved © Miao Token. 2025",
+    "footer.sendEmail": "Send Email",
+
+    // Games & Tools
     "games.title": "MIAO Games",
     "games.subtitle": "Play and have fun with MIAO",
     "games.back": "Back",
-    "games.featured": "Featured",
-    "games.playNow": "Play Now",
-    "games.close": "Close",
-    "games.fullscreen": "Fullscreen",
-
-    // Tools Page
     "tools.title": "MIAO Tools",
     "tools.subtitle": "Utilities for the community",
     "tools.back": "Back",
@@ -274,6 +286,9 @@ export const translations: Record<Language, Record<string, string>> = {
     "nav.nfts": "NFT's",
     "nav.menu": "Menú",
     "nav.christmasMode": "Modo Navidad",
+    "nav.tools": "Tools",
+    "nav.games": "Games",
+    "nav.whitepaper": "Whitepaper",
 
     // Header
     "header.connect": "Conectar",
@@ -285,6 +300,9 @@ export const translations: Record<Language, Record<string, string>> = {
     // Hero
     "hero.tagline1": "Primero vinieron los perros, luego las ranas...",
     "hero.tagline2": "Ahora, las sombras pertenecen al",
+    "hero.subtitle":
+      "Cuando los perros ladraban y las ranas saltaban, todos pensaban que las guerras de memes habían terminado. Pero en las sombras, algo paciente acechaba. Detrás de cada ladrido o croar venía un agudo y perspicaz $MIAO que nadie podía ignorar.",
+    "hero.typewriter": "The streets aren't safe... $MIAO is already watching.",
     "hero.dexscreen": "Dexscreen",
     "hero.liveCharts": "Gráficos en Vivo",
     "hero.view": "VER",
@@ -298,16 +316,15 @@ export const translations: Record<Language, Record<string, string>> = {
     "hero.playEarn": "Jugar & Ganar",
     "hero.play": "JUGAR",
 
-    // About
-    "about.text":
-      "Cuando los perros ladraban y las ranas saltaban, todos pensaban que las guerras de memes habían terminado. Pero en las sombras, algo paciente acechaba. Detrás de cada ladrido o croar venía un agudo y perspicaz",
-    "about.text2": "que nadie podía ignorar. Las calles no son seguras",
-
     // Tokenomics
     "tokenomics.title": "Tokenomics",
     "tokenomics.totalSupply": "Suministro Total",
-    "tokenomics.liquidity": "Liquidez",
-    "tokenomics.locked": "Bloqueada",
+    "tokenomics.liquidity": "Liquidez Quemada",
+    "tokenomics.liquidityDesc": "Sin rug pulls. La pool desapareció para siempre.",
+    "tokenomics.contract": "Contrato Renunciado",
+    "tokenomics.contractDesc": "No podemos cambiarlo aunque quisiéramos.",
+    "tokenomics.treasury": "Sin Tesorería",
+    "tokenomics.treasuryDesc": "Sin cartera dev. Sin impuesto marketing. Puro caos.",
     "tokenomics.tax": "Impuesto",
     "tokenomics.noTax": "Sin Impuestos",
     "tokenomics.community": "Comunidad",
@@ -315,6 +332,25 @@ export const translations: Record<Language, Record<string, string>> = {
     "tokenomics.contractAddress": "Dirección del Contrato",
     "tokenomics.copied": "¡Copiado!",
     "tokenomics.clickToCopy": "Clic para copiar",
+    "tokenomics.howToBuy": "Cómo Comprar",
+    "tokenomics.step1": "Crea una Cartera",
+    "tokenomics.step1Desc": "Descarga Phantom o Solflare",
+    "tokenomics.step2": "Añade SOL",
+    "tokenomics.step2Desc": "Compra o transfiere SOL",
+    "tokenomics.step3": "Conecta al DEX",
+    "tokenomics.step3Desc": "Ve a Raydium o Jupiter",
+    "tokenomics.step4": "Intercambia por $MIAO",
+    "tokenomics.step4Desc": "Pega la dirección del contrato",
+    "tokenomics.roadmap": "Roadmap",
+    "tokenomics.phase1": "Fase 1",
+    "tokenomics.phase1Title": "Lanzamiento",
+    "tokenomics.phase2": "Fase 2",
+    "tokenomics.phase2Title": "Comunidad",
+    "tokenomics.phase3": "Fase 3",
+    "tokenomics.phase3Title": "Expansión",
+    "tokenomics.phase4": "Fase 4",
+    "tokenomics.phase4Title": "Utilidad",
+    "tokenomics.more": "Más...",
 
     // Community
     "community.title": "Únete a la Comunidad",
@@ -322,28 +358,6 @@ export const translations: Record<Language, Record<string, string>> = {
     "community.telegram": "Telegram",
     "community.twitter": "Twitter",
     "community.discord": "Discord",
-
-    // Cat Generator
-    "generator.title": "Generador de Gatos IA",
-    "generator.subtitle": "Crea tu propio gato MIAO único",
-    "generator.placeholder": "Describe tu gato soñado...",
-    "generator.generate": "Generar Gato",
-    "generator.generating": "Generando...",
-    "generator.download": "Descargar",
-
-    // NFT Section
-    "nft.title": "Mint MIAO NFT",
-    "nft.description":
-      "Nacidos de las sombras de las guerras de memes, los NFTs $MIAO encarnan sigilo y energía. Posee un símbolo de poder en las calles.",
-    "nft.mintV1": "MINT V1",
-    "nft.mintV2": "MINT V2",
-
-    // Footer
-    "footer.disclaimer": "Descargo de Responsabilidad",
-    "footer.disclaimerText":
-      "Miao Token es una meme coin creada puramente para entretenimiento y propósitos comunitarios. No representa un contrato de inversión, valor o garantía de ganancias. Por favor, invierte solo lo que puedas perder. Al participar, reconoces la naturaleza de alto riesgo de las meme coins, incluyendo la potencial pérdida total de tu inversión.",
-    "footer.rights": "Todos los derechos reservados © Miao Token. 2025",
-    "footer.sendEmail": "Enviar Email",
 
     // Wallet Modal
     "wallet.title": "Conectar Cartera",
@@ -355,31 +369,35 @@ export const translations: Record<Language, Record<string, string>> = {
     "wallet.notSupported": "Solana no soportado",
     "wallet.timeout": "Tiempo agotado. Verifica si la cartera está abierta.",
     "wallet.error": "Error de conexión. Inténtalo de nuevo.",
+    "wallet.phantomDesc": "Cartera Solana más popular",
+    "wallet.solflareDesc": "Cartera Solana avanzada",
+    "wallet.backpackDesc": "Cartera multi-chain",
+    "wallet.recommended": "Recomendado",
+    "wallet.detected": "Detectado",
+    "wallet.newToCrypto": "¿Nuevo en crypto? Instala Phantom para empezar.",
 
-    // Swap Modal
-    "swap.title": "Intercambiar Tokens",
-    "swap.from": "De",
-    "swap.to": "A",
-    "swap.balance": "Saldo",
-    "swap.max": "MAX",
-    "swap.searchToken": "Buscar token o pegar dirección",
-    "swap.rate": "Tasa",
-    "swap.priceImpact": "Impacto en Precio",
-    "swap.minReceived": "Mínimo Recibido",
-    "swap.connectFirst": "Conecta la cartera primero",
-    "swap.swapNow": "Intercambiar Ahora",
-    "swap.swapping": "Intercambiando...",
+    // Tamagotchi
+    "tamagotchi.feed": "Alimentar",
+    "tamagotchi.sleep": "Dormir",
+    "tamagotchi.play": "Jugar",
+    "tamagotchi.study": "Estudiar",
+    "tamagotchi.stats": "Stats",
+    "tamagotchi.hunger": "Hambre",
+    "tamagotchi.energy": "Energía",
+    "tamagotchi.happiness": "Felicidad",
+    "tamagotchi.intelligence": "Inteligencia",
 
-    // Games Page
+    // Footer
+    "footer.disclaimer": "Descargo de Responsabilidad",
+    "footer.disclaimerText":
+      "Miao Token es una meme coin creada puramente para entretenimiento y propósitos comunitarios. No representa un contrato de inversión, valor o garantía de ganancias. Por favor, invierte solo lo que puedas perder.",
+    "footer.rights": "Todos los derechos reservados © Miao Token. 2025",
+    "footer.sendEmail": "Enviar Email",
+
+    // Games & Tools
     "games.title": "MIAO Games",
     "games.subtitle": "Juega y diviértete con MIAO",
     "games.back": "Volver",
-    "games.featured": "Destacado",
-    "games.playNow": "Jugar Ahora",
-    "games.close": "Cerrar",
-    "games.fullscreen": "Pantalla Completa",
-
-    // Tools Page
     "tools.title": "MIAO Tools",
     "tools.subtitle": "Utilidades para la comunidad",
     "tools.back": "Volver",
@@ -401,6 +419,9 @@ export const translations: Record<Language, Record<string, string>> = {
     "nav.nfts": "NFT's",
     "nav.menu": "Menu",
     "nav.christmasMode": "Mode Noël",
+    "nav.tools": "Tools",
+    "nav.games": "Games",
+    "nav.whitepaper": "Whitepaper",
 
     // Header
     "header.connect": "Connecter",
@@ -412,6 +433,9 @@ export const translations: Record<Language, Record<string, string>> = {
     // Hero
     "hero.tagline1": "D'abord vinrent les chiens, puis les grenouilles...",
     "hero.tagline2": "Maintenant, les ombres appartiennent au",
+    "hero.subtitle":
+      "Quand les chiens aboyaient et les grenouilles sautaient, tout le monde pensait que les guerres des mèmes étaient terminées. Mais dans l'ombre, quelque chose de patient guettait. Derrière chaque aboiement ou coassement venait un $MIAO tranchant et perspicace que personne ne pouvait ignorer.",
+    "hero.typewriter": "The streets aren't safe... $MIAO is already watching.",
     "hero.dexscreen": "Dexscreen",
     "hero.liveCharts": "Graphiques en Direct",
     "hero.view": "VOIR",
@@ -425,16 +449,15 @@ export const translations: Record<Language, Record<string, string>> = {
     "hero.playEarn": "Jouer & Gagner",
     "hero.play": "JOUER",
 
-    // About
-    "about.text":
-      "Quand les chiens aboyaient et les grenouilles sautaient, tout le monde pensait que les guerres des mèmes étaient terminées. Mais dans l'ombre, quelque chose de patient guettait. Derrière chaque aboiement ou coassement venait un",
-    "about.text2": "tranchant et perspicace que personne ne pouvait ignorer. Les rues ne sont pas sûres",
-
     // Tokenomics
     "tokenomics.title": "Tokenomics",
     "tokenomics.totalSupply": "Offre Totale",
-    "tokenomics.liquidity": "Liquidité",
-    "tokenomics.locked": "Verrouillée",
+    "tokenomics.liquidity": "Liquidité Brûlée",
+    "tokenomics.liquidityDesc": "Pas de rug pulls. La pool a disparu pour toujours.",
+    "tokenomics.contract": "Contrat Renoncé",
+    "tokenomics.contractDesc": "Nous ne pouvons pas le changer même si nous essayions.",
+    "tokenomics.treasury": "Pas de Trésorerie",
+    "tokenomics.treasuryDesc": "Pas de portefeuille dev. Pas de taxe marketing. Pur chaos.",
     "tokenomics.tax": "Taxe",
     "tokenomics.noTax": "Sans Taxe",
     "tokenomics.community": "Communauté",
@@ -442,6 +465,25 @@ export const translations: Record<Language, Record<string, string>> = {
     "tokenomics.contractAddress": "Adresse du Contrat",
     "tokenomics.copied": "Copié!",
     "tokenomics.clickToCopy": "Cliquez pour copier",
+    "tokenomics.howToBuy": "Comment Acheter",
+    "tokenomics.step1": "Créez un Portefeuille",
+    "tokenomics.step1Desc": "Téléchargez Phantom ou Solflare",
+    "tokenomics.step2": "Ajoutez SOL",
+    "tokenomics.step2Desc": "Achetez ou transférez SOL",
+    "tokenomics.step3": "Connectez au DEX",
+    "tokenomics.step3Desc": "Allez sur Raydium ou Jupiter",
+    "tokenomics.step4": "Échangez pour $MIAO",
+    "tokenomics.step4Desc": "Collez l'adresse du contrat",
+    "tokenomics.roadmap": "Roadmap",
+    "tokenomics.phase1": "Phase 1",
+    "tokenomics.phase1Title": "Lancement",
+    "tokenomics.phase2": "Phase 2",
+    "tokenomics.phase2Title": "Communauté",
+    "tokenomics.phase3": "Phase 3",
+    "tokenomics.phase3Title": "Expansion",
+    "tokenomics.phase4": "Phase 4",
+    "tokenomics.phase4Title": "Utilité",
+    "tokenomics.more": "Plus...",
 
     // Community
     "community.title": "Rejoignez la Communauté",
@@ -449,28 +491,6 @@ export const translations: Record<Language, Record<string, string>> = {
     "community.telegram": "Telegram",
     "community.twitter": "Twitter",
     "community.discord": "Discord",
-
-    // Cat Generator
-    "generator.title": "Générateur de Chats IA",
-    "generator.subtitle": "Créez votre propre chat MIAO unique",
-    "generator.placeholder": "Décrivez votre chat de rêve...",
-    "generator.generate": "Générer Chat",
-    "generator.generating": "Génération...",
-    "generator.download": "Télécharger",
-
-    // NFT Section
-    "nft.title": "Mint MIAO NFT",
-    "nft.description":
-      "Nés des ombres des guerres des mèmes, les NFTs $MIAO incarnent furtivité et énergie. Possédez un symbole de pouvoir dans les rues.",
-    "nft.mintV1": "MINT V1",
-    "nft.mintV2": "MINT V2",
-
-    // Footer
-    "footer.disclaimer": "Avertissement",
-    "footer.disclaimerText":
-      "Miao Token est une meme coin créée uniquement à des fins de divertissement et communautaires. Elle ne représente pas un contrat d'investissement, un titre ou une garantie de profit. Veuillez n'investir que ce que vous pouvez vous permettre de perdre. En participant, vous reconnaissez la nature à haut risque des meme coins, y compris la perte potentielle de tout votre investissement.",
-    "footer.rights": "Tous droits réservés © Miao Token. 2025",
-    "footer.sendEmail": "Envoyer Email",
 
     // Wallet Modal
     "wallet.title": "Connecter Portefeuille",
@@ -482,31 +502,35 @@ export const translations: Record<Language, Record<string, string>> = {
     "wallet.notSupported": "Solana non supporté",
     "wallet.timeout": "Délai dépassé. Vérifiez si le portefeuille est ouvert.",
     "wallet.error": "Erreur de connexion. Veuillez réessayer.",
+    "wallet.phantomDesc": "Portefeuille Solana le plus populaire",
+    "wallet.solflareDesc": "Portefeuille Solana avancé",
+    "wallet.backpackDesc": "Portefeuille multi-chain",
+    "wallet.recommended": "Recommandé",
+    "wallet.detected": "Détecté",
+    "wallet.newToCrypto": "Nouveau en crypto? Installez Phantom pour commencer.",
 
-    // Swap Modal
-    "swap.title": "Échanger Tokens",
-    "swap.from": "De",
-    "swap.to": "Vers",
-    "swap.balance": "Solde",
-    "swap.max": "MAX",
-    "swap.searchToken": "Rechercher token ou coller adresse",
-    "swap.rate": "Taux",
-    "swap.priceImpact": "Impact sur le Prix",
-    "swap.minReceived": "Minimum Reçu",
-    "swap.connectFirst": "Connectez d'abord le portefeuille",
-    "swap.swapNow": "Échanger Maintenant",
-    "swap.swapping": "Échange en cours...",
+    // Tamagotchi
+    "tamagotchi.feed": "Nourrir",
+    "tamagotchi.sleep": "Dormir",
+    "tamagotchi.play": "Jouer",
+    "tamagotchi.study": "Étudier",
+    "tamagotchi.stats": "Stats",
+    "tamagotchi.hunger": "Faim",
+    "tamagotchi.energy": "Énergie",
+    "tamagotchi.happiness": "Bonheur",
+    "tamagotchi.intelligence": "Intelligence",
 
-    // Games Page
+    // Footer
+    "footer.disclaimer": "Avertissement",
+    "footer.disclaimerText":
+      "Miao Token est une meme coin créée uniquement à des fins de divertissement et communautaires. Elle ne représente pas un contrat d'investissement, un titre ou une garantie de profit. Veuillez n'investir que ce que vous pouvez vous permettre de perdre.",
+    "footer.rights": "Tous droits réservés © Miao Token. 2025",
+    "footer.sendEmail": "Envoyer Email",
+
+    // Games & Tools
     "games.title": "MIAO Games",
     "games.subtitle": "Jouez et amusez-vous avec MIAO",
     "games.back": "Retour",
-    "games.featured": "En Vedette",
-    "games.playNow": "Jouer Maintenant",
-    "games.close": "Fermer",
-    "games.fullscreen": "Plein Écran",
-
-    // Tools Page
     "tools.title": "MIAO Tools",
     "tools.subtitle": "Utilitaires pour la communauté",
     "tools.back": "Retour",
@@ -528,6 +552,9 @@ export const translations: Record<Language, Record<string, string>> = {
     "nav.nfts": "NFT's",
     "nav.menu": "Menü",
     "nav.christmasMode": "Weihnachtsmodus",
+    "nav.tools": "Tools",
+    "nav.games": "Games",
+    "nav.whitepaper": "Whitepaper",
 
     // Header
     "header.connect": "Verbinden",
@@ -539,6 +566,9 @@ export const translations: Record<Language, Record<string, string>> = {
     // Hero
     "hero.tagline1": "Zuerst kamen die Hunde, dann die Frösche...",
     "hero.tagline2": "Jetzt gehören die Schatten dem",
+    "hero.subtitle":
+      "Als die Hunde bellten und die Frösche sprangen, dachten alle, die Meme-Kriege seien vorbei. Doch im Schatten lauerte etwas Geduldiges. Hinter jedem Bellen oder Quaken kam ein scharfes, wissendes $MIAO, das niemand ignorieren konnte.",
+    "hero.typewriter": "The streets aren't safe... $MIAO is already watching.",
     "hero.dexscreen": "Dexscreen",
     "hero.liveCharts": "Live-Charts",
     "hero.view": "ANSEHEN",
@@ -552,16 +582,15 @@ export const translations: Record<Language, Record<string, string>> = {
     "hero.playEarn": "Spielen & Verdienen",
     "hero.play": "SPIELEN",
 
-    // About
-    "about.text":
-      "Als die Hunde bellten und die Frösche sprangen, dachten alle, die Meme-Kriege seien vorbei. Doch im Schatten lauerte etwas Geduldiges. Hinter jedem Bellen oder Quaken kam ein scharfes, wissendes",
-    "about.text2": "das niemand ignorieren konnte. Die Straßen sind nicht sicher",
-
     // Tokenomics
     "tokenomics.title": "Tokenomics",
     "tokenomics.totalSupply": "Gesamtangebot",
-    "tokenomics.liquidity": "Liquidität",
-    "tokenomics.locked": "Gesperrt",
+    "tokenomics.liquidity": "Liquidität Verbrannt",
+    "tokenomics.liquidityDesc": "Keine Rug Pulls. Der Pool ist für immer weg.",
+    "tokenomics.contract": "Vertrag Aufgegeben",
+    "tokenomics.contractDesc": "Wir können es nicht ändern, selbst wenn wir es versuchen.",
+    "tokenomics.treasury": "Keine Schatzkammer",
+    "tokenomics.treasuryDesc": "Kein Dev-Wallet. Keine Marketing-Steuer. Reines Chaos.",
     "tokenomics.tax": "Steuer",
     "tokenomics.noTax": "Keine Steuer",
     "tokenomics.community": "Gemeinschaft",
@@ -569,6 +598,25 @@ export const translations: Record<Language, Record<string, string>> = {
     "tokenomics.contractAddress": "Vertragsadresse",
     "tokenomics.copied": "Kopiert!",
     "tokenomics.clickToCopy": "Klicken zum Kopieren",
+    "tokenomics.howToBuy": "Wie Kaufen",
+    "tokenomics.step1": "Wallet Erstellen",
+    "tokenomics.step1Desc": "Phantom oder Solflare herunterladen",
+    "tokenomics.step2": "SOL Hinzufügen",
+    "tokenomics.step2Desc": "SOL kaufen oder übertragen",
+    "tokenomics.step3": "Mit DEX Verbinden",
+    "tokenomics.step3Desc": "Zu Raydium oder Jupiter gehen",
+    "tokenomics.step4": "Gegen $MIAO Tauschen",
+    "tokenomics.step4Desc": "Vertragsadresse einfügen",
+    "tokenomics.roadmap": "Roadmap",
+    "tokenomics.phase1": "Phase 1",
+    "tokenomics.phase1Title": "Start",
+    "tokenomics.phase2": "Phase 2",
+    "tokenomics.phase2Title": "Gemeinschaft",
+    "tokenomics.phase3": "Phase 3",
+    "tokenomics.phase3Title": "Expansion",
+    "tokenomics.phase4": "Phase 4",
+    "tokenomics.phase4Title": "Nutzen",
+    "tokenomics.more": "Mehr...",
 
     // Community
     "community.title": "Tritt der Gemeinschaft bei",
@@ -576,28 +624,6 @@ export const translations: Record<Language, Record<string, string>> = {
     "community.telegram": "Telegram",
     "community.twitter": "Twitter",
     "community.discord": "Discord",
-
-    // Cat Generator
-    "generator.title": "KI-Katzengenerator",
-    "generator.subtitle": "Erstelle deine eigene einzigartige MIAO-Katze",
-    "generator.placeholder": "Beschreibe deine Traumkatze...",
-    "generator.generate": "Katze Generieren",
-    "generator.generating": "Generierung...",
-    "generator.download": "Herunterladen",
-
-    // NFT Section
-    "nft.title": "Mint MIAO NFT",
-    "nft.description":
-      "Geboren aus den Schatten der Meme-Kriege, verkörpern die $MIAO NFTs Heimlichkeit und Energie. Besitze ein Symbol der Macht auf den Straßen.",
-    "nft.mintV1": "MINT V1",
-    "nft.mintV2": "MINT V2",
-
-    // Footer
-    "footer.disclaimer": "Haftungsausschluss",
-    "footer.disclaimerText":
-      "Miao Token ist eine Meme-Coin, die ausschließlich zu Unterhaltungs- und Gemeinschaftszwecken erstellt wurde. Sie stellt keinen Investitionsvertrag, kein Wertpapier oder keine Gewinngarantie dar. Bitte investieren Sie nur, was Sie sich leisten können zu verlieren. Durch Ihre Teilnahme erkennen Sie die risikoreiche Natur von Meme-Coins an, einschließlich des möglichen Verlusts Ihrer gesamten Investition.",
-    "footer.rights": "Alle Rechte vorbehalten © Miao Token. 2025",
-    "footer.sendEmail": "E-Mail Senden",
 
     // Wallet Modal
     "wallet.title": "Wallet Verbinden",
@@ -609,31 +635,35 @@ export const translations: Record<Language, Record<string, string>> = {
     "wallet.notSupported": "Solana nicht unterstützt",
     "wallet.timeout": "Zeitüberschreitung. Prüfe ob Wallet geöffnet ist.",
     "wallet.error": "Verbindungsfehler. Bitte erneut versuchen.",
+    "wallet.phantomDesc": "Beliebteste Solana-Wallet",
+    "wallet.solflareDesc": "Fortgeschrittene Solana-Wallet",
+    "wallet.backpackDesc": "Multi-Chain-Wallet",
+    "wallet.recommended": "Empfohlen",
+    "wallet.detected": "Erkannt",
+    "wallet.newToCrypto": "Neu in Crypto? Installiere Phantom zum Starten.",
 
-    // Swap Modal
-    "swap.title": "Token Tauschen",
-    "swap.from": "Von",
-    "swap.to": "Zu",
-    "swap.balance": "Guthaben",
-    "swap.max": "MAX",
-    "swap.searchToken": "Token suchen oder Adresse einfügen",
-    "swap.rate": "Kurs",
-    "swap.priceImpact": "Preisauswirkung",
-    "swap.minReceived": "Minimum Erhalten",
-    "swap.connectFirst": "Zuerst Wallet verbinden",
-    "swap.swapNow": "Jetzt Tauschen",
-    "swap.swapping": "Tausche...",
+    // Tamagotchi
+    "tamagotchi.feed": "Füttern",
+    "tamagotchi.sleep": "Schlafen",
+    "tamagotchi.play": "Spielen",
+    "tamagotchi.study": "Lernen",
+    "tamagotchi.stats": "Stats",
+    "tamagotchi.hunger": "Hunger",
+    "tamagotchi.energy": "Energie",
+    "tamagotchi.happiness": "Glück",
+    "tamagotchi.intelligence": "Intelligenz",
 
-    // Games Page
+    // Footer
+    "footer.disclaimer": "Haftungsausschluss",
+    "footer.disclaimerText":
+      "Miao Token ist eine Meme-Coin, die ausschließlich zu Unterhaltungs- und Gemeinschaftszwecken erstellt wurde. Sie stellt keinen Investitionsvertrag, kein Wertpapier oder keine Gewinngarantie dar. Bitte investieren Sie nur, was Sie sich leisten können zu verlieren.",
+    "footer.rights": "Alle Rechte vorbehalten © Miao Token. 2025",
+    "footer.sendEmail": "E-Mail Senden",
+
+    // Games & Tools
     "games.title": "MIAO Games",
     "games.subtitle": "Spiele und hab Spaß mit MIAO",
     "games.back": "Zurück",
-    "games.featured": "Hervorgehoben",
-    "games.playNow": "Jetzt Spielen",
-    "games.close": "Schließen",
-    "games.fullscreen": "Vollbild",
-
-    // Tools Page
     "tools.title": "MIAO Tools",
     "tools.subtitle": "Werkzeuge für die Gemeinschaft",
     "tools.back": "Zurück",
@@ -656,6 +686,9 @@ export const translations: Record<Language, Record<string, string>> = {
     "nav.nfts": "NFT's",
     "nav.menu": "菜单",
     "nav.christmasMode": "圣诞模式",
+    "nav.tools": "工具",
+    "nav.games": "游戏",
+    "nav.whitepaper": "白皮书",
 
     // Header
     "header.connect": "连接",
@@ -667,6 +700,9 @@ export const translations: Record<Language, Record<string, string>> = {
     // Hero
     "hero.tagline1": "先是狗狗，然后是青蛙...",
     "hero.tagline2": "现在，阴影属于",
+    "hero.subtitle":
+      "当狗在叫，青蛙在跳，所有人都以为梗币战争结束了。然而在暗处，有什么东西在耐心等待。每一声吠叫或呱呱声背后，都传来一声尖锐而深知的$MIAO，没人能忽视。",
+    "hero.typewriter": "The streets aren't safe... $MIAO is already watching.",
     "hero.dexscreen": "Dexscreen",
     "hero.liveCharts": "实时图表",
     "hero.view": "查看",
@@ -680,16 +716,15 @@ export const translations: Record<Language, Record<string, string>> = {
     "hero.playEarn": "边玩边赚",
     "hero.play": "开玩",
 
-    // About
-    "about.text":
-      "当狗在叫，青蛙在跳，所有人都以为梗币战争结束了。然而在暗处，有什么东西在耐心等待。每一声吠叫或呱呱声背后，都传来一声尖锐而深知的",
-    "about.text2": "没人能忽视。街道不再安全",
-
     // Tokenomics
     "tokenomics.title": "代币经济",
     "tokenomics.totalSupply": "总供应量",
-    "tokenomics.liquidity": "流动性",
-    "tokenomics.locked": "已锁定",
+    "tokenomics.liquidity": "流动性已销毁",
+    "tokenomics.liquidityDesc": "没有跑路。池子永远消失了。",
+    "tokenomics.contract": "合约已放弃",
+    "tokenomics.contractDesc": "即使我们想改也改不了。",
+    "tokenomics.treasury": "无金库",
+    "tokenomics.treasuryDesc": "无开发钱包。无营销税。纯粹混乱。",
     "tokenomics.tax": "税费",
     "tokenomics.noTax": "零税费",
     "tokenomics.community": "社区",
@@ -697,6 +732,25 @@ export const translations: Record<Language, Record<string, string>> = {
     "tokenomics.contractAddress": "合约地址",
     "tokenomics.copied": "已复制！",
     "tokenomics.clickToCopy": "点击复制",
+    "tokenomics.howToBuy": "如何购买",
+    "tokenomics.step1": "创建钱包",
+    "tokenomics.step1Desc": "下载Phantom或Solflare",
+    "tokenomics.step2": "添加SOL",
+    "tokenomics.step2Desc": "购买或转入SOL",
+    "tokenomics.step3": "连接DEX",
+    "tokenomics.step3Desc": "前往Raydium或Jupiter",
+    "tokenomics.step4": "兑换$MIAO",
+    "tokenomics.step4Desc": "粘贴合约地址",
+    "tokenomics.roadmap": "路线图",
+    "tokenomics.phase1": "阶段1",
+    "tokenomics.phase1Title": "启动",
+    "tokenomics.phase2": "阶段2",
+    "tokenomics.phase2Title": "社区",
+    "tokenomics.phase3": "阶段3",
+    "tokenomics.phase3Title": "扩展",
+    "tokenomics.phase4": "阶段4",
+    "tokenomics.phase4Title": "实用",
+    "tokenomics.more": "更多...",
 
     // Community
     "community.title": "加入社区",
@@ -704,27 +758,6 @@ export const translations: Record<Language, Record<string, string>> = {
     "community.telegram": "Telegram",
     "community.twitter": "Twitter",
     "community.discord": "Discord",
-
-    // Cat Generator
-    "generator.title": "AI猫咪生成器",
-    "generator.subtitle": "创建你独特的MIAO猫咪",
-    "generator.placeholder": "描述你梦想中的猫咪...",
-    "generator.generate": "生成猫咪",
-    "generator.generating": "生成中...",
-    "generator.download": "下载",
-
-    // NFT Section
-    "nft.title": "铸造 MIAO NFT",
-    "nft.description": "诞生于梗币战争的阴影中，$MIAO NFT体现了隐秘与能量。拥有街头权力的象征。",
-    "nft.mintV1": "铸造 V1",
-    "nft.mintV2": "铸造 V2",
-
-    // Footer
-    "footer.disclaimer": "免责声明",
-    "footer.disclaimerText":
-      "Miao Token是一个纯粹为娱乐和社区目的创建的梗币。它不代表投资合同、证券或利润保证。请只投资您能承受损失的金额。参与即表示您承认梗币的高风险性质，包括可能损失全部投资。",
-    "footer.rights": "版权所有 © Miao Token. 2025",
-    "footer.sendEmail": "发送邮件",
 
     // Wallet Modal
     "wallet.title": "连接钱包",
@@ -736,31 +769,35 @@ export const translations: Record<Language, Record<string, string>> = {
     "wallet.notSupported": "不支持Solana",
     "wallet.timeout": "连接超时。请检查钱包是否打开。",
     "wallet.error": "连接错误。请重试。",
+    "wallet.phantomDesc": "最受欢迎的Solana钱包",
+    "wallet.solflareDesc": "高级Solana钱包",
+    "wallet.backpackDesc": "多链钱包",
+    "wallet.recommended": "推荐",
+    "wallet.detected": "已检测",
+    "wallet.newToCrypto": "加密新手？安装Phantom开始使用。",
 
-    // Swap Modal
-    "swap.title": "代币交换",
-    "swap.from": "从",
-    "swap.to": "到",
-    "swap.balance": "余额",
-    "swap.max": "最大",
-    "swap.searchToken": "搜索代币或粘贴地址",
-    "swap.rate": "汇率",
-    "swap.priceImpact": "价格影响",
-    "swap.minReceived": "最低收到",
-    "swap.connectFirst": "请先连接钱包",
-    "swap.swapNow": "立即交换",
-    "swap.swapping": "交换中...",
+    // Tamagotchi
+    "tamagotchi.feed": "喂食",
+    "tamagotchi.sleep": "睡觉",
+    "tamagotchi.play": "玩耍",
+    "tamagotchi.study": "学习",
+    "tamagotchi.stats": "状态",
+    "tamagotchi.hunger": "饥饿",
+    "tamagotchi.energy": "能量",
+    "tamagotchi.happiness": "快乐",
+    "tamagotchi.intelligence": "智力",
 
-    // Games Page
+    // Footer
+    "footer.disclaimer": "免责声明",
+    "footer.disclaimerText":
+      "Miao Token是一个纯粹为娱乐和社区目的创建的梗币。它不代表投资合同、证券或利润保证。请只投资您能承受损失的金额。",
+    "footer.rights": "版权所有 © Miao Token. 2025",
+    "footer.sendEmail": "发送邮件",
+
+    // Games & Tools
     "games.title": "MIAO 游戏",
     "games.subtitle": "与MIAO一起玩乐",
     "games.back": "返回",
-    "games.featured": "精选",
-    "games.playNow": "立即游玩",
-    "games.close": "关闭",
-    "games.fullscreen": "全屏",
-
-    // Tools Page
     "tools.title": "MIAO 工具",
     "tools.subtitle": "社区工具",
     "tools.back": "返回",
@@ -781,6 +818,9 @@ export const translations: Record<Language, Record<string, string>> = {
     "nav.nfts": "NFT's",
     "nav.menu": "القائمة",
     "nav.christmasMode": "وضع عيد الميلاد",
+    "nav.tools": "الأدوات",
+    "nav.games": "الألعاب",
+    "nav.whitepaper": "الورقة البيضاء",
 
     // Header
     "header.connect": "اتصال",
@@ -792,6 +832,9 @@ export const translations: Record<Language, Record<string, string>> = {
     // Hero
     "hero.tagline1": "أولاً جاءت الكلاب، ثم الضفادع...",
     "hero.tagline2": "الآن، الظلال تنتمي إلى",
+    "hero.subtitle":
+      "عندما نبحت الكلاب وقفزت الضفادع، اعتقد الجميع أن حروب الميم قد انتهت. لكن في الظلال، كان هناك شيء صبور يتربص. خلف كل نباح أو نقيق جاء $MIAO حاد وواعٍ لم يستطع أحد تجاهله.",
+    "hero.typewriter": "The streets aren't safe... $MIAO is already watching.",
     "hero.dexscreen": "Dexscreen",
     "hero.liveCharts": "الرسوم البيانية المباشرة",
     "hero.view": "عرض",
@@ -805,16 +848,15 @@ export const translations: Record<Language, Record<string, string>> = {
     "hero.playEarn": "العب واربح",
     "hero.play": "العب",
 
-    // About
-    "about.text":
-      "عندما نبحت الكلاب وقفزت الضفادع، اعتقد الجميع أن حروب الميم قد انتهت. لكن في الظلال، كان هناك شيء صبور يتربص. خلف كل نباح أو نقيق جاء",
-    "about.text2": "حاد وواعٍ لم يستطع أحد تجاهله. الشوارع ليست آمنة",
-
     // Tokenomics
     "tokenomics.title": "اقتصاد الرمز",
     "tokenomics.totalSupply": "إجمالي العرض",
-    "tokenomics.liquidity": "السيولة",
-    "tokenomics.locked": "مقفل",
+    "tokenomics.liquidity": "السيولة محروقة",
+    "tokenomics.liquidityDesc": "لا سحب بساط. المجمع اختفى للأبد.",
+    "tokenomics.contract": "العقد متنازل عنه",
+    "tokenomics.contractDesc": "لا يمكننا تغييره حتى لو حاولنا.",
+    "tokenomics.treasury": "لا خزينة",
+    "tokenomics.treasuryDesc": "لا محفظة مطور. لا ضريبة تسويق. فوضى نقية.",
     "tokenomics.tax": "الضريبة",
     "tokenomics.noTax": "بدون ضريبة",
     "tokenomics.community": "المجتمع",
@@ -822,6 +864,25 @@ export const translations: Record<Language, Record<string, string>> = {
     "tokenomics.contractAddress": "عنوان العقد",
     "tokenomics.copied": "تم النسخ!",
     "tokenomics.clickToCopy": "انقر للنسخ",
+    "tokenomics.howToBuy": "كيف تشتري",
+    "tokenomics.step1": "أنشئ محفظة",
+    "tokenomics.step1Desc": "حمل Phantom أو Solflare",
+    "tokenomics.step2": "أضف SOL",
+    "tokenomics.step2Desc": "اشترِ أو حوّل SOL",
+    "tokenomics.step3": "اتصل بـ DEX",
+    "tokenomics.step3Desc": "اذهب إلى Raydium أو Jupiter",
+    "tokenomics.step4": "بادل مقابل $MIAO",
+    "tokenomics.step4Desc": "الصق عنوان العقد",
+    "tokenomics.roadmap": "خارطة الطريق",
+    "tokenomics.phase1": "المرحلة 1",
+    "tokenomics.phase1Title": "الإطلاق",
+    "tokenomics.phase2": "المرحلة 2",
+    "tokenomics.phase2Title": "المجتمع",
+    "tokenomics.phase3": "المرحلة 3",
+    "tokenomics.phase3Title": "التوسع",
+    "tokenomics.phase4": "المرحلة 4",
+    "tokenomics.phase4Title": "الفائدة",
+    "tokenomics.more": "المزيد...",
 
     // Community
     "community.title": "انضم إلى المجتمع",
@@ -829,27 +890,6 @@ export const translations: Record<Language, Record<string, string>> = {
     "community.telegram": "تيليجرام",
     "community.twitter": "تويتر",
     "community.discord": "ديسكورد",
-
-    // Cat Generator
-    "generator.title": "مولد القطط بالذكاء الاصطناعي",
-    "generator.subtitle": "أنشئ قطك MIAO الفريد",
-    "generator.placeholder": "صف قطك الحلم...",
-    "generator.generate": "إنشاء قط",
-    "generator.generating": "جاري الإنشاء...",
-    "generator.download": "تحميل",
-
-    // NFT Section
-    "nft.title": "سك MIAO NFT",
-    "nft.description": "ولدت من ظلال حروب الميم، تجسد NFTs $MIAO التخفي والطاقة. امتلك رمز القوة في الشوارع.",
-    "nft.mintV1": "سك V1",
-    "nft.mintV2": "سك V2",
-
-    // Footer
-    "footer.disclaimer": "إخلاء المسؤولية",
-    "footer.disclaimerText":
-      "رمز Miao هو عملة ميم تم إنشاؤها بحتة لأغراض الترفيه والمجتمع. لا يمثل عقد استثمار أو ضمان أو ضمان ربح. يرجى الاستثمار فقط بما يمكنك تحمل خسارته. بالمشاركة، فإنك تقر بالطبيعة عالية المخاطر لعملات الميم، بما في ذلك الخسارة المحتملة لاستثمارك بالكامل.",
-    "footer.rights": "جميع الحقوق محفوظة © Miao Token. 2025",
-    "footer.sendEmail": "إرسال بريد إلكتروني",
 
     // Wallet Modal
     "wallet.title": "ربط المحفظة",
@@ -861,31 +901,35 @@ export const translations: Record<Language, Record<string, string>> = {
     "wallet.notSupported": "Solana غير مدعوم",
     "wallet.timeout": "انتهت المهلة. تحقق مما إذا كانت المحفظة مفتوحة.",
     "wallet.error": "خطأ في الاتصال. يرجى المحاولة مرة أخرى.",
+    "wallet.phantomDesc": "محفظة Solana الأكثر شعبية",
+    "wallet.solflareDesc": "محفظة Solana متقدمة",
+    "wallet.backpackDesc": "محفظة متعددة السلاسل",
+    "wallet.recommended": "موصى به",
+    "wallet.detected": "تم الكشف",
+    "wallet.newToCrypto": "جديد في العملات الرقمية؟ ثبت Phantom للبدء.",
 
-    // Swap Modal
-    "swap.title": "تبادل الرموز",
-    "swap.from": "من",
-    "swap.to": "إلى",
-    "swap.balance": "الرصيد",
-    "swap.max": "الحد الأقصى",
-    "swap.searchToken": "ابحث عن رمز أو الصق العنوان",
-    "swap.rate": "السعر",
-    "swap.priceImpact": "تأثير السعر",
-    "swap.minReceived": "الحد الأدنى المستلم",
-    "swap.connectFirst": "اربط المحفظة أولاً",
-    "swap.swapNow": "تبادل الآن",
-    "swap.swapping": "جاري التبادل...",
+    // Tamagotchi
+    "tamagotchi.feed": "إطعام",
+    "tamagotchi.sleep": "نوم",
+    "tamagotchi.play": "لعب",
+    "tamagotchi.study": "دراسة",
+    "tamagotchi.stats": "الإحصائيات",
+    "tamagotchi.hunger": "الجوع",
+    "tamagotchi.energy": "الطاقة",
+    "tamagotchi.happiness": "السعادة",
+    "tamagotchi.intelligence": "الذكاء",
 
-    // Games Page
+    // Footer
+    "footer.disclaimer": "إخلاء المسؤولية",
+    "footer.disclaimerText":
+      "رمز Miao هو عملة ميم تم إنشاؤها بحتة لأغراض الترفيه والمجتمع. لا يمثل عقد استثمار أو ضمان أو ضمان ربح. يرجى الاستثمار فقط بما يمكنك تحمل خسارته.",
+    "footer.rights": "جميع الحقوق محفوظة © Miao Token. 2025",
+    "footer.sendEmail": "إرسال بريد إلكتروني",
+
+    // Games & Tools
     "games.title": "ألعاب MIAO",
     "games.subtitle": "العب واستمتع مع MIAO",
     "games.back": "رجوع",
-    "games.featured": "مميز",
-    "games.playNow": "العب الآن",
-    "games.close": "إغلاق",
-    "games.fullscreen": "ملء الشاشة",
-
-    // Tools Page
     "tools.title": "أدوات MIAO",
     "tools.subtitle": "أدوات للمجتمع",
     "tools.back": "رجوع",

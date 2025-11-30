@@ -15,8 +15,12 @@ import GamesPage from "./components/GamesPage"
 import ToolsPage from "./components/ToolsPage"
 import WalletModal from "./components/WalletModal"
 import SwapModal from "./components/SwapModal"
+import SnowEffect from "./components/SnowEffect"
 import type { WalletState, WalletType } from "./types"
 import { getSolBalance, disconnectWallet } from "./lib/wallet-service"
+
+const BG_NORMAL = "/images/grass3d-light.png"
+const BG_CHRISTMAS = "/images/grass3d-christmas.png"
 
 const AppContent: React.FC = () => {
   const [currentView, setCurrentView] = useState<"home" | "games" | "tools">("home")
@@ -60,38 +64,55 @@ const AppContent: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen text-[var(--text-primary)] bg-[var(--bg-primary)] transition-colors duration-300">
-      <Header
-        walletState={walletState}
-        onConnectClick={() => setIsWalletModalOpen(true)}
-        onDisconnectClick={handleDisconnect}
-        onSwapClick={() => setIsSwapModalOpen(true)}
-        isChristmasMode={isChristmasMode}
-        toggleChristmasMode={() => setIsChristmasMode(!isChristmasMode)}
-      />
+    <div
+      className="min-h-screen text-[var(--text-primary)] transition-colors duration-500 relative"
+      style={{
+        backgroundImage: `url(${isChristmasMode ? BG_CHRISTMAS : BG_NORMAL})`,
+        backgroundSize: "cover",
+        backgroundPosition: "bottom center",
+        backgroundAttachment: "fixed",
+        backgroundRepeat: "no-repeat",
+      }}
+    >
+      <div className="fixed inset-0 bg-[var(--bg-primary)]/85 pointer-events-none z-0" />
 
-      <main>
-        {currentView === "home" && (
-          <>
-            <Hero
-              onOpenGames={() => setCurrentView("games")}
-              onOpenTools={() => setCurrentView("tools")}
-              isChristmasMode={isChristmasMode}
-            />
-            <About />
-            <Tokenomics isChristmasMode={isChristmasMode} />
-            <Community />
-            <CatGenerator isChristmasMode={isChristmasMode} />
-            <NFTSection isChristmasMode={isChristmasMode} />
-          </>
-        )}
+      {isChristmasMode && (
+        <div className="fixed inset-0 pointer-events-none z-50">
+          <SnowEffect isActive={isChristmasMode} />
+        </div>
+      )}
 
-        {currentView === "games" && <GamesPage onBack={() => setCurrentView("home")} walletState={walletState} />}
+      <div className="relative z-10">
+        <Header
+          walletState={walletState}
+          onConnectClick={() => setIsWalletModalOpen(true)}
+          onDisconnectClick={handleDisconnect}
+          onSwapClick={() => setIsSwapModalOpen(true)}
+          isChristmasMode={isChristmasMode}
+          toggleChristmasMode={() => setIsChristmasMode(!isChristmasMode)}
+          onToolsClick={() => setCurrentView("tools")}
+          onGamesClick={() => setCurrentView("games")}
+        />
 
-        {currentView === "tools" && <ToolsPage onBack={() => setCurrentView("home")} walletState={walletState} />}
-      </main>
+        <main>
+          {currentView === "home" && (
+            <>
+              <Hero />
+              <About />
+              <Tokenomics isChristmasMode={isChristmasMode} />
+              <Community />
+              <CatGenerator isChristmasMode={isChristmasMode} />
+              <NFTSection isChristmasMode={isChristmasMode} />
+            </>
+          )}
 
-      <Footer />
+          {currentView === "games" && <GamesPage onBack={() => setCurrentView("home")} walletState={walletState} />}
+
+          {currentView === "tools" && <ToolsPage onBack={() => setCurrentView("home")} walletState={walletState} />}
+        </main>
+
+        <Footer />
+      </div>
 
       <WalletModal isOpen={isWalletModalOpen} onClose={() => setIsWalletModalOpen(false)} onConnect={handleConnect} />
 

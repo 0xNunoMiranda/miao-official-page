@@ -1,191 +1,163 @@
-import type { WalletType } from "../types"
+export type WalletType = "phantom" | "solflare" | "metamask" | "backpack"
 
-export interface WalletConnectionResult {
+export interface WalletConnection {
+  address: string
+  balance: number
+  walletType: WalletType
+}
+
+export interface ConnectionResult {
   success: boolean
-  address?: string
+  data?: WalletConnection
   error?: string
-  userRejected?: boolean
+  cancelled?: boolean
   timeout?: boolean
 }
 
-export const isWalletInstalled = (type: WalletType): boolean => {
-  if (typeof window === "undefined") return false
-
-  switch (type) {
-    case "phantom":
-      return !!window.solana?.isPhantom
-    case "solflare":
-      return !!window.solflare?.isSolflare
-    case "metamask":
-      return !!window.ethereum?.isMetaMask
-    case "backpack":
-      return !!window.backpack?.isBackpack
-    default:
-      return false
+declare global {
+  interface Window {
+    phantom?: {
+      solana?: {
+        isPhantom?: boolean
+        connect: () => Promise<{ publicKey: { toString: () => string } }>
+        disconnect: () => Promise<void>
+        connection: unknown
+      }
+    }
+    solflare?: {
+      isSolflare?: boolean
+      connect: () => Promise<void>
+      disconnect: () => Promise<void>
+      publicKey?: { toString: () => string }
+    }
+    backpack?: {
+      isBackpack?: boolean
+      connect: () => Promise<{ publicKey: { toString: () => string } }>
+      disconnect: () => Promise<void>
+    }
+    ethereum?: {
+      isMetaMask?: boolean
+      request: (args: { method: string; params?: unknown[] }) => Promise<unknown>
+    }
   }
 }
 
-export const getWalletDownloadUrl = (type: WalletType): string => {
-  switch (type) {
-    case "phantom":
-      return "https://phantom.app/download"
-    case "solflare":
-      return "https://solflare.com/download"
-    case "metamask":
-      return "https://metamask.io/download/"
-    case "backpack":
-      return "https://backpack.app/download"
-    default:
-      return "#"
-  }
-}
-
-const withTimeout = <T>(promise: Promise<T>, ms: number): Promise<T> => {\
-  return new Promise((resolve, reject) => {\
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return new Promise((resolve, reject) => {
     const timer = setTimeout(() => {
       reject(new Error("TIMEOUT"))
     }, ms)
-
     promise
       .then((value) => {
-        clearTimeout(timer)\
+        clearTimeout(timer)
         resolve(value)
       })
       .catch((err) => {
-        clearTimeout(timer)\
+        clearTimeout(timer)
         reject(err)
       })
   })
 }
 
-export const connectWallet = async (type: WalletType): Promise<WalletConnectionResult> => {\
-  const TIMEOUT_MS = 30000
-
-  try {\
-    switch (type) {\
-      case "phantom": {\
-        if (!window.solana?.isPhantom) {\
-          return { success: false, error: "Phantom not installed" }
-        }
-        const response = await withTimeout(window.solana.connect(), TIMEOUT_MS)
-        return {\
-          success: true,
-          address: response.publicKey.toString(),
-        }
-      }
-
-      case "solflare": {\
-        if (!window.solflare?.isSolflare) {\
-          return { success: false, error: "Solflare not installed" }
-        }
-        await withTimeout(window.solflare.connect(), TIMEOUT_MS)
-        const address = window.solflare.publicKey?.toString()
-        if (!address) {\
-          return { success: false, error: "Failed to get address" }
-        }\
-        return { success: true, address }
-      }
-
-      case "metamask": {\
-        if (!window.ethereum?.isMetaMask) {\
-          return { success: false, error: "MetaMask not installed" }
-        }
-        
-        try {\
-          const accounts = await withTimeout(
-            window.ethereum.request({\
-              method: "eth_requestAccounts",\
-            }) as Promise<string[]>,
-            TIMEOUT_MS
-          )
-          
-          if (accounts && accounts.length > 0) {\
-            return { \
-              success: true, 
-              address: accounts[0],
-            }
-          }\
-          return { success: false, error: "No accounts found" }
-        } catch (mmError: any) {\
-          if (mmError?.code === -32002) {\
-            return { \
-              success: false, 
-              error: "MetaMask ja tem um pedido pendente. Abra a extensao MetaMask." 
-            }
-          }
-          throw mmError
-        }
-      }
-
-      case "backpack": {\
-        if (!window.backpack?.isBackpack) {\
-          return { success: false, error: "Backpack not installed" }
-        }
-        const response = await withTimeout(window.backpack.connect(), TIMEOUT_MS)
-        return {\
-          success: true,
-          address: response.publicKey.toString(),
-        }
-      }
-
-      default:\
-        return { success: false, error: "Unknown wallet type" }
-    }
-  } catch (error: any) {\
-    if (error?.message === "TIMEOUT") {
-      return {
-        success: false,
-        timeout: true,
-        error: "Tempo limite excedido. A carteira nao respondeu.",
-      }
-    }
-
-    const errorMessage = error?.message?.toLowerCase() || ""
-    const isUserRejected =
-      errorMessage.includes("user rejected") ||
-      errorMessage.includes("user denied") ||
-      errorMessage.includes("user cancelled") ||
-      errorMessage.includes("user canceled") ||
-      error?.code === 4001 ||
-      error?.code === -32603
-
-    if (isUserRejected) {
-      return {
-        success: false,
-        userRejected: true,
-        error: "Conexao cancelada",
-      }
-    }
-
-    console.error("Wallet connection error:", error)
-    return {
-      success: false,
-      error: error.message || "Connection failed",
-    }
+export function isWalletInstalled(walletType: WalletType): boolean {
+  if (typeof window === "undefined") return false
+  switch (walletType) {
+    case "phantom":
+      return !!window.phantom?.solana?.isPhantom
+    case "solflare":
+      return !!window.solflare?.isSolflare
+    case "backpack":
+      return !!window.backpack?.isBackpack
+    case "metamask":
+      return !!window.ethereum?.isMetaMask
+    default:
+      return false
   }
 }
 
-export const disconnectWallet = async (type: WalletType): Promise<void> => {
+export function getWalletDownloadUrl(walletType: WalletType): string {
+  switch (walletType) {
+    case "phantom":
+      return "https://phantom.app/download"
+    case "solflare":
+      return "https://solflare.com/download"
+    case "backpack":
+      return "https://backpack.app/download"
+    case "metamask":
+      return "https://metamask.io/download/"
+    default:
+      return ""
+  }
+}
+
+export async function connectWallet(walletType: WalletType, timeoutMs = 30000): Promise<ConnectionResult> {
   try {
-    switch (type) {
-      case "phantom":
-        await window.solana?.disconnect()
-        break
-      case "solflare":
-        await window.solflare?.disconnect()
-        break
-      case "backpack":
-        await window.backpack?.disconnect()
-        break
-      case "metamask":
-        break
+    if (!isWalletInstalled(walletType)) {
+      return { success: false, error: `${walletType} not installed` }
     }
-  } catch (error) {
-    console.error("Disconnect error:", error)
+
+    let address = ""
+
+    const connectionPromise = (async () => {
+      switch (walletType) {
+        case "phantom": {
+          const resp = await window.phantom!.solana!.connect()
+          address = resp.publicKey.toString()
+          break
+        }
+        case "solflare": {
+          await window.solflare!.connect()
+          address = window.solflare!.publicKey?.toString() || ""
+          break
+        }
+        case "backpack": {
+          const resp = await window.backpack!.connect()
+          address = resp.publicKey.toString()
+          break
+        }
+        case "metamask": {
+          const accounts = (await window.ethereum!.request({
+            method: "eth_requestAccounts",
+          })) as string[]
+          address = accounts[0] || ""
+          break
+        }
+      }
+      return address
+    })()
+
+    address = await withTimeout(connectionPromise, timeoutMs)
+
+    if (!address) {
+      return { success: false, error: "Failed to get wallet address" }
+    }
+
+    let balance = 0
+    if (walletType !== "metamask") {
+      balance = await getSolBalance(address)
+    }
+
+    return {
+      success: true,
+      data: { address, balance, walletType },
+    }
+  } catch (err) {
+    const error = err as Error
+    if (error.message === "TIMEOUT") {
+      return { success: false, error: "Connection timeout", timeout: true }
+    }
+    if (
+      error.message?.includes("User rejected") ||
+      error.message?.includes("User denied") ||
+      (error as { code?: number }).code === 4001
+    ) {
+      return { success: false, cancelled: true }
+    }
+    return { success: false, error: error.message || "Connection failed" }
   }
 }
 
-export const getSolBalance = async (address: string): Promise<number> => {
+export async function getSolBalance(address: string): Promise<number> {
   try {
     const response = await fetch("https://api.mainnet-beta.solana.com", {
       method: "POST",
@@ -198,19 +170,26 @@ export const getSolBalance = async (address: string): Promise<number> => {
       }),
     })
     const data = await response.json()
-    if (data.result?.value) {
-      return data.result.value / 1e9
-    }
-    return 0
-  } catch (error) {
-    console.error("Failed to get balance:", error)
+    return (data.result?.value || 0) / 1e9
+  } catch {
     return 0
   }
 }
 
-export const getSolanaProvider = () => {
-  if (window.solana?.isPhantom) return window.solana
-  if (window.solflare?.isSolflare) return window.solflare
-  if (window.backpack?.isBackpack) return window.backpack
-  return null
+export async function disconnectWallet(walletType: WalletType): Promise<void> {
+  try {
+    switch (walletType) {
+      case "phantom":
+        await window.phantom?.solana?.disconnect()
+        break
+      case "solflare":
+        await window.solflare?.disconnect()
+        break
+      case "backpack":
+        await window.backpack?.disconnect()
+        break
+    }
+  } catch {
+    // Ignore disconnect errors
+  }
 }

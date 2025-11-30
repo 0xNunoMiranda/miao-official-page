@@ -66,7 +66,7 @@ const ToolsPage: React.FC<ToolsPageProps> = ({ onBack, walletState }) => {
             </p>
             <button
               onClick={onBack}
-              className="bg-[var(--brand)] text-white w-full font-black text-xl px-8 py-4 rounded-2xl border-b-4 border-green-700 hover:brightness-110 active:border-b-0 active:translate-y-1 transition-all btn-comic"
+              className="bg-[var(--brand)] text-white w-full font-black text-xl px-8 py-4 rounded-2xl border-b-4 border-green-700 hover:brightness-110 active:border-b-0 active:translate-y-1 transition-all"
             >
               GO BACK
             </button>
@@ -157,7 +157,7 @@ const ToolsPage: React.FC<ToolsPageProps> = ({ onBack, walletState }) => {
     <button
       onClick={() => setActiveTab(id)}
       className={`
-        w-full text-left p-4 rounded-2xl font-black flex items-center gap-4 transition-all border-2 border-transparent btn-comic
+        w-full text-left p-4 rounded-2xl font-black flex items-center gap-4 transition-all border-2 border-transparent
         ${
           activeTab === id
             ? "bg-blue-100 text-blue-500 border-blue-200 border-b-4"
@@ -203,7 +203,10 @@ const ToolsPage: React.FC<ToolsPageProps> = ({ onBack, walletState }) => {
             </p>
             <p className="font-bold" style={{ color: "var(--text-secondary)" }}>
               Ainda nao tem qualquer utilidade e este sera um{" "}
-              <span style={{ color: "var(--brand)" }}>projeto a ser debatido pela comunidade</span>.
+              <span className="font-black" style={{ color: "var(--brand)" }}>
+                projeto a ser debatido pela comunidade
+              </span>
+              .
             </p>
             <div className="bg-[var(--bg-tertiary)] rounded-2xl p-4 mt-4">
               <p className="font-bold flex items-center justify-center gap-2" style={{ color: "var(--text-primary)" }}>
@@ -250,7 +253,7 @@ const ToolsPage: React.FC<ToolsPageProps> = ({ onBack, walletState }) => {
           <div className="flex items-center gap-4">
             <button
               onClick={onBack}
-              className="w-12 h-12 bg-white dark:bg-slate-800 rounded-xl border-b-4 border-slate-300 text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-all flex items-center justify-center active:border-b-0 active:translate-y-1 btn-comic"
+              className="w-12 h-12 bg-white dark:bg-slate-800 rounded-xl border-b-4 border-slate-300 text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-all flex items-center justify-center active:border-b-0 active:translate-y-1"
             >
               <ArrowLeft size={24} strokeWidth={3} />
             </button>
@@ -310,7 +313,7 @@ const ToolsPage: React.FC<ToolsPageProps> = ({ onBack, walletState }) => {
                       <p className="text-yellow-800 font-bold text-lg">
                         Complete 3 daily quests to earn a streak bonus!
                       </p>
-                      <button className="mt-4 bg-white text-yellow-600 font-black px-6 py-3 rounded-xl border-b-4 border-yellow-200 hover:bg-yellow-50 active:border-b-0 active:translate-y-1 transition-all uppercase tracking-wide text-sm btn-comic">
+                      <button className="mt-4 bg-white text-yellow-600 font-black px-6 py-3 rounded-xl border-b-4 border-yellow-200 hover:bg-yellow-50 active:border-b-0 active:translate-y-1 transition-all uppercase tracking-wide text-sm">
                         Start Quests
                       </button>
                     </div>
@@ -362,7 +365,7 @@ const ToolsPage: React.FC<ToolsPageProps> = ({ onBack, walletState }) => {
                       <div className="flex-grow bg-slate-100 dark:bg-slate-900 rounded-xl border-2 border-slate-200 dark:border-slate-700 flex items-center px-4 font-mono text-xs font-bold text-slate-500">
                         miao.vip/u/7x...
                       </div>
-                      <button className="bg-blue-500 text-white font-black px-4 py-3 rounded-xl border-b-4 border-blue-700 active:border-b-0 active:translate-y-1 transition-all btn-comic">
+                      <button className="bg-blue-500 text-white font-black px-4 py-3 rounded-xl border-b-4 border-blue-700 active:border-b-0 active:translate-y-1 transition-all">
                         COPY
                       </button>
                     </div>
@@ -401,7 +404,7 @@ const ToolsPage: React.FC<ToolsPageProps> = ({ onBack, walletState }) => {
                         <button
                           onClick={handleGenerateMemeBase}
                           disabled={isGenerating || !prompt}
-                          className="absolute right-2 top-2 bottom-2 bg-blue-500 text-white px-4 rounded-xl font-black text-sm border-b-4 border-blue-700 hover:brightness-110 active:border-b-0 active:translate-y-1 disabled:opacity-50 disabled:active:border-b-4 disabled:active:translate-y-0 transition-all btn-comic"
+                          className="absolute right-2 top-2 bottom-2 bg-blue-500 text-white px-4 rounded-xl font-black text-sm border-b-4 border-blue-700 hover:brightness-110 active:border-b-0 active:translate-y-1 disabled:opacity-50 disabled:active:border-b-4 disabled:active:translate-y-0 transition-all"
                         >
                           {isGenerating ? <RefreshCw className="animate-spin" /> : "GENERATE"}
                         </button>
@@ -470,7 +473,7 @@ const ToolsPage: React.FC<ToolsPageProps> = ({ onBack, walletState }) => {
 
                 {generatedImage && (
                   <div className="mt-8 flex flex-col md:flex-row flex-wrap gap-4 justify-between items-center border-t-2 border-slate-100 dark:border-slate-700 pt-6">
-                    <button className="flex items-center gap-2 font-black text-slate-400 hover:text-slate-600 px-4 py-3 btn-comic">
+                    <button className="flex items-center gap-2 font-black text-slate-400 hover:text-slate-600 px-4 py-3">
                       <Download size={20} strokeWidth={3} /> Save Image
                     </button>
 
@@ -478,21 +481,21 @@ const ToolsPage: React.FC<ToolsPageProps> = ({ onBack, walletState }) => {
                       {/* Social Share Group */}
                       <button
                         onClick={() => handleSocialShare("twitter")}
-                        className="bg-[#1DA1F2] text-white p-4 rounded-xl border-b-4 border-[#1681bf] active:border-b-0 active:translate-y-1 transition-all hover:brightness-110 btn-icon-pop"
+                        className="bg-[#1DA1F2] text-white p-4 rounded-xl border-b-4 border-[#1681bf] active:border-b-0 active:translate-y-1 transition-all hover:brightness-110"
                         title="Share on Twitter"
                       >
                         <Twitter size={20} fill="currentColor" />
                       </button>
                       <button
                         onClick={() => handleSocialShare("telegram")}
-                        className="bg-[#229ED9] text-white p-4 rounded-xl border-b-4 border-[#1b7db0] active:border-b-0 active:translate-y-1 transition-all hover:brightness-110 btn-icon-pop"
+                        className="bg-[#229ED9] text-white p-4 rounded-xl border-b-4 border-[#1b7db0] active:border-b-0 active:translate-y-1 transition-all hover:brightness-110"
                         title="Share on Telegram"
                       >
                         <Send size={20} fill="currentColor" />
                       </button>
                       <button
                         onClick={() => handleSocialShare("native")}
-                        className="bg-slate-200 text-slate-600 p-4 rounded-xl border-b-4 border-slate-300 active:border-b-0 active:translate-y-1 transition-all hover:bg-slate-300 btn-icon-pop"
+                        className="bg-slate-200 text-slate-600 p-4 rounded-xl border-b-4 border-slate-300 active:border-b-0 active:translate-y-1 transition-all hover:bg-slate-300"
                         title="More Options"
                       >
                         <Share size={20} strokeWidth={3} />
@@ -500,7 +503,7 @@ const ToolsPage: React.FC<ToolsPageProps> = ({ onBack, walletState }) => {
 
                       <button
                         onClick={handleShareMeme}
-                        className="bg-green-500 text-white px-6 py-4 rounded-xl font-black text-lg border-b-4 border-green-700 hover:brightness-110 active:border-b-0 active:translate-y-1 transition-all flex items-center gap-3 shadow-lg shadow-green-200 dark:shadow-none ml-2 btn-comic"
+                        className="bg-green-500 text-white px-6 py-4 rounded-xl font-black text-lg border-b-4 border-green-700 hover:brightness-110 active:border-b-0 active:translate-y-1 transition-all flex items-center gap-3 shadow-lg shadow-green-200 dark:shadow-none ml-2"
                       >
                         <Share2 size={24} strokeWidth={3} /> PUBLISH & EARN
                       </button>
@@ -559,7 +562,7 @@ const ToolsPage: React.FC<ToolsPageProps> = ({ onBack, walletState }) => {
                           setPoints((p) => p + task.reward)
                           alert(`Quest Complete! +${task.reward} Gems`)
                         }}
-                        className="bg-yellow-400 text-yellow-900 px-6 py-3 rounded-xl font-black text-sm border-b-4 border-yellow-600 hover:brightness-110 active:border-b-0 active:translate-y-1 transition-all btn-comic"
+                        className="bg-yellow-400 text-yellow-900 px-6 py-3 rounded-xl font-black text-sm border-b-4 border-yellow-600 hover:brightness-110 active:border-b-0 active:translate-y-1 transition-all"
                       >
                         CLAIM {task.reward}
                       </button>

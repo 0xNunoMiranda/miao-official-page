@@ -5,6 +5,7 @@ import { useState, useEffect } from "react"
 import type { WalletType } from "../types"
 import { X, Shield, Wallet, ExternalLink, CheckCircle, AlertCircle } from "lucide-react"
 import { isWalletInstalled, getWalletDownloadUrl, connectWallet } from "../lib/wallet-service"
+import { useLanguage } from "../lib/language-context"
 
 interface WalletModalProps {
   isOpen: boolean
@@ -13,6 +14,7 @@ interface WalletModalProps {
 }
 
 const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, onConnect }) => {
+  const { t } = useLanguage()
   const [connecting, setConnecting] = useState<WalletType | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [countdown, setCountdown] = useState<number | null>(null)
@@ -76,20 +78,21 @@ const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, onConnect })
     try {
       const result = await connectWallet(type)
 
-      if (result.success && result.address) {
-        onConnect(type, result.address)
+      if (result.success && result.data?.address) {
+        onConnect(type, result.data.address)
         setConnecting(null)
-      } else if (result.userRejected) {
+      } else if (result.cancelled) {
         setConnecting(null)
       } else if (result.timeout) {
-        setError("Tempo limite excedido (30s). Verifique se a carteira esta aberta e tente novamente.")
+        setError(t("wallet.timeout"))
         setConnecting(null)
       } else {
-        setError(result.error || "Connection failed")
+        setError(result.error || t("wallet.error"))
         setConnecting(null)
       }
-    } catch (err: any) {
-      setError(err.message || "Connection failed")
+    } catch (err: unknown) {
+      const error = err as Error
+      setError(error.message || t("wallet.error"))
       setConnecting(null)
     }
   }
@@ -101,7 +104,7 @@ const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, onConnect })
       icon: "/assets/wallets/phantom.png",
       color: "#AB9FF2",
       recommended: true,
-      description: "Carteira Solana mais popular",
+      description: t("wallet.phantomDesc"),
       disabled: false,
     },
     {
@@ -109,7 +112,7 @@ const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, onConnect })
       name: "Solflare",
       icon: "/assets/wallets/solflare.png",
       color: "#FFE500",
-      description: "Carteira Solana avancada",
+      description: t("wallet.solflareDesc"),
       disabled: false,
     },
     {
@@ -117,7 +120,7 @@ const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, onConnect })
       name: "Backpack",
       icon: "/assets/wallets/backpack.png",
       color: "#E33E3F",
-      description: "Carteira multi-chain",
+      description: t("wallet.backpackDesc"),
       disabled: false,
     },
     {
@@ -125,7 +128,7 @@ const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, onConnect })
       name: "MetaMask",
       icon: "/assets/wallets/metamask.png",
       color: "#F6851B",
-      description: "Em breve - Solana nao suportado",
+      description: t("wallet.notSupported"),
       disabled: true,
     },
   ]
@@ -140,7 +143,7 @@ const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, onConnect })
             <div className="w-10 h-10 rounded-xl bg-[var(--brand)] flex items-center justify-center">
               <Wallet className="text-white" size={20} />
             </div>
-            Conectar Carteira
+            {t("wallet.title")}
           </h2>
           <button
             onClick={onClose}
@@ -209,12 +212,12 @@ const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, onConnect })
                       </span>
                       {wallet.recommended && (
                         <span className="px-2 py-0.5 text-xs font-bold bg-[var(--brand)] text-white rounded-full">
-                          Recomendado
+                          {t("wallet.recommended")}
                         </span>
                       )}
                       {isDisabled && (
                         <span className="px-2 py-0.5 text-xs font-bold bg-gray-500 text-white rounded-full">
-                          Em breve
+                          {t("wallet.comingSoon")}
                         </span>
                       )}
                     </div>
@@ -230,12 +233,12 @@ const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, onConnect })
                         {isInstalled ? (
                           <>
                             <CheckCircle size={12} />
-                            Detectado
+                            {t("wallet.detected")}
                           </>
                         ) : (
                           <>
                             <ExternalLink size={12} />
-                            Instalar
+                            {t("wallet.install")}
                           </>
                         )}
                       </div>
@@ -280,7 +283,7 @@ const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, onConnect })
           <div className="text-center p-3 rounded-xl bg-[var(--bg-tertiary)] border-2 border-dashed border-[var(--border-color)]">
             <p className="text-xs text-[var(--text-secondary)] font-bold flex items-center justify-center gap-2">
               <Shield size={14} className="text-[var(--brand)]" />
-              Novo em crypto? Instale Phantom para comecar.
+              {t("wallet.newToCrypto")}
             </p>
           </div>
         </div>

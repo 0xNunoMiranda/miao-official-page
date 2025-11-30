@@ -1,237 +1,341 @@
+"use client"
+
 import type React from "react"
+import { useState } from "react"
+import {
+  Copy,
+  Check,
+  Rocket,
+  Coins,
+  Target,
+  Flame,
+  Wallet,
+  Download,
+  ArrowRightLeft,
+  ShoppingCart,
+  ShieldCheck,
+  FileX,
+} from "lucide-react"
 import SnowCap from "./SnowCap"
 
 interface TokenomicsProps {
   isChristmasMode?: boolean
 }
 
+const CONTRACT_ADDRESS = "8xpdiZ5GrnAdxpf7DSyZ1YXZxx6itvvoXPHZ4K2Epump"
+
 const Tokenomics: React.FC<TokenomicsProps> = ({ isChristmasMode = false }) => {
+  const [copied, setCopied] = useState(false)
+
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(CONTRACT_ADDRESS)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch (err) {
+      console.error("Failed to copy:", err)
+    }
+  }
+
+  const tokenomicsItems = [
+    {
+      k: "Fair Launch",
+      v: "100% Community",
+      color: "bg-[var(--duo-orange)]",
+      shadow: "border-[var(--btn-shadow-orange)]",
+      icon: Rocket,
+    },
+    {
+      k: "Supply",
+      v: "1B MIAO",
+      color: "bg-[var(--duo-yellow)]",
+      shadow: "border-[var(--btn-shadow-orange)]",
+      icon: Coins,
+    },
+    {
+      k: "Launchpad",
+      v: "Pumpfun",
+      color: "bg-[var(--duo-pink)]",
+      shadow: "border-[var(--duo-pink-dark)]",
+      icon: Target,
+    },
+    {
+      k: "Liquidity Burned",
+      v: "No rug pulls",
+      color: "bg-[var(--duo-red)]",
+      shadow: "border-[var(--btn-shadow-red)]",
+      icon: Flame,
+    },
+    {
+      k: "Contract Renounced",
+      v: "Can't change it",
+      color: "bg-[var(--duo-blue)]",
+      shadow: "border-[var(--btn-shadow-blue)]",
+      icon: ShieldCheck,
+    },
+    {
+      k: "No Treasury",
+      v: "Pure chaos",
+      color: "bg-[var(--duo-purple)]",
+      shadow: "border-[var(--btn-shadow-purple)]",
+      icon: FileX,
+    },
+  ]
+
+  const howToBuySteps = [
+    {
+      title: "Buy Solana",
+      desc: "Binance, Coinbase, Kraken",
+      color: "bg-[var(--duo-blue)]",
+      shadow: "border-[var(--btn-shadow-blue)]",
+      icon: ShoppingCart,
+    },
+    {
+      title: "Get Phantom",
+      desc: "Install wallet",
+      color: "bg-[var(--duo-purple)]",
+      shadow: "border-[var(--btn-shadow-purple)]",
+      icon: Wallet,
+    },
+    {
+      title: "Send SOL",
+      desc: "Transfer from exchange",
+      color: "bg-[var(--duo-orange)]",
+      shadow: "border-[var(--btn-shadow-orange)]",
+      icon: Download,
+    },
+    {
+      title: "Swap to $MIAO",
+      desc: "Use Raydium DEX",
+      color: "bg-[var(--duo-green)]",
+      shadow: "border-[var(--btn-shadow)]",
+      icon: ArrowRightLeft,
+    },
+  ]
+
+  const roadmapItems = [
+    {
+      label: "1000 Holders",
+      img: "https://miaotoken.vip/wp-content/uploads/2025/10/22-1.png",
+      color: "var(--duo-green)",
+      x: 60,
+      y: 280,
+    },
+    {
+      label: "250k MC",
+      img: "https://miaotoken.vip/wp-content/uploads/2025/10/77.png",
+      color: "var(--duo-blue)",
+      x: 185,
+      y: 200,
+    },
+    {
+      label: "Games",
+      img: "https://miaotoken.vip/wp-content/uploads/2025/10/1010.png",
+      color: "var(--duo-orange)",
+      x: 310,
+      y: 280,
+    },
+    {
+      label: "Miao Tools",
+      img: "https://miaotoken.vip/wp-content/uploads/2025/10/1212.png",
+      color: "var(--duo-purple)",
+      x: 435,
+      y: 200,
+    },
+    {
+      label: "Android APP",
+      img: "https://miaotoken.vip/wp-content/uploads/2025/10/1313.png",
+      color: "var(--duo-pink)",
+      x: 560,
+      y: 280,
+    },
+    {
+      label: "+1500 Holders",
+      img: "https://miaotoken.vip/wp-content/uploads/2025/10/1111.png",
+      color: "var(--duo-yellow)",
+      x: 685,
+      y: 200,
+    },
+    {
+      label: "CMC/CG Lists",
+      img: "https://miaotoken.vip/wp-content/uploads/2025/10/1414.png",
+      color: "var(--duo-red)",
+      x: 810,
+      y: 280,
+    },
+    {
+      label: "More...",
+      img: "https://miaotoken.vip/wp-content/uploads/2025/10/22-1.png",
+      color: "var(--duo-green)",
+      x: 935,
+      y: 60,
+    },
+  ]
+
   return (
-    <section id="overview" className="py-24 bg-[var(--bg-primary)] relative">
-      <div className="max-w-[1400px] mx-auto px-6 md:px-12 lg:px-24">
-        {/* Tokenomics & How To Buy Grid */}
-        <div className="grid lg:grid-cols-2 gap-8 mb-24">
+    <section id="overview" className="py-20">
+      <div className="max-w-6xl mx-auto px-4 md:px-8">
+        {/* Tokenomics + How to Buy Grid */}
+        <div className="grid lg:grid-cols-2 gap-6 mb-8">
           {/* Tokenomics Card */}
-          <div className="bg-[var(--bg-secondary)] rounded-[2.5rem] border-b-8 border-[var(--border-color)] p-8 md:p-12 relative overflow-hidden group hover:-translate-y-2 transition-transform duration-300">
+          <div className="bg-[var(--bg-secondary)]/95 backdrop-blur-sm rounded-3xl p-6 border-2 border-[var(--border-color)] border-b-4 relative">
             <SnowCap className="h-10" visible={isChristmasMode} />
-            <div className="absolute top-0 right-0 w-64 h-64 bg-[var(--brand)] rounded-full blur-[80px] opacity-20 -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+            <h2 className="text-2xl md:text-3xl font-black text-[var(--text-primary)] mb-6">Tokenomics</h2>
 
-            <h2 className="text-3xl md:text-4xl font-black text-[var(--text-primary)] mb-8 inline-block">Tokenomics</h2>
-
-            <ul className="space-y-4 relative z-10">
-              {[
-                { k: "Fair Launch", v: "100% Community", color: "text-blue-500" },
-                { k: "Supply", v: "1,000,000,000", color: "text-[var(--brand)]" },
-                { k: "Launchpad", v: "Pumpfun", color: "text-purple-500" },
-                { k: "Contract", v: "Renounced", color: "text-red-500" },
-                { k: "Chain", v: "Solana", color: "text-indigo-500" },
-                { k: "Liquidity", v: "Burned", color: "text-orange-500" },
-              ].map((item, i) => (
-                <li
-                  key={i}
-                  className="flex flex-col sm:flex-row justify-between sm:items-center bg-[var(--bg-tertiary)] p-4 rounded-2xl border-2 border-[var(--border-color)] hover:border-[var(--brand)] transition-colors"
-                >
-                  <span className="font-bold text-[var(--text-secondary)] text-lg">{item.k}</span>
-                  <span className={`font-black text-xl md:text-2xl ${item.color}`}>{item.v}</span>
-                </li>
-              ))}
-            </ul>
+            <div className="grid grid-cols-3 gap-3">
+              {tokenomicsItems.map((item, i) => {
+                const IconComponent = item.icon
+                return (
+                  <div
+                    key={i}
+                    className="aspect-square bg-[var(--bg-primary)] rounded-2xl p-2 flex flex-col items-center justify-center text-center cursor-pointer border-2 border-b-4 border-[var(--border-color)] hover:scale-105 active:border-b-2 active:translate-y-[2px] transition-all"
+                  >
+                    <div
+                      className={`w-10 h-10 ${item.color} rounded-xl flex items-center justify-center mb-2 border-2 ${item.shadow}`}
+                    >
+                      <IconComponent className="w-5 h-5 text-white" strokeWidth={2.5} />
+                    </div>
+                    <span className="font-bold text-[var(--text-secondary)] text-[10px] uppercase tracking-tight leading-tight">
+                      {item.k}
+                    </span>
+                    <span className="font-black text-[var(--duo-green)] text-xs leading-tight">{item.v}</span>
+                  </div>
+                )
+              })}
+            </div>
           </div>
 
-          {/* How To Buy Card */}
-          <div className="bg-[var(--bg-secondary)] rounded-[2.5rem] border-b-8 border-[var(--border-color)] p-8 md:p-12 relative overflow-hidden group hover:-translate-y-2 transition-transform duration-300">
+          {/* How to Buy Card */}
+          <div className="bg-[var(--bg-secondary)]/95 backdrop-blur-sm rounded-3xl p-6 border-2 border-[var(--border-color)] border-b-4 relative overflow-hidden">
             <SnowCap className="h-10" visible={isChristmasMode} />
-            <div className="absolute bottom-0 left-0 w-64 h-64 bg-yellow-500 rounded-full blur-[80px] opacity-20 translate-y-1/2 -translate-x-1/2 pointer-events-none"></div>
+            <h2 className="text-2xl md:text-3xl font-black text-[var(--text-primary)] mb-6">How to Buy</h2>
 
-            <h2 className="text-3xl md:text-4xl font-black text-[var(--text-primary)] mb-8 inline-block">How to Buy</h2>
-
-            <div className="space-y-4 relative z-10">
-              {[
-                {
-                  title: "Buy Solana (SOL)",
-                  desc: "Comprar SOL em Binance, Coinbase, Kraken, OKX.",
-                  color: "bg-black",
-                },
-                {
-                  title: "Install Phantom",
-                  desc: "Instalar a carteira Phantom e copiar o endereço SOL.",
-                  color: "bg-[#AB9FF2]",
-                },
-                { title: "Send Solana", desc: "Enviar SOL da exchange para a Phantom.", color: "bg-purple-600" },
-                {
-                  title: "Buy $MIAO",
-                  desc: "Conectar à Raydium DEX e trocar SOL por $MIAO.",
-                  color: "bg-[var(--brand)]",
-                },
-              ].map((step, i) => (
-                <div
-                  key={i}
-                  className="flex gap-5 items-center bg-[var(--bg-tertiary)] p-4 rounded-3xl border-b-4 border-[var(--border-color)]"
-                >
+            <div className="grid grid-cols-2 gap-3 relative z-10">
+              {howToBuySteps.map((step, i) => {
+                const IconComponent = step.icon
+                return (
                   <div
-                    className={`flex-shrink-0 w-14 h-14 rounded-2xl ${step.color} text-white flex items-center justify-center font-black text-2xl shadow-md transform rotate-3`}
+                    key={i}
+                    className="bg-[var(--bg-primary)] p-4 rounded-2xl cursor-pointer border-2 border-b-4 border-[var(--border-color)] hover:scale-[1.02] active:border-b-2 active:translate-y-[2px] transition-all"
                   >
-                    {i + 1}
+                    <div className="flex items-start gap-3">
+                      <div
+                        className={`flex-shrink-0 w-10 h-10 ${step.color} rounded-xl text-white flex items-center justify-center font-black text-lg border-2 ${step.shadow}`}
+                      >
+                        <IconComponent className="w-5 h-5" strokeWidth={2.5} />
+                      </div>
+                      <div className="min-w-0 pt-1">
+                        <h4 className="font-black text-sm text-[var(--text-primary)] leading-tight">{step.title}</h4>
+                        <p className="text-[var(--text-secondary)] font-medium text-xs leading-tight mt-0.5">
+                          {step.desc}
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-black text-lg text-[var(--text-primary)] leading-tight mb-1">{step.title}</h4>
-                    <p className="text-[var(--text-secondary)] font-bold text-sm leading-tight">{step.desc}</p>
-                  </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
+
+            <img
+              src="/images/miao-asking.png"
+              alt="MIAO asking"
+              className="absolute bottom-0 right-0 w-28 h-28 object-contain opacity-90 pointer-events-none"
+            />
           </div>
         </div>
 
-        {/* Roadmap Section */}
-        <div className="text-center relative">
-          <h2 className="text-4xl md:text-5xl font-black text-[var(--text-primary)] mb-12 inline-block">Roadmap</h2>
+        <div className="mb-16">
+          <div
+            onClick={copyToClipboard}
+            className="bg-[var(--duo-green)] rounded-2xl p-5 cursor-pointer group border-2 border-b-4 border-[var(--btn-shadow)] hover:brightness-105 active:border-b-2 active:translate-y-[2px] transition-all"
+          >
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <span className="font-black text-white text-lg uppercase tracking-wide">Contract Address</span>
+              <div className="flex items-center gap-3">
+                <code className="font-mono text-sm bg-white text-[var(--duo-green)] px-4 py-3 rounded-xl break-all font-bold">
+                  {CONTRACT_ADDRESS}
+                </code>
+                <button className="flex-shrink-0 w-12 h-12 rounded-xl bg-white text-[var(--duo-green)] flex items-center justify-center font-black">
+                  {copied ? (
+                    <Check className="w-5 h-5" strokeWidth={3} />
+                  ) : (
+                    <Copy className="w-5 h-5" strokeWidth={3} />
+                  )}
+                </button>
+              </div>
+            </div>
+            {copied && <p className="text-center text-white font-black mt-3 text-lg animate-bounce">Copied! MEOW~</p>}
+          </div>
+        </div>
 
-          <div className="w-full overflow-x-auto pb-8 custom-scrollbar">
-            <div className="min-w-[1000px] w-full max-w-[1200px] mx-auto bg-slate-900 rounded-[3rem] p-10 relative border-b-8 border-slate-950 shadow-2xl">
-              <svg viewBox="0 0 2600 500" width="100%" height="auto" className="w-full h-auto">
-                <defs>
-                  <pattern id="img1" patternUnits="objectBoundingBox" width="1" height="1">
-                    <image
-                      href="https://miaotoken.vip/wp-content/uploads/2025/10/22-1.png"
-                      x="0"
-                      y="0"
-                      width="180"
-                      height="180"
-                      preserveAspectRatio="xMidYMid slice"
-                    />
-                  </pattern>
-                  <pattern id="img2" patternUnits="objectBoundingBox" width="1" height="1">
-                    <image
-                      href="https://miaotoken.vip/wp-content/uploads/2025/10/77.png"
-                      x="0"
-                      y="0"
-                      width="180"
-                      height="180"
-                      preserveAspectRatio="xMidYMid slice"
-                    />
-                  </pattern>
-                  <pattern id="img3" patternUnits="objectBoundingBox" width="1" height="1">
-                    <image
-                      href="https://miaotoken.vip/wp-content/uploads/2025/10/1010.png"
-                      x="0"
-                      y="0"
-                      width="180"
-                      height="180"
-                      preserveAspectRatio="xMidYMid slice"
-                    />
-                  </pattern>
-                  <pattern id="img4" patternUnits="objectBoundingBox" width="1" height="1">
-                    <image
-                      href="https://miaotoken.vip/wp-content/uploads/2025/10/1212.png"
-                      x="0"
-                      y="0"
-                      width="180"
-                      height="180"
-                      preserveAspectRatio="xMidYMid slice"
-                    />
-                  </pattern>
-                  <pattern id="img5" patternUnits="objectBoundingBox" width="1" height="1">
-                    <image
-                      href="https://miaotoken.vip/wp-content/uploads/2025/10/1313.png"
-                      x="0"
-                      y="0"
-                      width="180"
-                      height="180"
-                      preserveAspectRatio="xMidYMid slice"
-                    />
-                  </pattern>
-                  <pattern id="img6" patternUnits="objectBoundingBox" width="1" height="1">
-                    <image
-                      href="https://miaotoken.vip/wp-content/uploads/2025/10/1111.png"
-                      x="0"
-                      y="0"
-                      width="180"
-                      height="180"
-                      preserveAspectRatio="xMidYMid slice"
-                    />
-                  </pattern>
-                  <pattern id="img7" patternUnits="objectBoundingBox" width="1" height="1">
-                    <image
-                      href="https://miaotoken.vip/wp-content/uploads/2025/10/1414.png"
-                      x="0"
-                      y="0"
-                      width="180"
-                      height="180"
-                      preserveAspectRatio="xMidYMid slice"
-                    />
-                  </pattern>
-                  <pattern id="img8" patternUnits="objectBoundingBox" width="1" height="1">
-                    <image
-                      href="https://miaotoken.vip/wp-content/uploads/2025/10/22-1.png"
-                      x="0"
-                      y="0"
-                      width="180"
-                      height="180"
-                      preserveAspectRatio="xMidYMid slice"
-                    />
-                  </pattern>
-                </defs>
-                <path
-                  d="M200,270 Q500,60 800,270 T1400,270 T2000,270 T2400,430"
-                  stroke="#fff"
-                  strokeWidth="16"
-                  strokeDasharray="48 32"
-                  fill="none"
-                />
-                <g>
-                  <text x="200" y="120" textAnchor="middle" fontSize="54" fill="#fff" fontWeight="bold">
-                    1000 Holders
-                  </text>
-                  <circle cx="200" cy="270" r="90" fill="url(#img1)" stroke="#fff" strokeWidth="16" />
-                </g>
-                <g>
-                  <circle cx="500" cy="120" r="90" fill="url(#img2)" stroke="#fff" strokeWidth="16" />
-                  <text x="500" y="270" textAnchor="middle" fontSize="54" fill="#fff" fontWeight="bold">
-                    250k MC
-                  </text>
-                </g>
-                <g>
-                  <text x="800" y="120" textAnchor="middle" fontSize="54" fill="#fff" fontWeight="bold">
-                    Games
-                  </text>
-                  <circle cx="800" cy="270" r="90" fill="url(#img3)" stroke="#fff" strokeWidth="16" />
-                </g>
-                <g>
-                  <text x="1100" y="280" textAnchor="middle" fontSize="54" fill="#fff" fontWeight="bold">
-                    Miao Tools
-                  </text>
-                  <circle cx="1100" cy="390" r="90" fill="url(#img4)" stroke="#fff" strokeWidth="16" />
-                </g>
-                <g>
-                  <text x="1400" y="120" textAnchor="middle" fontSize="54" fill="#fff" fontWeight="bold">
-                    Android APP
-                  </text>
-                  <circle cx="1400" cy="270" r="90" fill="url(#img5)" stroke="#fff" strokeWidth="16" />
-                </g>
-                <g>
-                  <circle cx="1700" cy="120" r="90" fill="url(#img6)" stroke="#fff" strokeWidth="16" />
-                  <text x="1700" y="270" textAnchor="middle" fontSize="54" fill="#fff" fontWeight="bold">
-                    +1500 Holders
-                  </text>
-                </g>
-                <g>
-                  <text x="2000" y="120" textAnchor="middle" fontSize="54" fill="#fff" fontWeight="bold">
-                    CMC/CG Lists
-                  </text>
-                  <circle cx="2000" cy="270" r="90" fill="url(#img7)" stroke="#fff" strokeWidth="16" />
-                </g>
-                <g>
-                  <circle cx="2400" cy="330" r="90" fill="url(#img8)" stroke="#fff" strokeWidth="16" />
-                  <text x="2400" y="210" textAnchor="middle" fontSize="54" fill="#fff" fontWeight="bold">
-                    More...
-                  </text>
-                </g>
-              </svg>
+        <div className="text-center">
+          <h2 className="text-3xl md:text-4xl font-black text-[var(--text-primary)] mb-10">Roadmap</h2>
+
+          <div className="w-full overflow-x-auto pb-6 custom-scrollbar">
+            <div className="min-w-[1000px] w-full max-w-[1200px] mx-auto bg-[var(--bg-tertiary)]/95 backdrop-blur-sm rounded-3xl p-8 border-2 border-[var(--border-color)] border-b-4">
+              <div className="relative" style={{ height: "400px" }}>
+                <svg
+                  className="absolute inset-0 w-full h-full"
+                  viewBox="0 0 1000 400"
+                  preserveAspectRatio="xMidYMid meet"
+                >
+                  <path
+                    d="M60,280 L185,200 L310,280 L435,200 L560,280 L685,200 L810,280 L935,60"
+                    stroke="var(--duo-green)"
+                    strokeWidth="6"
+                    strokeDasharray="15 10"
+                    fill="none"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="animate-path-dash"
+                  />
+                </svg>
+
+                {roadmapItems.map((item, i) => (
+                  <div
+                    key={i}
+                    className="absolute flex flex-col items-center gap-2"
+                    style={{
+                      left: `${(item.x / 1000) * 100}%`,
+                      top: `${(item.y / 400) * 100}%`,
+                      transform: "translate(-50%, -50%)",
+                      animation: `roadmap-float 4s ease-in-out infinite`,
+                      animationDelay: `${i * 0.4}s`,
+                    }}
+                  >
+                    {/* Label above for items at y=200 or y=60, below for y=280 */}
+                    {(item.y === 200 || item.y === 60) && (
+                      <span className="font-black text-xs text-[var(--text-primary)] bg-[var(--bg-primary)] px-3 py-1 rounded-full border-2 border-[var(--border-color)] whitespace-nowrap mb-1">
+                        {item.label}
+                      </span>
+                    )}
+
+                    {/* Avatar */}
+                    <div
+                      className="w-14 h-14 rounded-full border-4 overflow-hidden bg-[var(--bg-primary)] shadow-lg"
+                      style={{ borderColor: item.color }}
+                    >
+                      <img
+                        src={item.img || "/placeholder.svg"}
+                        alt={item.label}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+
+                    {/* Label below for items at y=280 */}
+                    {item.y === 280 && (
+                      <span className="font-black text-xs text-[var(--text-primary)] bg-[var(--bg-primary)] px-3 py-1 rounded-full border-2 border-[var(--border-color)] whitespace-nowrap mt-1">
+                        {item.label}
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
-          <p className="mt-8 text-2xl font-black text-[var(--text-secondary)] uppercase tracking-widest">
-            Building the future with miao
+
+          <p className="mt-8 text-lg font-black text-[var(--text-primary)] uppercase tracking-wider">
+            Building the future with MIAO
           </p>
         </div>
       </div>

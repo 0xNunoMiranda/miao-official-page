@@ -411,7 +411,7 @@ const NFTSection: React.FC<NFTSectionProps> = ({ isChristmasMode = false }) => {
                   href="https://launchmynft.io/sol/20841"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="duo-btn duo-btn-green text-sm font-bold py-2.5 px-5 text-center uppercase tracking-wide"
+                  className="text-sm font-bold py-2.5 px-5 text-center uppercase tracking-wide rounded-xl bg-[var(--brand)] text-white border-[3px] border-[var(--comic-outline)] shadow-[4px_4px_0_0_var(--comic-outline)] hover:shadow-[6px_6px_0_0_var(--comic-outline)] hover:-translate-y-0.5 active:shadow-none active:translate-x-[4px] active:translate-y-[4px] transition-all"
                 >
                   MINT V1
                 </a>
@@ -419,7 +419,7 @@ const NFTSection: React.FC<NFTSectionProps> = ({ isChristmasMode = false }) => {
                   href="https://launchmynft.io/sol/20841"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="duo-btn duo-btn-secondary text-sm font-bold py-2.5 px-5 text-center uppercase tracking-wide"
+                  className="text-sm font-bold py-2.5 px-5 text-center uppercase tracking-wide rounded-xl bg-[var(--bg-tertiary)] text-[var(--text-primary)] border-[3px] border-[var(--border-color)] shadow-[4px_4px_0_0_var(--border-color)] hover:shadow-[6px_6px_0_0_var(--border-color)] hover:-translate-y-0.5 active:shadow-none active:translate-x-[4px] active:translate-y-[4px] transition-all"
                 >
                   MINT V2
                 </a>

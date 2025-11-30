@@ -339,19 +339,19 @@ const SwapModal: React.FC<SwapModalProps> = ({ isOpen, onClose, walletBalance, w
     <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose}></div>
 
-      <div className="relative w-full max-w-md bg-[var(--bg-secondary)] border-4 border-[var(--border-color)] rounded-3xl p-6 comic-shadow animate-float">
+      <div className="relative w-full max-w-md bg-[var(--bg-secondary)] border-4 border-[var(--border-color)] rounded-3xl p-6 shadow-[6px_6px_0_0_var(--border-color)]">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-black text-[var(--text-primary)]">Swap</h2>
           <div className="flex gap-2">
             <button
               onClick={() => setShowSettings(!showSettings)}
-              className={`p-2 rounded-full hover:bg-[var(--bg-tertiary)] text-[var(--text-secondary)] btn-icon-pop ${showSettings ? "bg-[var(--bg-tertiary)]" : ""}`}
+              className={`p-2 rounded-full hover:bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:scale-110 transition-all ${showSettings ? "bg-[var(--bg-tertiary)]" : ""}`}
             >
               <Settings size={20} />
             </button>
             <button
               onClick={onClose}
-              className="p-2 rounded-full hover:bg-[var(--bg-tertiary)] text-[var(--text-primary)] btn-icon-pop"
+              className="p-2 rounded-full hover:bg-[var(--bg-tertiary)] text-[var(--text-primary)] hover:scale-110 transition-all"
             >
               <X size={20} />
             </button>
@@ -402,7 +402,7 @@ const SwapModal: React.FC<SwapModalProps> = ({ isOpen, onClose, walletBalance, w
             )}
             <button
               onClick={reset}
-              className="w-full bg-[var(--brand)] text-white font-black py-3 rounded-xl comic-border comic-shadow btn-comic"
+              className="w-full bg-[var(--brand)] text-white font-black py-3 rounded-xl border-[3px] border-[var(--comic-outline)] shadow-[4px_4px_0_0_var(--comic-outline)] hover:shadow-[6px_6px_0_0_var(--comic-outline)] active:shadow-none active:translate-x-[4px] active:translate-y-[4px] transition-all"
             >
               Fechar
             </button>
@@ -523,10 +523,10 @@ const SwapModal: React.FC<SwapModalProps> = ({ isOpen, onClose, walletBalance, w
             <button
               onClick={handleSwap}
               disabled={isSwapping || !inputAmount || !walletAddress || isLoadingQuote}
-              className={`w-full py-4 rounded-xl font-black text-xl flex items-center justify-center gap-2 comic-border comic-shadow transition-all btn-comic ${
-                !inputAmount || !walletAddress || isLoadingQuote
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-[var(--brand)] text-white hover:brightness-110"
+              className={`w-full py-4 rounded-xl font-black text-xl flex items-center justify-center gap-2 border-[3px] border-[var(--comic-outline)] shadow-[4px_4px_0_0_var(--comic-outline)] transition-all ${
+                isSwapping || !inputAmount || !walletAddress || isLoadingQuote
+                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  : "bg-[var(--brand)] text-white hover:shadow-[6px_6px_0_0_var(--comic-outline)] active:shadow-none active:translate-x-[4px] active:translate-y-[4px]"
               }`}
             >
               {isSwapping ? (

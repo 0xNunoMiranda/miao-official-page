@@ -1,19 +1,17 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Geist, Geist_Mono, Nunito } from "next/font/google"
+import { Fredoka } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 
-const _geist = Geist({ subsets: ["latin"] })
-const _geistMono = Geist_Mono({ subsets: ["latin"] })
-const nunito = Nunito({
+const fredoka = Fredoka({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800", "900"],
+  weight: ["300", "400", "500", "600", "700"],
 })
 
 export const metadata: Metadata = {
   title: "MIAO - The Green Cat Token",
-  description: "Primeiro vieram os cães, depois os sapos... Agora, as sombras pertencem ao $MIAO",
+  description: "First came the dogs, then the frogs, but the streets were never safe from the shadows.",
   generator: "v0.app",
   icons: {
     icon: [
@@ -40,7 +38,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="pt" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{
@@ -53,7 +51,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${nunito.className} antialiased`}>
+      <body className={`${fredoka.className} antialiased`}>
         {children}
         <Analytics />
       </body>

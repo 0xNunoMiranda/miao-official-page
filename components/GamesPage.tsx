@@ -70,7 +70,7 @@ const GamesPage: React.FC<GamesPageProps> = ({ onBack, walletState }) => {
     <button
       onClick={() => setActiveTab(id)}
       className={`
-        w-full text-left p-4 rounded-2xl font-black flex items-center gap-4 transition-all border-2 border-transparent btn-comic
+        w-full text-left p-4 rounded-2xl font-black flex items-center gap-4 transition-all border-2 border-transparent
         ${
           activeTab === id
             ? "bg-[var(--brand-green)] bg-opacity-10 text-[var(--brand-green)] border-[var(--brand-green)] border-opacity-20 border-b-4"
@@ -131,7 +131,7 @@ const GamesPage: React.FC<GamesPageProps> = ({ onBack, walletState }) => {
           <div className="flex items-center gap-4">
             <button
               onClick={onBack}
-              className="w-12 h-12 bg-[var(--bg-secondary)] rounded-xl border-b-4 border-[var(--bg-tertiary)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)] transition-all flex items-center justify-center active:border-b-0 active:translate-y-1 btn-comic"
+              className="w-12 h-12 bg-[var(--bg-secondary)] rounded-xl border-b-4 border-[var(--bg-tertiary)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)] transition-all flex items-center justify-center active:border-b-0 active:translate-y-1"
             >
               <ArrowLeft size={24} strokeWidth={3} />
             </button>
@@ -198,7 +198,7 @@ const GamesPage: React.FC<GamesPageProps> = ({ onBack, walletState }) => {
                     Battle against other players in this strategic card game! Collect cards and become the ultimate
                     champion.
                   </p>
-                  <button className="bg-white text-emerald-600 font-black px-8 py-4 rounded-xl border-b-4 border-emerald-200 hover:bg-emerald-50 active:border-b-0 active:translate-y-1 transition-all uppercase tracking-wide flex items-center gap-2 mx-auto md:mx-0 btn-comic">
+                  <button className="bg-white text-emerald-600 font-black px-8 py-4 rounded-xl border-b-4 border-emerald-200 hover:bg-emerald-50 active:border-b-0 active:translate-y-1 transition-all uppercase tracking-wide flex items-center gap-2 mx-auto md:mx-0">
                     <Gamepad2 size={20} /> Play Now
                   </button>
                 </div>
@@ -257,7 +257,7 @@ const GamesPage: React.FC<GamesPageProps> = ({ onBack, walletState }) => {
                       <span className="text-xs font-bold text-[var(--text-muted)] flex items-center gap-1">
                         <Gamepad2 size={14} /> itch.io
                       </span>
-                      <button className="bg-[var(--brand-green)] text-white px-6 py-2 rounded-xl font-black text-sm border-b-4 border-green-700 hover:brightness-110 active:border-b-0 active:translate-y-1 transition-all btn-comic">
+                      <button className="bg-[var(--brand-green)] text-white px-6 py-2 rounded-xl font-black text-sm border-b-4 border-green-700 hover:brightness-110 active:border-b-0 active:translate-y-1 transition-all">
                         PLAY
                       </button>
                     </div>
