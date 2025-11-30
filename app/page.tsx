@@ -1,12 +1,5 @@
 "use client"
 
-// Desabilitar completamente a pré-renderização estática
-export const dynamic = 'force-dynamic'
-export const revalidate = 0
-export const dynamicParams = true
-export const fetchCache = 'force-no-store'
-export const runtime = 'nodejs'
-
 import { useEffect, useState } from "react"
 import App from "../App"
 

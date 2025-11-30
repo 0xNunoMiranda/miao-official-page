@@ -22,6 +22,8 @@ const nextConfig = {
       },
     ]
   },
+  // Desabilitar output estático para forçar renderização dinâmica
+  output: undefined,
 }
 
 export default nextConfig
