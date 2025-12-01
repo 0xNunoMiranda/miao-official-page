@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useState, useEffect, useMemo } from "react"
 import {
   Copy,
   Check,
@@ -91,9 +91,83 @@ const Flame3DIcon: React.FC<{ className?: string }> = ({ className = "w-5 h-5" }
 
 const CONTRACT_ADDRESS = "8xpdiZ5GrnAdxpf7DSyZ1YXZxx6itvvoXPHZ4K2Epump"
 
+// Função para gerar URL de imagem NFT aleatória do LaunchMyNFT
+// Baseado no formato: https://gateway.pinit.io/cdn-cgi/image/format=auto/https://ap-assets.pinit.io/{collectionId}/{uuid}/{nftNumber}
+const generateRandomNFTImage = (): string => {
+  // ID da coleção Miao NFT do LaunchMyNFT (https://launchmynft.io/sol/20841)
+  const collectionId = "5bVgayL6649hBZACjWtoC1jziVrVxBg4HPRTQvShLaWd"
+  // UUID da coleção (fixo baseado no exemplo fornecido)
+  const uuid = "25d5498d-a12a-4878-87ee-813a56b20308"
+  // Gera número de NFT aleatório (assumindo que há NFTs numerados)
+  // Usando um range maior para ter mais variedade
+  const nftNumber = Math.floor(Math.random() * 10000) + 1
+  
+  return `https://gateway.pinit.io/cdn-cgi/image/format=auto/https://ap-assets.pinit.io/${collectionId}/${uuid}/${nftNumber}`
+}
+
 const Tokenomics: React.FC<TokenomicsProps> = ({ isChristmasMode = false, onSwapClick }) => {
   const [copied, setCopied] = useState(false)
   const [swapCardClicked, setSwapCardClicked] = useState(false)
+  
+  // Gera imagens aleatórias do LaunchMyNFT para o roadmap
+  const roadmapItemsWithNFTImages = useMemo(() => {
+    const baseItems = [
+      {
+        label: "1000 Holders",
+        color: "var(--duo-green)",
+        x: 60,
+        y: 280,
+      },
+      {
+        label: "250k MC",
+        color: "var(--duo-blue)",
+        x: 185,
+        y: 200,
+      },
+      {
+        label: "Games",
+        color: "var(--duo-orange)",
+        x: 310,
+        y: 280,
+      },
+      {
+        label: "Miao Tools",
+        color: "var(--duo-purple)",
+        x: 435,
+        y: 200,
+      },
+      {
+        label: "Android APP",
+        color: "var(--duo-pink)",
+        x: 560,
+        y: 280,
+      },
+      {
+        label: "+1500 Holders",
+        color: "var(--duo-yellow)",
+        x: 685,
+        y: 200,
+      },
+      {
+        label: "CMC/CG Lists",
+        color: "var(--duo-red)",
+        x: 810,
+        y: 280,
+      },
+      {
+        label: "More...",
+        color: "var(--duo-green)",
+        x: 935,
+        y: 60,
+      },
+    ]
+    
+    // Adiciona imagem NFT aleatória para cada item
+    return baseItems.map(item => ({
+      ...item,
+      img: generateRandomNFTImage(),
+    }))
+  }, []) // Array vazio para gerar apenas uma vez
 
   const copyToClipboard = async () => {
     try {
@@ -187,64 +261,6 @@ const Tokenomics: React.FC<TokenomicsProps> = ({ isChristmasMode = false, onSwap
     },
   ]
 
-  const roadmapItems = [
-    {
-      label: "1000 Holders",
-      img: "https://miaotoken.vip/wp-content/uploads/2025/10/22-1.png",
-      color: "var(--duo-green)",
-      x: 60,
-      y: 280,
-    },
-    {
-      label: "250k MC",
-      img: "https://miaotoken.vip/wp-content/uploads/2025/10/77.png",
-      color: "var(--duo-blue)",
-      x: 185,
-      y: 200,
-    },
-    {
-      label: "Games",
-      img: "https://miaotoken.vip/wp-content/uploads/2025/10/1010.png",
-      color: "var(--duo-orange)",
-      x: 310,
-      y: 280,
-    },
-    {
-      label: "Miao Tools",
-      img: "https://miaotoken.vip/wp-content/uploads/2025/10/1212.png",
-      color: "var(--duo-purple)",
-      x: 435,
-      y: 200,
-    },
-    {
-      label: "Android APP",
-      img: "https://miaotoken.vip/wp-content/uploads/2025/10/1313.png",
-      color: "var(--duo-pink)",
-      x: 560,
-      y: 280,
-    },
-    {
-      label: "+1500 Holders",
-      img: "https://miaotoken.vip/wp-content/uploads/2025/10/1111.png",
-      color: "var(--duo-yellow)",
-      x: 685,
-      y: 200,
-    },
-    {
-      label: "CMC/CG Lists",
-      img: "https://miaotoken.vip/wp-content/uploads/2025/10/1414.png",
-      color: "var(--duo-red)",
-      x: 810,
-      y: 280,
-    },
-    {
-      label: "More...",
-      img: "https://miaotoken.vip/wp-content/uploads/2025/10/22-1.png",
-      color: "var(--duo-green)",
-      x: 935,
-      y: 60,
-    },
-  ]
 
   return (
     <section id="overview" className="py-20">
@@ -444,7 +460,7 @@ const Tokenomics: React.FC<TokenomicsProps> = ({ isChristmasMode = false, onSwap
                   />
                 </svg>
 
-                {roadmapItems.map((item, i) => (
+                {roadmapItemsWithNFTImages.map((item, i) => (
                   <div
                     key={i}
                     className="absolute flex flex-col items-center gap-2"
