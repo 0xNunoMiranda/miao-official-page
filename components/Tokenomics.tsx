@@ -91,16 +91,13 @@ const Flame3DIcon: React.FC<{ className?: string }> = ({ className = "w-5 h-5" }
 
 const CONTRACT_ADDRESS = "8xpdiZ5GrnAdxpf7DSyZ1YXZxx6itvvoXPHZ4K2Epump"
 
-// Função para gerar URL de imagem NFT aleatória do LaunchMyNFT
+// Função para gerar URL de imagem NFT do LaunchMyNFT
 // Baseado no formato: https://gateway.pinit.io/cdn-cgi/image/format=auto/https://ap-assets.pinit.io/{collectionId}/{uuid}/{nftNumber}
-const generateRandomNFTImage = (): string => {
+const generateRandomNFTImageWithNumber = (nftNumber: number): string => {
   // ID da coleção Miao NFT do LaunchMyNFT (https://launchmynft.io/sol/20841)
   const collectionId = "5bVgayL6649hBZACjWtoC1jziVrVxBg4HPRTQvShLaWd"
   // UUID da coleção (fixo baseado no exemplo fornecido)
   const uuid = "25d5498d-a12a-4878-87ee-813a56b20308"
-  // Gera número de NFT aleatório (assumindo que há NFTs numerados)
-  // Usando um range maior para ter mais variedade
-  const nftNumber = Math.floor(Math.random() * 10000) + 1
   
   return `https://gateway.pinit.io/cdn-cgi/image/format=auto/https://ap-assets.pinit.io/${collectionId}/${uuid}/${nftNumber}`
 }
@@ -162,11 +159,22 @@ const Tokenomics: React.FC<TokenomicsProps> = ({ isChristmasMode = false, onSwap
       },
     ]
     
-    // Adiciona imagem NFT aleatória para cada item
-    return baseItems.map(item => ({
-      ...item,
-      img: generateRandomNFTImage(),
-    }))
+    // Adiciona imagem NFT aleatória única para cada item
+    // Usa um conjunto para garantir que não haja duplicatas
+    const usedNumbers = new Set<number>()
+    return baseItems.map(item => {
+      let nftNumber: number
+      // Gera um número único que não foi usado ainda
+      do {
+        nftNumber = Math.floor(Math.random() * 10000) + 1
+      } while (usedNumbers.has(nftNumber))
+      usedNumbers.add(nftNumber)
+      
+      return {
+        ...item,
+        img: generateRandomNFTImageWithNumber(nftNumber),
+      }
+    })
   }, []) // Array vazio para gerar apenas uma vez
 
   const copyToClipboard = async () => {
@@ -485,14 +493,14 @@ const Tokenomics: React.FC<TokenomicsProps> = ({ isChristmasMode = false, onSwap
                       style={{ borderColor: item.color }}
                     >
                       <img
-                        src={item.img || "/placeholder.svg"}
+                        src={item.img || generateRandomNFTImageWithNumber(Math.floor(Math.random() * 10000) + 1)}
                         alt={item.label}
                         className="w-full h-full object-cover"
                         onError={(e) => {
                           const target = e.target as HTMLImageElement
-                          if (target.src !== "/placeholder.svg") {
-                            target.src = "/placeholder.svg"
-                          }
+                          // Tenta gerar uma nova imagem NFT se a anterior falhar
+                          const newNftNumber = Math.floor(Math.random() * 10000) + 1
+                          target.src = generateRandomNFTImageWithNumber(newNftNumber)
                         }}
                         loading="lazy"
                       />
