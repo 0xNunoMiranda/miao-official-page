@@ -472,6 +472,13 @@ const Tokenomics: React.FC<TokenomicsProps> = ({ isChristmasMode = false, onSwap
                         src={item.img || "/placeholder.svg"}
                         alt={item.label}
                         className="w-full h-full object-cover"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement
+                          if (target.src !== "/placeholder.svg") {
+                            target.src = "/placeholder.svg"
+                          }
+                        }}
+                        loading="lazy"
                       />
                     </div>
 

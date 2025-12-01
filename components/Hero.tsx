@@ -211,9 +211,10 @@ const Hero: React.FC<HeroProps> = ({ onSwapChartClick, isChristmasMode = false, 
             {/* Logo */}
             <div className="flex justify-center lg:justify-end">
               <img
-                src="https://miaotoken.vip/wp-content/uploads/2025/11/miao-1.png"
+                src="/logo.png"
                 alt="$MIAO"
                 className="w-64 md:w-80 lg:w-96 h-auto"
+                loading="lazy"
               />
             </div>
 

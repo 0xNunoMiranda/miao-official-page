@@ -76,9 +76,10 @@ const Header: React.FC<HeaderProps> = ({
             {/* Logo */}
             <a href="#hero" className="flex items-center group">
               <img
-                src="https://miaotoken.vip/wp-content/uploads/2025/11/miao-1.png"
+                src="/logo.png"
                 alt="MIAO"
                 className="w-14 h-14 object-contain group-hover:scale-110 transition-transform"
+                loading="lazy"
               />
             </a>
 
@@ -205,9 +206,10 @@ const Header: React.FC<HeaderProps> = ({
             <div className="flex items-center justify-between p-5 border-b-2 border-[var(--border-color)]">
               <div className="flex items-center gap-3">
                 <img
-                  src="https://miaotoken.vip/wp-content/uploads/2025/11/miao-1.png"
+                  src="/logo.png"
                   alt="MIAO"
                   className="w-10 h-10 object-contain"
+                  loading="lazy"
                 />
                 <span className="text-xl font-black text-[var(--text-primary)]">{t("nav.menu")}</span>
               </div>
