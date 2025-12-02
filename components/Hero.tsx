@@ -208,7 +208,7 @@ const Hero: React.FC<HeroProps> = ({ onSwapChartClick, isChristmasMode = false, 
   }, [season])
 
   return (
-    <section id="hero" className="relative min-h-screen pt-28 pb-12 flex items-center overflow-x-hidden overflow-y-auto">
+    <section id="hero" className="relative min-h-screen pt-28 pb-12 flex items-center overflow-x-hidden overflow-y-auto" style={{ overflowY: 'auto', overflowX: 'hidden' }}>
       {/* Image Placeholder - Normal */}
       <img
         src="/assets/page/summer.jpg"

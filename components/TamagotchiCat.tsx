@@ -172,9 +172,11 @@ export default function TamagotchiCat() {
   }) => (
     <button
       onClick={onClick}
-      className="w-14 h-14 md:w-16 md:h-16 lg:w-18 lg:h-18 rounded-full bg-[var(--bg-primary)] hover:bg-[var(--bg-secondary)] border-2 border-[var(--border-color)] border-b-4 active:border-b-2 active:translate-y-[2px] flex items-center justify-center transition-all shadow-sm"
+      className="w-14 h-14 md:w-16 md:h-16 lg:w-18 lg:h-18 rounded-full bg-[var(--bg-primary)] hover:bg-[var(--bg-secondary)] border-2 border-[var(--border-color)] border-b-4 active:border-b-2 active:translate-y-[2px] flex items-center justify-center transition-all shadow-sm relative z-40"
       style={{
         boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+        position: 'relative',
+        zIndex: 40,
       }}
       title={label}
     >
@@ -190,20 +192,22 @@ export default function TamagotchiCat() {
       style={{ overflow: 'visible' }}
     >
       {/* Botões verticais à esquerda */}
-      <div className="flex flex-col items-center gap-3 md:gap-4 relative z-40 flex-shrink-0" style={{ position: 'relative' }}>
+      <div className="flex flex-col items-center gap-3 md:gap-4 relative z-40 flex-shrink-0" style={{ position: 'relative', pointerEvents: 'auto' }}>
         <ActionButton icon={Utensils} onClick={handleFeed} label={t("tamagotchi.feed")} />
         <ActionButton icon={Moon} onClick={handleSleep} label={t("tamagotchi.sleep")} />
         <ActionButton icon={Gamepad2} onClick={handlePlay} label={t("tamagotchi.play")} />
         <ActionButton icon={BookOpen} onClick={handleStudy} label={t("tamagotchi.study")} />
         <button
           onClick={() => setShowStats(!showStats)}
-          className={`w-14 h-14 md:w-16 md:h-16 lg:w-18 lg:h-18 rounded-full border-2 border-b-4 active:border-b-2 active:translate-y-[2px] flex items-center justify-center transition-all shadow-sm ${
+          className={`w-14 h-14 md:w-16 md:h-16 lg:w-18 lg:h-18 rounded-full border-2 border-b-4 active:border-b-2 active:translate-y-[2px] flex items-center justify-center transition-all shadow-sm relative z-40 ${
             showStats
               ? "bg-[var(--bg-secondary)] text-[var(--text-primary)] border-[var(--border-color)]"
               : "bg-[var(--bg-primary)] text-[var(--text-primary)] border-[var(--border-color)]"
           }`}
           style={{
             boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+            position: 'relative',
+            zIndex: 40,
           }}
           title={t("tamagotchi.stats")}
         >
