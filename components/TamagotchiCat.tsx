@@ -172,7 +172,7 @@ export default function TamagotchiCat() {
   }) => (
     <button
       onClick={onClick}
-      className="w-14 h-14 md:w-16 md:h-16 lg:w-18 lg:h-18 rounded-full bg-[var(--bg-primary)] hover:bg-[var(--bg-secondary)] border-2 border-[var(--border-color)] border-b-4 active:border-b-2 active:translate-y-[2px] flex items-center justify-center transition-all shadow-sm relative z-40"
+      className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 lg:w-18 lg:h-18 rounded-full bg-[var(--bg-primary)] hover:bg-[var(--bg-secondary)] border-2 border-[var(--border-color)] border-b-4 active:border-b-2 active:translate-y-[2px] flex items-center justify-center transition-all shadow-sm relative z-40"
       style={{
         boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
         position: 'relative',
@@ -180,26 +180,26 @@ export default function TamagotchiCat() {
       }}
       title={label}
     >
-      <Icon size={20} className="text-[var(--text-primary)] md:w-5 md:h-5 lg:w-6 lg:h-6" />
+      <Icon size={18} className="text-[var(--text-primary)] sm:w-5 sm:h-5 md:w-5 md:h-5 lg:w-6 lg:h-6" />
     </button>
   )
 
   return (
     <div
-      className={`flex flex-row items-center justify-center lg:justify-start gap-1 sm:gap-2 md:gap-3 transition-all duration-700 ease-out relative mx-auto lg:mx-0 ${
+      className={`flex flex-row items-center justify-center lg:justify-start gap-1 sm:gap-2 md:gap-3 transition-all duration-700 ease-out relative mx-auto lg:mx-0 w-full max-w-full ${
         isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
       }`}
-      style={{ overflow: 'visible' }}
+      style={{ overflow: 'visible', padding: '0 8px' }}
     >
       {/* Botões verticais à esquerda */}
-      <div className="flex flex-col items-center gap-3 md:gap-4 relative z-40 flex-shrink-0" style={{ position: 'relative', pointerEvents: 'auto' }}>
+      <div className="flex flex-col items-center gap-2 sm:gap-3 md:gap-4 relative z-40 flex-shrink-0" style={{ position: 'relative', pointerEvents: 'auto' }}>
         <ActionButton icon={Utensils} onClick={handleFeed} label={t("tamagotchi.feed")} />
         <ActionButton icon={Moon} onClick={handleSleep} label={t("tamagotchi.sleep")} />
         <ActionButton icon={Gamepad2} onClick={handlePlay} label={t("tamagotchi.play")} />
         <ActionButton icon={BookOpen} onClick={handleStudy} label={t("tamagotchi.study")} />
         <button
           onClick={() => setShowStats(!showStats)}
-          className={`w-14 h-14 md:w-16 md:h-16 lg:w-18 lg:h-18 rounded-full border-2 border-b-4 active:border-b-2 active:translate-y-[2px] flex items-center justify-center transition-all shadow-sm relative z-40 ${
+          className={`w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 lg:w-18 lg:h-18 rounded-full border-2 border-b-4 active:border-b-2 active:translate-y-[2px] flex items-center justify-center transition-all shadow-sm relative z-40 ${
             showStats
               ? "bg-[var(--bg-secondary)] text-[var(--text-primary)] border-[var(--border-color)]"
               : "bg-[var(--bg-primary)] text-[var(--text-primary)] border-[var(--border-color)]"
@@ -211,7 +211,7 @@ export default function TamagotchiCat() {
           }}
           title={t("tamagotchi.stats")}
         >
-          <BarChart3 size={20} className="md:w-5 md:h-5 lg:w-6 lg:h-6" />
+          <BarChart3 size={18} className="sm:w-5 sm:h-5 md:w-5 md:h-5 lg:w-6 lg:h-6" />
         </button>
       </div>
 
@@ -221,6 +221,7 @@ export default function TamagotchiCat() {
         style={{
           animation: "tamagotchi-float 3s ease-in-out infinite",
           position: 'relative',
+          maxWidth: 'calc(100% - 80px)',
         }}
         onClick={handleClick}
       >
@@ -235,8 +236,8 @@ export default function TamagotchiCat() {
         <img
           src={catEmotions[currentEmotion].src || "/placeholder.svg"}
           alt={`Miao ${catEmotions[currentEmotion].name}`}
-          className="relative w-full max-w-[280px] sm:max-w-[320px] md:max-w-[400px] lg:max-w-[500px] xl:max-w-[580px] h-auto object-contain mx-auto"
-          style={{ maxHeight: '90vh' }}
+          className="relative w-full max-w-[200px] sm:max-w-[280px] md:max-w-[350px] lg:max-w-[450px] xl:max-w-[550px] h-auto object-contain mx-auto"
+          style={{ maxHeight: 'calc(100vh - 200px)' }}
           draggable={false}
         />
       </div>
