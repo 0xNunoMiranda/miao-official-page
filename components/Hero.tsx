@@ -74,11 +74,21 @@ const Hero: React.FC<HeroProps> = ({ onSwapChartClick, isChristmasMode = false, 
     winter: 0
   }))
   const [imageOpacity, setImageOpacity] = useState(() => {
-    if (season === "winter") return { normal: 0, fall: 0, winter: 1 }
-    if (season === "fall") return { normal: 0, fall: 1, winter: 0 }
-    return { normal: 1, fall: 0, winter: 0 }
+    if (season === "winter") return { normal: 0, fall: 0, winter: 0 }
+    if (season === "fall") return { normal: 0, fall: 0, winter: 0 }
+    return { normal: 0, fall: 0, winter: 0 }
+  })
+  const [imageLoaded, setImageLoaded] = useState({
+    normal: false,
+    fall: false,
+    winter: false
   })
   const [videoReady, setVideoReady] = useState({
+    normal: false,
+    fall: false,
+    winter: false
+  })
+  const [videoError, setVideoError] = useState({
     normal: false,
     fall: false,
     winter: false
@@ -121,9 +131,47 @@ const Hero: React.FC<HeroProps> = ({ onSwapChartClick, isChristmasMode = false, 
   }, [])
 
 
+  // Mostrar imagem da season atual quando carregar ou quando vídeo falhar
+  useEffect(() => {
+    const currentSeasonImage = season === "winter" ? "winter" : season === "fall" ? "fall" : "normal"
+    
+    // Se a imagem já carregou, mostrar a imagem com fade in (a menos que o vídeo esteja pronto e sem erro)
+    if (imageLoaded[currentSeasonImage] && (!videoReady[currentSeasonImage] || videoError[currentSeasonImage])) {
+      setTimeout(() => {
+        if (season === "winter") {
+          setImageOpacity({ normal: 0, fall: 0, winter: 1 })
+        } else if (season === "fall") {
+          setImageOpacity({ normal: 0, fall: 1, winter: 0 })
+        } else {
+          setImageOpacity({ normal: 1, fall: 0, winter: 0 })
+        }
+      }, 100)
+    }
+  }, [season, imageLoaded, videoError, videoReady])
+
   // Garantir que os vídeos estejam sempre reproduzindo
   // Handle video loading and transition
   useEffect(() => {
+    const handleVideoError = (mode: "normal" | "fall" | "winter") => {
+      setVideoError(prev => ({
+        ...prev,
+        [mode]: true
+      }))
+      // Se o vídeo falhar, garantir que a imagem apareça com fade in
+      if (season === mode) {
+        setTimeout(() => {
+          setImageOpacity(prev => ({
+            ...prev,
+            [mode]: 1
+          }))
+          setVideoOpacity(prev => ({
+            ...prev,
+            [mode]: 0
+          }))
+        }, 100)
+      }
+    }
+
     const handleVideoCanPlay = (mode: "normal" | "fall" | "winter") => {
       let video: HTMLVideoElement | null = null
       if (mode === "normal") video = videoRef.current
@@ -137,11 +185,14 @@ const Hero: React.FC<HeroProps> = ({ onSwapChartClick, isChristmasMode = false, 
       
       // Start playing video
       if (video) {
-        video.play().catch(() => {})
+        video.play().catch(() => {
+          // Se falhar ao reproduzir, mostrar imagem
+          handleVideoError(mode)
+        })
       }
       
-      // Only transition if this is the active season
-      if (season === mode) {
+      // Only transition if this is the active season and video didn't error
+      if (season === mode && !videoError[mode]) {
         // Fade out image and fade in video with smooth transition
         setTimeout(() => {
           setImageOpacity(prev => ({
@@ -162,17 +213,29 @@ const Hero: React.FC<HeroProps> = ({ onSwapChartClick, isChristmasMode = false, 
 
     // Reset all opacities when season changes
     setVideoOpacity({ normal: 0, fall: 0, winter: 0 })
-    if (season === "winter") {
-      setImageOpacity({ normal: 0, fall: 0, winter: 1 })
-    } else if (season === "fall") {
-      setImageOpacity({ normal: 0, fall: 1, winter: 0 })
+    // Mostrar imagem da season atual enquanto o vídeo carrega (sempre mostrar inicialmente se já carregou)
+    const currentSeasonImage = season === "winter" ? "winter" : season === "fall" ? "fall" : "normal"
+    // Se a imagem já carregou, mostrar com fade in
+    if (imageLoaded[currentSeasonImage]) {
+      setTimeout(() => {
+        if (season === "winter") {
+          setImageOpacity({ normal: 0, fall: 0, winter: 1 })
+        } else if (season === "fall") {
+          setImageOpacity({ normal: 0, fall: 1, winter: 0 })
+        } else {
+          setImageOpacity({ normal: 1, fall: 0, winter: 0 })
+        }
+      }, 100)
     } else {
-      setImageOpacity({ normal: 1, fall: 0, winter: 0 })
+      // Se a imagem ainda não carregou, começar com opacidade 0 (será mostrada quando carregar)
+      setImageOpacity({ normal: 0, fall: 0, winter: 0 })
     }
 
     // Load and play video for current season
     if (season === "normal" && videoNormal) {
       videoNormal.load() // Force reload
+      // Adicionar handler de erro
+      videoNormal.addEventListener('error', () => handleVideoError("normal"), { once: true })
       if (videoNormal.readyState >= 3) {
         handleVideoCanPlay("normal")
       } else {
@@ -180,6 +243,8 @@ const Hero: React.FC<HeroProps> = ({ onSwapChartClick, isChristmasMode = false, 
       }
     } else if (season === "fall" && videoFall) {
       videoFall.load() // Force reload
+      // Adicionar handler de erro
+      videoFall.addEventListener('error', () => handleVideoError("fall"), { once: true })
       if (videoFall.readyState >= 3) {
         handleVideoCanPlay("fall")
       } else {
@@ -187,6 +252,8 @@ const Hero: React.FC<HeroProps> = ({ onSwapChartClick, isChristmasMode = false, 
       }
     } else if (season === "winter" && videoWinter) {
       videoWinter.load() // Force reload
+      // Adicionar handler de erro
+      videoWinter.addEventListener('error', () => handleVideoError("winter"), { once: true })
       if (videoWinter.readyState >= 3) {
         handleVideoCanPlay("winter")
       } else {
@@ -197,15 +264,18 @@ const Hero: React.FC<HeroProps> = ({ onSwapChartClick, isChristmasMode = false, 
     return () => {
       if (videoNormal) {
         videoNormal.removeEventListener('canplaythrough', () => handleVideoCanPlay("normal"))
+        videoNormal.removeEventListener('error', () => handleVideoError("normal"))
       }
       if (videoFall) {
         videoFall.removeEventListener('canplaythrough', () => handleVideoCanPlay("fall"))
+        videoFall.removeEventListener('error', () => handleVideoError("fall"))
       }
       if (videoWinter) {
         videoWinter.removeEventListener('canplaythrough', () => handleVideoCanPlay("winter"))
+        videoWinter.removeEventListener('error', () => handleVideoError("winter"))
       }
     }
-  }, [season])
+  }, [season, videoError])
 
   return (
     <section id="hero" className="relative min-h-screen pt-28 pb-12 flex items-center overflow-x-hidden overflow-y-auto" style={{ overflowY: 'auto', overflowX: 'hidden' }}>
@@ -220,6 +290,15 @@ const Hero: React.FC<HeroProps> = ({ onSwapChartClick, isChristmasMode = false, 
           opacity: imageOpacity.normal,
           pointerEvents: 'none'
         }}
+        onLoad={() => {
+          setImageLoaded(prev => ({ ...prev, normal: true }))
+          // Se for a season atual, mostrar imagem com fade in inicialmente
+          if (season === "normal") {
+            setTimeout(() => {
+              setImageOpacity(prev => ({ ...prev, normal: 1 }))
+            }, 100)
+          }
+        }}
       />
       
       {/* Image Placeholder - Fall */}
@@ -233,6 +312,15 @@ const Hero: React.FC<HeroProps> = ({ onSwapChartClick, isChristmasMode = false, 
           opacity: imageOpacity.fall,
           pointerEvents: 'none'
         }}
+        onLoad={() => {
+          setImageLoaded(prev => ({ ...prev, fall: true }))
+          // Se for a season atual, mostrar imagem com fade in inicialmente
+          if (season === "fall") {
+            setTimeout(() => {
+              setImageOpacity(prev => ({ ...prev, fall: 1 }))
+            }, 100)
+          }
+        }}
       />
       
       {/* Image Placeholder - Winter */}
@@ -245,6 +333,15 @@ const Hero: React.FC<HeroProps> = ({ onSwapChartClick, isChristmasMode = false, 
           objectPosition: 'left top',
           opacity: imageOpacity.winter,
           pointerEvents: 'none'
+        }}
+        onLoad={() => {
+          setImageLoaded(prev => ({ ...prev, winter: true }))
+          // Se for a season atual, mostrar imagem com fade in inicialmente
+          if (season === "winter") {
+            setTimeout(() => {
+              setImageOpacity(prev => ({ ...prev, winter: 1 }))
+            }, 100)
+          }
         }}
       />
       
@@ -261,6 +358,13 @@ const Hero: React.FC<HeroProps> = ({ onSwapChartClick, isChristmasMode = false, 
           objectPosition: 'left top',
           opacity: videoOpacity.normal,
           pointerEvents: videoOpacity.normal === 0 ? 'none' : 'auto'
+        }}
+        onError={() => {
+          setVideoError(prev => ({ ...prev, normal: true }))
+          if (season === "normal") {
+            setImageOpacity(prev => ({ ...prev, normal: 1 }))
+            setVideoOpacity(prev => ({ ...prev, normal: 0 }))
+          }
         }}
       >
         <source 
@@ -283,6 +387,13 @@ const Hero: React.FC<HeroProps> = ({ onSwapChartClick, isChristmasMode = false, 
           opacity: videoOpacity.fall,
           pointerEvents: videoOpacity.fall === 0 ? 'none' : 'auto'
         }}
+        onError={() => {
+          setVideoError(prev => ({ ...prev, fall: true }))
+          if (season === "fall") {
+            setImageOpacity(prev => ({ ...prev, fall: 1 }))
+            setVideoOpacity(prev => ({ ...prev, fall: 0 }))
+          }
+        }}
       >
         <source 
           src="/assets/page/bg_video_home_section_fall.mp4"
@@ -303,6 +414,13 @@ const Hero: React.FC<HeroProps> = ({ onSwapChartClick, isChristmasMode = false, 
           objectPosition: 'left top',
           opacity: videoOpacity.winter,
           pointerEvents: videoOpacity.winter === 0 ? 'none' : 'auto'
+        }}
+        onError={() => {
+          setVideoError(prev => ({ ...prev, winter: true }))
+          if (season === "winter") {
+            setImageOpacity(prev => ({ ...prev, winter: 1 }))
+            setVideoOpacity(prev => ({ ...prev, winter: 0 }))
+          }
         }}
       >
         <source 
