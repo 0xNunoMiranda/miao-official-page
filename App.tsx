@@ -17,6 +17,7 @@ import ToolsPage from "@/components/ToolsPage"
 import WalletModal from "@/components/WalletModal"
 import SwapModal from "@/components/SwapModal"
 import SwapChartModal from "@/components/SwapChartModal"
+import WhitepaperModal from "@/components/WhitepaperModal"
 import SnowEffect from "@/components/SnowEffect"
 import LeafEffect from "@/components/LeafEffect"
 import SeasonSelector, { type Season } from "@/components/SeasonSelector"
@@ -204,6 +205,11 @@ const AppContent: React.FC = () => {
         onClose={() => setIsSwapChartModalOpen(false)}
         walletBalance={walletState.balance}
         walletAddress={walletState.address || undefined}
+      />
+
+      <WhitepaperModal
+        isOpen={showWhitepaper}
+        onClose={() => setShowWhitepaper(false)}
       />
     </div>
   )
