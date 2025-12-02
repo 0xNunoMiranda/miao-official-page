@@ -17,9 +17,14 @@ import {
   FileX,
 } from "lucide-react"
 import SnowCap from "./SnowCap"
+import SnowEffect from "./SnowEffect"
+import LeafEffect from "./LeafEffect"
+import { useLanguage } from "../lib/language-context"
+import { type Season } from "./SeasonSelector"
 
 interface TokenomicsProps {
   isChristmasMode?: boolean
+  season?: Season
   onSwapClick?: () => void
 }
 
@@ -91,91 +96,81 @@ const Flame3DIcon: React.FC<{ className?: string }> = ({ className = "w-5 h-5" }
 
 const CONTRACT_ADDRESS = "8xpdiZ5GrnAdxpf7DSyZ1YXZxx6itvvoXPHZ4K2Epump"
 
-// Função para gerar URL de imagem NFT do LaunchMyNFT
-// Baseado no formato: https://gateway.pinit.io/cdn-cgi/image/format=auto/https://ap-assets.pinit.io/{collectionId}/{uuid}/{nftNumber}
-const generateRandomNFTImageWithNumber = (nftNumber: number): string => {
-  // ID da coleção Miao NFT do LaunchMyNFT (https://launchmynft.io/sol/20841)
-  const collectionId = "5bVgayL6649hBZACjWtoC1jziVrVxBg4HPRTQvShLaWd"
-  // UUID da coleção (fixo baseado no exemplo fornecido)
-  const uuid = "25d5498d-a12a-4878-87ee-813a56b20308"
-  
-  return `https://gateway.pinit.io/cdn-cgi/image/format=auto/https://ap-assets.pinit.io/${collectionId}/${uuid}/${nftNumber}`
-}
+// URL base para imagens NFT do LaunchMyNFT (mesma usada no NFTSection)
+const NFT_BASE_URL =
+  "https://gateway.pinit.io/cdn-cgi/image/format=auto/https://ap-assets.pinit.io/5bVgayL6649hBZACjWtoC1jziVrVxBg4HPRTQvShLaWd/25d5498d-a12a-4878-87ee-813a56b20308"
 
-const Tokenomics: React.FC<TokenomicsProps> = ({ isChristmasMode = false, onSwapClick }) => {
+// IDs disponíveis dos NFTs (1-100, mesmo range usado no NFTSection)
+const NFT_IDS = Array.from({ length: 100 }, (_, i) => i + 1)
+
+const Tokenomics: React.FC<TokenomicsProps> = ({ isChristmasMode = false, season = "normal", onSwapClick }) => {
+  const { t } = useLanguage()
   const [copied, setCopied] = useState(false)
   const [swapCardClicked, setSwapCardClicked] = useState(false)
   
-  // Gera imagens aleatórias do LaunchMyNFT para o roadmap
+  // Gera imagens aleatórias do LaunchMyNFT para o roadmap usando IDs reais (1-100)
   const roadmapItemsWithNFTImages = useMemo(() => {
     const baseItems = [
       {
-        label: "1000 Holders",
+        label: t("tokenomics.roadmap.1000Holders"),
         color: "var(--duo-green)",
         x: 60,
         y: 280,
       },
       {
-        label: "250k MC",
+        label: t("tokenomics.roadmap.250kMC"),
         color: "var(--duo-blue)",
         x: 185,
         y: 200,
       },
       {
-        label: "Games",
+        label: t("tokenomics.roadmap.games"),
         color: "var(--duo-orange)",
         x: 310,
         y: 280,
       },
       {
-        label: "Miao Tools",
+        label: t("tokenomics.roadmap.miaoTools"),
         color: "var(--duo-purple)",
         x: 435,
         y: 200,
       },
       {
-        label: "Android APP",
+        label: t("tokenomics.roadmap.androidApp"),
         color: "var(--duo-pink)",
         x: 560,
         y: 280,
       },
       {
-        label: "+1500 Holders",
+        label: t("tokenomics.roadmap.1500Holders"),
         color: "var(--duo-yellow)",
         x: 685,
         y: 200,
       },
       {
-        label: "CMC/CG Lists",
+        label: t("tokenomics.roadmap.cmcLists"),
         color: "var(--duo-red)",
         x: 810,
         y: 280,
       },
       {
-        label: "More...",
+        label: t("tokenomics.roadmap.more"),
         color: "var(--duo-green)",
         x: 935,
         y: 60,
       },
     ]
     
-    // Adiciona imagem NFT aleatória única para cada item
-    // Usa um conjunto para garantir que não haja duplicatas
-    const usedNumbers = new Set<number>()
-    return baseItems.map(item => {
-      let nftNumber: number
-      // Gera um número único que não foi usado ainda
-      do {
-        nftNumber = Math.floor(Math.random() * 10000) + 1
-      } while (usedNumbers.has(nftNumber))
-      usedNumbers.add(nftNumber)
-      
-      return {
-        ...item,
-        img: generateRandomNFTImageWithNumber(nftNumber),
-      }
-    })
-  }, []) // Array vazio para gerar apenas uma vez
+    // Seleciona IDs únicos aleatórios do array de NFTs disponíveis (1-100)
+    const shuffledIds = [...NFT_IDS].sort(() => Math.random() - 0.5)
+    const selectedIds = shuffledIds.slice(0, baseItems.length)
+    
+    // Adiciona imagem NFT para cada item usando IDs reais
+    return baseItems.map((item, index) => ({
+      ...item,
+      img: `${NFT_BASE_URL}/${selectedIds[index]}`,
+    }))
+  }, [t]) // Inclui t nas dependências para atualizar quando o idioma mudar
 
   const copyToClipboard = async () => {
     try {
@@ -240,29 +235,29 @@ const Tokenomics: React.FC<TokenomicsProps> = ({ isChristmasMode = false, onSwap
 
   const howToBuySteps = [
     {
-      title: "Buy Solana",
-      desc: "Binance, Coinbase, Kraken",
+      title: t("tokenomics.step1"),
+      desc: t("tokenomics.step1Desc"),
       color: "bg-[var(--duo-blue)]",
       shadow: "border-[var(--btn-shadow-blue)]",
       icon: ShoppingCart,
     },
     {
-      title: "Get Phantom",
-      desc: "Install wallet",
+      title: t("tokenomics.step2"),
+      desc: t("tokenomics.step2Desc"),
       color: "bg-[var(--duo-purple)]",
       shadow: "border-[var(--btn-shadow-purple)]",
       icon: Wallet,
     },
     {
-      title: "Send SOL",
-      desc: "Transfer from exchange",
+      title: t("tokenomics.step3"),
+      desc: t("tokenomics.step3Desc"),
       color: "bg-[var(--duo-orange)]",
       shadow: "border-[var(--btn-shadow-orange)]",
       icon: Download,
     },
     {
-      title: "Swap to $MIAO",
-      desc: "Use our Swap",
+      title: t("tokenomics.swapToMiao"),
+      desc: t("tokenomics.useOurSwap"),
       color: "bg-[var(--duo-green)]",
       shadow: "border-[var(--btn-shadow)]",
       icon: ArrowRightLeft,
@@ -276,34 +271,45 @@ const Tokenomics: React.FC<TokenomicsProps> = ({ isChristmasMode = false, onSwap
         {/* Tokenomics + How to Buy Grid */}
         <div className="grid lg:grid-cols-2 gap-6 mb-8">
           {/* Tokenomics Card */}
-          <div className="bg-[var(--bg-secondary)]/95 backdrop-blur-sm rounded-3xl p-6 border-2 border-[var(--border-color)] border-b-4 relative overflow-visible">
+          <div className="bg-[var(--bg-secondary)]/95 backdrop-blur-sm rounded-3xl p-4 md:p-6 border-2 border-[var(--border-color)] border-b-4 relative overflow-visible">
+            {isChristmasMode && (
+              <div className="absolute -inset-4 rounded-3xl pointer-events-none z-[20]">
+                <SnowEffect isActive={isChristmasMode} borderRadius="1.5rem" />
+              </div>
+            )}
+            {season === "fall" && (
+              <div className="absolute -inset-4 rounded-3xl pointer-events-none z-[20]">
+                <LeafEffect isActive={season === "fall"} />
+              </div>
+            )}
             <SnowCap className="h-10" visible={isChristmasMode} />
-            <div className="absolute -top-3 right-0 w-32 h-32 md:w-40 md:h-40 z-0 pointer-events-none">
+            <div className="absolute -top-2 right-0 w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 pointer-events-none z-[25]">
               <img
                 src="/images/miao-confident.png"
                 alt="MIAO confident"
-                className="w-full h-full object-cover object-top opacity-90"
+                className="w-full h-full object-cover object-top"
                 style={{ 
                   clipPath: 'inset(0 0 30% 0)',
                   objectPosition: 'top',
                   maskImage: 'linear-gradient(to bottom, black 0%, black 50%, rgba(0,0,0,0.8) 60%, rgba(0,0,0,0.4) 75%, transparent 100%)',
-                  WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 50%, rgba(0,0,0,0.8) 60%, rgba(0,0,0,0.4) 75%, transparent 100%)'
+                  WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 50%, rgba(0,0,0,0.8) 60%, rgba(0,0,0,0.4) 75%, transparent 100%)',
+                  opacity: 1
                 }}
               />
             </div>
-            <h2 className="text-2xl md:text-3xl font-black text-[var(--text-primary)] mb-6 relative z-10">Tokenomics</h2>
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-[var(--text-primary)] mb-4 md:mb-6 relative z-[30] pr-20 sm:pr-0">Tokenomics</h2>
 
-            <div className="grid grid-cols-3 gap-2.5 relative z-10">
+            <div className="grid grid-cols-3 gap-2 sm:gap-2.5 relative z-[30]">
               {tokenomicsItems.map((item, i) => {
                 const IconComponent = item.icon
                 const isLiquidityBurned = item.k === "Liquidity Burned"
                 return (
                   <div
                     key={i}
-                    className="aspect-square bg-[var(--bg-primary)] rounded-xl p-2.5 flex flex-col items-center justify-center text-center cursor-pointer border-2 border-b-4 border-[var(--border-color)] hover:scale-105 active:border-b-2 active:translate-y-[2px] transition-all"
+                    className="aspect-square bg-[var(--bg-primary)] rounded-xl p-1.5 sm:p-2 md:p-2.5 flex flex-col items-center justify-center text-center cursor-pointer border-2 border-b-4 border-[var(--btn-shadow)] hover:scale-105 active:border-b-2 active:translate-y-[2px] transition-all relative z-[30]"
                   >
                     <div
-                      className={`w-12 h-12 rounded-xl flex items-center justify-center mb-2 border-2 ${item.shadow} icon-3d relative`}
+                      className={`w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center mb-1 sm:mb-2 border-2 ${item.shadow} icon-3d relative`}
                       style={{
                         transform: 'perspective(1000px) rotateX(8deg) rotateY(-8deg)',
                         transformStyle: 'preserve-3d',
@@ -316,10 +322,10 @@ const Tokenomics: React.FC<TokenomicsProps> = ({ isChristmasMode = false, onSwap
                       }}
                     >
                       {isLiquidityBurned ? (
-                        <Flame3DIcon className="w-7 h-7 relative z-10" />
+                        <Flame3DIcon className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 relative z-10" />
                       ) : (
                         <IconComponent 
-                          className="w-7 h-7 text-white relative z-10" 
+                          className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-white relative z-10" 
                           strokeWidth={2.5}
                           style={{ 
                             transform: 'translateZ(8px)',
@@ -328,10 +334,10 @@ const Tokenomics: React.FC<TokenomicsProps> = ({ isChristmasMode = false, onSwap
                         />
                       )}
                     </div>
-                    <span className="font-bold text-[var(--text-secondary)] text-xs uppercase tracking-tight leading-tight">
+                    <span className="font-bold text-[var(--text-secondary)] text-[10px] sm:text-xs uppercase tracking-tight leading-tight px-0.5">
                       {item.k}
                     </span>
-                    <span className="font-black text-[var(--duo-green)] text-sm leading-tight">{item.v}</span>
+                    <span className="font-black text-[var(--duo-green)] text-xs sm:text-sm leading-tight px-0.5">{item.v}</span>
                   </div>
                 )
               })}
@@ -339,24 +345,35 @@ const Tokenomics: React.FC<TokenomicsProps> = ({ isChristmasMode = false, onSwap
           </div>
 
           {/* How to Buy Card */}
-          <div className="bg-[var(--bg-secondary)]/95 backdrop-blur-sm rounded-3xl p-6 border-2 border-[var(--border-color)] border-b-4 relative overflow-visible">
+          <div className="bg-[var(--bg-secondary)]/95 backdrop-blur-sm rounded-3xl p-4 md:p-6 border-2 border-[var(--border-color)] border-b-4 relative overflow-visible">
+            {isChristmasMode && (
+              <div className="absolute -inset-4 rounded-3xl pointer-events-none z-[20]">
+                <SnowEffect isActive={isChristmasMode} borderRadius="1.5rem" />
+              </div>
+            )}
+            {season === "fall" && (
+              <div className="absolute -inset-4 rounded-3xl pointer-events-none z-[20]">
+                <LeafEffect isActive={season === "fall"} />
+              </div>
+            )}
             <SnowCap className="h-10" visible={isChristmasMode} />
-            <div className="absolute -top-3 right-0 w-32 h-32 md:w-40 md:h-40 z-0 pointer-events-none">
+            <div className="absolute -top-2 right-0 w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 pointer-events-none z-[25]">
               <img
                 src="/images/miao-asking.png"
                 alt="MIAO asking"
-                className="w-full h-full object-cover object-top opacity-90"
+                className="w-full h-full object-cover object-top"
                 style={{ 
                   clipPath: 'inset(0 0 30% 0)',
                   objectPosition: 'top',
                   maskImage: 'linear-gradient(to bottom, black 0%, black 50%, rgba(0,0,0,0.8) 60%, rgba(0,0,0,0.4) 75%, transparent 100%)',
-                  WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 50%, rgba(0,0,0,0.8) 60%, rgba(0,0,0,0.4) 75%, transparent 100%)'
+                  WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 50%, rgba(0,0,0,0.8) 60%, rgba(0,0,0,0.4) 75%, transparent 100%)',
+                  opacity: 1
                 }}
               />
             </div>
-            <h2 className="text-2xl md:text-3xl font-black text-[var(--text-primary)] mb-6 relative z-10">How to Buy</h2>
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-[var(--text-primary)] mb-4 md:mb-6 relative z-[30] pr-20 sm:pr-0">How to Buy</h2>
 
-            <div className="grid grid-cols-2 gap-3 relative z-10">
+            <div className="grid grid-cols-2 gap-2 sm:gap-3 relative z-[30]">
               {howToBuySteps.map((step, i) => {
                 const IconComponent = step.icon
                 const numberImage = `/assets/numbers/${i + 1}.png`
@@ -373,34 +390,34 @@ const Tokenomics: React.FC<TokenomicsProps> = ({ isChristmasMode = false, onSwap
                           }
                         : undefined
                     }
-                    className={`bg-[var(--bg-primary)]/70 backdrop-blur-sm p-4 rounded-2xl border-2 border-b-4 transition-all ${
+                    className={`bg-[var(--bg-primary)]/70 backdrop-blur-sm p-3 sm:p-4 rounded-2xl border-2 border-b-4 transition-all relative z-20 ${
                       isSwapStep && onSwapClick
                         ? `cursor-pointer hover:scale-[1.02] active:border-b-2 active:translate-y-[2px] ${
                             swapCardClicked
                               ? "bg-[var(--duo-green)]/30 border-[var(--duo-green)] border-b-[var(--btn-shadow)]"
                               : "border-[var(--duo-green)] border-b-[var(--btn-shadow)] shadow-[0_4px_0_var(--btn-shadow)] hover:shadow-[0_6px_0_var(--btn-shadow)]"
                           }`
-                        : "border-[var(--border-color)] hover:scale-[1.02] active:border-b-2 active:translate-y-[2px]"
+                        : "border-[var(--btn-shadow)] hover:scale-[1.02] active:border-b-2 active:translate-y-[2px]"
                     }`}
                   >
-                    <div className="flex items-start gap-3">
-                      <div className="flex-shrink-0 relative">
+                    <div className="flex items-start gap-2 sm:gap-3">
+                      <div className="flex-shrink-0 relative z-10">
                         <img
                           src={numberImage}
                           alt={`Step ${i + 1}`}
-                          className="w-12 h-12 object-contain"
+                          className="w-10 h-10 sm:w-12 sm:h-12 object-contain"
                         />
                       </div>
-                      <div className="flex-1 min-w-0 pt-1">
-                        <h4 className="font-black text-base text-[var(--text-primary)] leading-tight mb-1">{step.title}</h4>
-                        <p className="text-[var(--text-secondary)] font-medium text-sm leading-tight">
+                      <div className="flex-1 min-w-0 pt-0.5 sm:pt-1">
+                        <h4 className="font-black text-sm sm:text-base text-[var(--text-primary)] leading-tight mb-0.5 sm:mb-1">{step.title}</h4>
+                        <p className="text-[var(--text-secondary)] font-medium text-xs sm:text-sm leading-tight">
                           {step.desc}
                         </p>
                       </div>
                       <div
-                        className={`flex-shrink-0 w-10 h-10 ${step.color} rounded-xl text-white flex items-center justify-center border-2 ${step.shadow}`}
+                        className={`flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 ${step.color} rounded-xl text-white flex items-center justify-center border-2 ${step.shadow}`}
                       >
-                        <IconComponent className="w-5 h-5" strokeWidth={2.5} />
+                        <IconComponent className="w-4 h-4 sm:w-5 sm:h-5" strokeWidth={2.5} />
                       </div>
                     </div>
                   </div>
@@ -431,23 +448,39 @@ const Tokenomics: React.FC<TokenomicsProps> = ({ isChristmasMode = false, onSwap
                 </button>
               </div>
             </div>
-            {copied && <p className="text-center text-white font-black mt-3 text-lg animate-bounce">Copied! MEOW~</p>}
+            {copied && <p className="text-center text-white font-black mt-3 text-lg animate-bounce">{t("tokenomics.copiedMeow")}</p>}
           </div>
         </div>
 
         <div className="text-center">
-          <h2 className="text-3xl md:text-4xl font-black text-[var(--text-primary)] mb-10">Roadmap</h2>
+          <h2 className="text-3xl md:text-4xl font-black text-[var(--text-primary)] mb-10">{t("tokenomics.roadmapTitle")}</h2>
 
           <div className="w-full overflow-x-auto pb-6 custom-scrollbar">
             <div 
               className="min-w-[1000px] w-full max-w-[1200px] mx-auto rounded-3xl p-8 border-2 border-[var(--border-color)] border-b-4 relative overflow-hidden"
               style={{
-                backgroundImage: `url('/assets/${isChristmasMode ? 'bg_roadmap_christmas.jpg' : 'bg_roadmap.jpg'}')`,
+                backgroundImage: `url('/assets/${
+                  season === "winter" || isChristmasMode 
+                    ? 'bg_roadmap_christmas.jpg' 
+                    : season === "fall" 
+                    ? 'bg_roadmap_fall.jpg' 
+                    : 'bg_roadmap.jpg'
+                }')`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
                 backgroundRepeat: "no-repeat"
               }}
             >
+              {isChristmasMode && (
+                <div className="absolute inset-0 rounded-3xl overflow-hidden pointer-events-none z-0">
+                  <SnowEffect isActive={isChristmasMode} borderRadius="1.5rem" />
+                </div>
+              )}
+              {season === "fall" && (
+                <div className="absolute inset-0 rounded-3xl overflow-hidden pointer-events-none z-0">
+                  <LeafEffect isActive={season === "fall"} />
+                </div>
+              )}
               {/* Overlay sutil para melhorar legibilidade */}
               <div className="absolute inset-0 bg-[var(--bg-tertiary)]/30 backdrop-blur-[2px] pointer-events-none"></div>
               <div className="relative z-10" style={{ height: "400px" }}>
@@ -471,7 +504,7 @@ const Tokenomics: React.FC<TokenomicsProps> = ({ isChristmasMode = false, onSwap
                 {roadmapItemsWithNFTImages.map((item, i) => (
                   <div
                     key={i}
-                    className="absolute flex flex-col items-center gap-2"
+                    className="absolute flex flex-col items-center gap-2 z-10"
                     style={{
                       left: `${(item.x / 1000) * 100}%`,
                       top: `${(item.y / 400) * 100}%`,
@@ -489,18 +522,20 @@ const Tokenomics: React.FC<TokenomicsProps> = ({ isChristmasMode = false, onSwap
 
                     {/* Avatar */}
                     <div
-                      className="w-16 h-16 rounded-full border-4 overflow-hidden bg-[var(--bg-primary)] shadow-lg"
+                      className="w-16 h-16 rounded-full border-4 overflow-hidden bg-[var(--bg-primary)] shadow-lg z-10"
                       style={{ borderColor: item.color }}
                     >
                       <img
-                        src={item.img || generateRandomNFTImageWithNumber(Math.floor(Math.random() * 10000) + 1)}
+                        src={item.img || "/placeholder.svg"}
                         alt={item.label}
                         className="w-full h-full object-cover"
                         onError={(e) => {
                           const target = e.target as HTMLImageElement
-                          // Tenta gerar uma nova imagem NFT se a anterior falhar
-                          const newNftNumber = Math.floor(Math.random() * 10000) + 1
-                          target.src = generateRandomNFTImageWithNumber(newNftNumber)
+                          // Se falhar, tenta um ID NFT aleatório do range válido (1-100)
+                          if (target.src !== "/placeholder.svg") {
+                            const randomId = NFT_IDS[Math.floor(Math.random() * NFT_IDS.length)]
+                            target.src = `${NFT_BASE_URL}/${randomId}`
+                          }
                         }}
                         loading="lazy"
                       />
@@ -519,7 +554,7 @@ const Tokenomics: React.FC<TokenomicsProps> = ({ isChristmasMode = false, onSwap
           </div>
 
           <p className="mt-8 text-lg font-black text-[var(--text-primary)] uppercase tracking-wider">
-            Building the future with MIAO
+            {t("tokenomics.roadmapBuilding")}
           </p>
         </div>
       </div>

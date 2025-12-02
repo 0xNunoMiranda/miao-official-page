@@ -24,9 +24,10 @@ const Footer: React.FC = () => {
         </div>
 
         {/* Right: Copyright & Contact */}
-        <div className="flex flex-col items-start md:items-end justify-between">
-          <div className="text-right w-full">
+        <div className="flex flex-col items-start justify-between">
+          <div className="text-left w-full">
             <p className="font-bold text-[var(--text-primary)] text-lg mb-4">{t("footer.rights")}</p>
+            <p className="text-sm font-medium text-[var(--text-secondary)] mb-4">v1.0.0</p>
             <a
               href="mailto:miaotokenonsol@gmail.com"
               className="inline-flex items-center gap-2 px-8 py-3 rounded-2xl font-bold uppercase bg-[var(--duo-green)] text-white border-2 border-b-4 border-[var(--btn-shadow)] hover:brightness-105 active:border-b-2 active:translate-y-[2px] transition-all"
@@ -41,8 +42,7 @@ const Footer: React.FC = () => {
       <img
         src="/images/clouds3.png"
         alt="Miao cats relaxing on a tropical island"
-        className="absolute bottom-0 right-0 w-[300px] md:w-[400px] lg:w-[500px] h-auto pointer-events-none select-none rounded-[50%]"
-        style={{ borderRadius: '50%' }}
+        className="absolute bottom-0 right-0 w-[500px] md:w-[650px] lg:w-[800px] h-auto pointer-events-none select-none"
       />
     </footer>
   )

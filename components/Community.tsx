@@ -1,29 +1,32 @@
 import type React from "react"
+import { useLanguage } from "../lib/language-context"
 
 const Community: React.FC = () => {
+  const { t } = useLanguage()
+  
   return (
     <section id="community" className="py-24 px-6 md:px-12 lg:px-24 bg-[var(--bg-secondary)]">
       <div className="max-w-4xl mx-auto text-center">
-        <h2 className="text-4xl md:text-5xl font-black text-[var(--text-primary)] mb-8">100% Community Owned</h2>
+        <h2 className="text-4xl md:text-5xl font-black text-[var(--text-primary)] mb-8">{t("community.title")}</h2>
 
         <div className="bg-[var(--bg-primary)] rounded-3xl p-8 md:p-12 border-2 border-[var(--border-color)] border-b-4">
           <div className="grid md:grid-cols-3 gap-8">
             {[
               {
-                title: "Liquidity Burned",
-                desc: "No rug pulls. The pool is gone forever.",
+                title: t("community.liquidityBurned"),
+                desc: t("community.liquidityBurnedDesc"),
                 color: "bg-[var(--duo-red)]",
                 shadow: "border-[var(--btn-shadow-red)]",
               },
               {
-                title: "Contract Renounced",
-                desc: "We can't change it even if we tried.",
+                title: t("community.contractRenounced"),
+                desc: t("community.contractRenouncedDesc"),
                 color: "bg-[var(--duo-blue)]",
                 shadow: "border-[var(--btn-shadow-blue)]",
               },
               {
-                title: "No Treasury",
-                desc: "No dev wallet. No marketing tax. Pure chaos.",
+                title: t("community.noTreasury"),
+                desc: t("community.noTreasuryDesc"),
                 color: "bg-[var(--duo-yellow)]",
                 shadow: "border-[var(--btn-shadow-orange)]",
               },
@@ -69,12 +72,12 @@ const Community: React.FC = () => {
 
           <div className="mt-12 relative">
             {/* Interface do Telegram - fundo azul escuro */}
-            <div className="bg-[#0e1621] rounded-2xl p-6 shadow-2xl min-h-[200px]">
+            <div className="bg-[#0e1621] rounded-2xl p-4 sm:p-6 shadow-2xl min-h-[200px]">
               {/* Mensagem anterior (fade X) - como contexto */}
               <div className="mb-4 opacity-60">
-                <div className="flex gap-3">
-                  <div className="flex-shrink-0 self-end mb-1">
-                    <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-[#1e2a35]">
+                <div className="flex gap-2 sm:gap-3">
+                  <div className="hidden min-[500px]:flex flex-shrink-0 self-end mb-1">
+                    <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-[var(--telegram-border)]">
                       <img 
                         src="/assets/tg_avatar_fade.jpg" 
                         alt="fade X" 
@@ -82,17 +85,17 @@ const Community: React.FC = () => {
                       />
                     </div>
                   </div>
-                  <div className="flex-1">
+                  <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="text-[#8e98a3] font-semibold text-xs">fade X</span>
                     </div>
-                    <div className="bg-[#182533] rounded-2xl rounded-tl-none p-3 relative">
+                    <div className="bg-[#182533] rounded-2xl rounded-tl-none p-3 sm:p-4 relative">
                       <div className="absolute -left-[6px] top-0">
                         <svg width="6" height="13" viewBox="0 0 6 13">
                           <path d="M0 0L6 0L0 13Z" fill="#182533"/>
                         </svg>
                       </div>
-                      <p className="text-[#8e98a3] text-xs leading-relaxed">
+                      <p className="text-[#8e98a3] text-xs sm:text-sm leading-relaxed break-words">
                         Chill man. I heard you said "0xMiranda was right about"...
                       </p>
                     </div>
@@ -101,10 +104,10 @@ const Community: React.FC = () => {
               </div>
               
               {/* Balão de mensagem - 0xmiranda */}
-              <div className="relative flex gap-3">
+              <div className="relative flex gap-2 sm:gap-3">
                 {/* Avatar */}
-                <div className="flex-shrink-0 self-end mb-1">
-                  <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-[#1e2a35]">
+                <div className="hidden min-[500px]:flex flex-shrink-0 self-end mb-1">
+                  <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-[var(--telegram-border)]">
                     <img 
                       src="/assets/tg_avatar.jpg" 
                       alt="0xmiranda" 
@@ -114,7 +117,7 @@ const Community: React.FC = () => {
                 </div>
                 
                 {/* Mensagem */}
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   {/* Nome do remetente */}
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-white font-semibold text-sm">0xmiranda</span>
@@ -126,7 +129,7 @@ const Community: React.FC = () => {
                   </div>
                   
                   {/* Balão de mensagem */}
-                  <div className="bg-[#182533] rounded-2xl rounded-tl-none p-4 shadow-lg relative">
+                  <div className="bg-[#182533] rounded-2xl rounded-tl-none p-3 sm:p-4 shadow-lg relative">
                     {/* Cauda do balão */}
                     <div className="absolute -left-[6px] top-0">
                       <svg width="6" height="13" viewBox="0 0 6 13">
@@ -135,7 +138,7 @@ const Community: React.FC = () => {
                     </div>
                     
                     {/* Texto da mensagem */}
-                    <p className="text-white text-sm leading-relaxed mb-3">
+                    <p className="text-white text-xs sm:text-sm leading-relaxed mb-3 break-words">
                       I admit that initially I was skeptical about the project given the behavior of certain members here, but I continued to observe the token. If this were meant to be a rug pull, I'd say it would have already happened. Now, you might consider it hypocrisy, but I'm even developing mini-games as a way to enrich the community. It's all about the value you give to something, and that value is built. Let's do it together.
                     </p>
                     

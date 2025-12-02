@@ -2,15 +2,22 @@
 
 import type React from "react"
 import { useState, useEffect, useRef } from "react"
-import { Send, Twitter, Instagram, ArrowDownUp } from "lucide-react"
+import { ArrowDownUp, Wrench, Gamepad2, FileText, Send, Twitter, Instagram } from "lucide-react"
 import TamagotchiCat from "./TamagotchiCat"
 import { useVideoSound } from "@/lib/use-video-sound"
+import { useLanguage } from "../lib/language-context"
+
+import { type Season } from "./SeasonSelector"
 
 interface HeroProps {
   onSwapChartClick?: () => void
   isChristmasMode?: boolean
+  season?: Season
   soundEnabled?: boolean
   onDisableSound?: () => void
+  onToolsClick?: () => void
+  onGamesClick?: () => void
+  onWhitepaperClick?: () => void
 }
 
 const TikTokIcon = ({ size = 20 }: { size?: number }) => (
@@ -55,26 +62,42 @@ const TypewriterText = ({ text }: { text: string }) => {
   )
 }
 
-const Hero: React.FC<HeroProps> = ({ onSwapChartClick, isChristmasMode = false, soundEnabled = true, onDisableSound }) => {
+const Hero: React.FC<HeroProps> = ({ onSwapChartClick, isChristmasMode = false, season = "normal", soundEnabled = true, onDisableSound, onToolsClick, onGamesClick, onWhitepaperClick }) => {
+  const { t } = useLanguage()
   const videoRef = useRef<HTMLVideoElement>(null)
-  const videoRefChristmas = useRef<HTMLVideoElement>(null)
+  const videoRefFall = useRef<HTMLVideoElement>(null)
+  const videoRefWinter = useRef<HTMLVideoElement>(null)
   const [isDark, setIsDark] = useState(false)
   const [videoOpacity, setVideoOpacity] = useState(() => ({
-    normal: isChristmasMode ? 0 : 1,
-    christmas: isChristmasMode ? 1 : 0
+    normal: 0,
+    fall: 0,
+    winter: 0
   }))
+  const [imageOpacity, setImageOpacity] = useState(() => {
+    if (season === "winter") return { normal: 0, fall: 0, winter: 1 }
+    if (season === "fall") return { normal: 0, fall: 1, winter: 0 }
+    return { normal: 1, fall: 0, winter: 0 }
+  })
+  const [videoReady, setVideoReady] = useState({
+    normal: false,
+    fall: false,
+    winter: false
+  })
   
   // Usar o hook de som para reprodução aleatória - usar o vídeo ativo
-  const activeVideoRef = isChristmasMode ? videoRefChristmas : videoRef
-  useVideoSound({ videoRef: activeVideoRef, soundEnabled, isChristmasMode, onDisableSound })
+  const activeVideoRef = season === "winter" ? videoRefWinter : season === "fall" ? videoRefFall : videoRef
+  useVideoSound({ videoRef: activeVideoRef, soundEnabled, isChristmasMode: season === "winter", onDisableSound })
   
   // Garantir que os vídeos estejam sempre muted (o hook controla o unmute quando necessário)
   useEffect(() => {
     if (videoRef.current) {
       videoRef.current.muted = true
     }
-    if (videoRefChristmas.current) {
-      videoRefChristmas.current.muted = true
+    if (videoRefFall.current) {
+      videoRefFall.current.muted = true
+    }
+    if (videoRefWinter.current) {
+      videoRefWinter.current.muted = true
     }
   }, [])
 
@@ -97,74 +120,142 @@ const Hero: React.FC<HeroProps> = ({ onSwapChartClick, isChristmasMode = false, 
     return () => observer.disconnect()
   }, [])
 
-  // Transição suave entre vídeos
-  useEffect(() => {
-    const transitionDuration = 2000 // 2 segundos para transição suave
-    const steps = 60
-    const stepTime = transitionDuration / steps
-    let currentStep = 0
-
-    if (isChristmasMode) {
-      // Fade in Christmas, fade out normal
-      const interval = setInterval(() => {
-        currentStep++
-        const progress = Math.min(currentStep / steps, 1)
-        setVideoOpacity({
-          normal: 1 - progress,
-          christmas: progress
-        })
-        if (currentStep >= steps) {
-          // Garantir valores finais exatos
-          setVideoOpacity({
-            normal: 0,
-            christmas: 1
-          })
-          clearInterval(interval)
-        }
-      }, stepTime)
-      return () => clearInterval(interval)
-    } else {
-      // Fade in normal, fade out Christmas
-      const interval = setInterval(() => {
-        currentStep++
-        const progress = Math.min(currentStep / steps, 1)
-        setVideoOpacity({
-          normal: progress,
-          christmas: 1 - progress
-        })
-        if (currentStep >= steps) {
-          // Garantir valores finais exatos
-          setVideoOpacity({
-            normal: 1,
-            christmas: 0
-          })
-          clearInterval(interval)
-        }
-      }, stepTime)
-      return () => clearInterval(interval)
-    }
-  }, [isChristmasMode])
 
   // Garantir que os vídeos estejam sempre reproduzindo
+  // Handle video loading and transition
   useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.play().catch(() => {})
+    const handleVideoCanPlay = (mode: "normal" | "fall" | "winter") => {
+      let video: HTMLVideoElement | null = null
+      if (mode === "normal") video = videoRef.current
+      else if (mode === "fall") video = videoRefFall.current
+      else if (mode === "winter") video = videoRefWinter.current
+      
+      setVideoReady(prev => ({
+        ...prev,
+        [mode]: true
+      }))
+      
+      // Start playing video
+      if (video) {
+        video.play().catch(() => {})
+      }
+      
+      // Only transition if this is the active season
+      if (season === mode) {
+        // Fade out image and fade in video with smooth transition
+        setTimeout(() => {
+          setImageOpacity(prev => ({
+            ...prev,
+            [mode]: 0
+          }))
+          setVideoOpacity(prev => ({
+            ...prev,
+            [mode]: 1
+          }))
+        }, 100)
+      }
     }
-    if (videoRefChristmas.current) {
-      videoRefChristmas.current.play().catch(() => {})
+
+    const videoNormal = videoRef.current
+    const videoFall = videoRefFall.current
+    const videoWinter = videoRefWinter.current
+
+    // Reset all opacities when season changes
+    setVideoOpacity({ normal: 0, fall: 0, winter: 0 })
+    if (season === "winter") {
+      setImageOpacity({ normal: 0, fall: 0, winter: 1 })
+    } else if (season === "fall") {
+      setImageOpacity({ normal: 0, fall: 1, winter: 0 })
+    } else {
+      setImageOpacity({ normal: 1, fall: 0, winter: 0 })
     }
-  }, [])
+
+    // Load and play video for current season
+    if (season === "normal" && videoNormal) {
+      videoNormal.load() // Force reload
+      if (videoNormal.readyState >= 3) {
+        handleVideoCanPlay("normal")
+      } else {
+        videoNormal.addEventListener('canplaythrough', () => handleVideoCanPlay("normal"), { once: true })
+      }
+    } else if (season === "fall" && videoFall) {
+      videoFall.load() // Force reload
+      if (videoFall.readyState >= 3) {
+        handleVideoCanPlay("fall")
+      } else {
+        videoFall.addEventListener('canplaythrough', () => handleVideoCanPlay("fall"), { once: true })
+      }
+    } else if (season === "winter" && videoWinter) {
+      videoWinter.load() // Force reload
+      if (videoWinter.readyState >= 3) {
+        handleVideoCanPlay("winter")
+      } else {
+        videoWinter.addEventListener('canplaythrough', () => handleVideoCanPlay("winter"), { once: true })
+      }
+    }
+
+    return () => {
+      if (videoNormal) {
+        videoNormal.removeEventListener('canplaythrough', () => handleVideoCanPlay("normal"))
+      }
+      if (videoFall) {
+        videoFall.removeEventListener('canplaythrough', () => handleVideoCanPlay("fall"))
+      }
+      if (videoWinter) {
+        videoWinter.removeEventListener('canplaythrough', () => handleVideoCanPlay("winter"))
+      }
+    }
+  }, [season])
 
   return (
     <section id="hero" className="relative min-h-screen pt-28 pb-12 flex items-center overflow-hidden">
+      {/* Image Placeholder - Normal */}
+      <img
+        src="/assets/page/summer.jpg"
+        alt="Summer background"
+        className="absolute inset-0 w-full h-full object-cover z-0 transition-opacity duration-1000 ease-in-out"
+        style={{ 
+          objectFit: 'cover', 
+          objectPosition: 'left top',
+          opacity: imageOpacity.normal,
+          pointerEvents: 'none'
+        }}
+      />
+      
+      {/* Image Placeholder - Fall */}
+      <img
+        src="/assets/page/fall.jpg"
+        alt="Fall background"
+        className="absolute inset-0 w-full h-full object-cover z-0 transition-opacity duration-1000 ease-in-out"
+        style={{ 
+          objectFit: 'cover', 
+          objectPosition: 'left top',
+          opacity: imageOpacity.fall,
+          pointerEvents: 'none'
+        }}
+      />
+      
+      {/* Image Placeholder - Winter */}
+      <img
+        src="/assets/page/winter.jpg"
+        alt="Winter background"
+        className="absolute inset-0 w-full h-full object-cover z-0 transition-opacity duration-1000 ease-in-out"
+        style={{ 
+          objectFit: 'cover', 
+          objectPosition: 'left top',
+          opacity: imageOpacity.winter,
+          pointerEvents: 'none'
+        }}
+      />
+      
       {/* Video Background - Normal */}
       <video
         ref={videoRef}
-        autoPlay
         loop
         muted={true}
         playsInline
-        className="absolute inset-0 w-full h-full object-cover z-0 transition-opacity duration-[2000ms] ease-in-out"
+        preload="auto"
+        className="absolute inset-0 w-full h-full object-cover z-0 transition-opacity duration-1000 ease-in-out"
         style={{ 
           objectFit: 'cover', 
           objectPosition: 'left top',
@@ -178,19 +269,40 @@ const Hero: React.FC<HeroProps> = ({ onSwapChartClick, isChristmasMode = false, 
         />
       </video>
       
-      {/* Video Background - Christmas */}
+      {/* Video Background - Fall */}
       <video
-        ref={videoRefChristmas}
-        autoPlay
+        ref={videoRefFall}
         loop
         muted={true}
         playsInline
-        className="absolute inset-0 w-full h-full object-cover z-0 transition-opacity duration-[2000ms] ease-in-out"
+        preload="auto"
+        className="absolute inset-0 w-full h-full object-cover z-0 transition-opacity duration-1000 ease-in-out"
         style={{ 
           objectFit: 'cover', 
           objectPosition: 'left top',
-          opacity: videoOpacity.christmas,
-          pointerEvents: videoOpacity.christmas === 0 ? 'none' : 'auto'
+          opacity: videoOpacity.fall,
+          pointerEvents: videoOpacity.fall === 0 ? 'none' : 'auto'
+        }}
+      >
+        <source 
+          src="/assets/page/bg_video_home_section_fall.mp4"
+          type="video/mp4" 
+        />
+      </video>
+      
+      {/* Video Background - Winter */}
+      <video
+        ref={videoRefWinter}
+        loop
+        muted={true}
+        playsInline
+        preload="auto"
+        className="absolute inset-0 w-full h-full object-cover z-0 transition-opacity duration-1000 ease-in-out"
+        style={{ 
+          objectFit: 'cover', 
+          objectPosition: 'left top',
+          opacity: videoOpacity.winter,
+          pointerEvents: videoOpacity.winter === 0 ? 'none' : 'auto'
         }}
       >
         <source 
@@ -199,93 +311,233 @@ const Hero: React.FC<HeroProps> = ({ onSwapChartClick, isChristmasMode = false, 
         />
       </video>
       
-      <div className="max-w-[1400px] mx-auto px-6 md:px-12 lg:px-24 w-full relative z-10">
-        <div className="grid lg:grid-cols-2 gap-12 md:gap-16 items-center">
+      <div className="max-w-[1400px] mx-auto px-3 sm:px-6 md:px-8 lg:px-12 xl:px-24 w-full relative z-20">
+        <div className="grid lg:grid-cols-2 gap-6 sm:gap-8 md:gap-6 lg:gap-8 items-center">
           {/* Cat Image - Left */}
-          <div className="order-2 lg:order-1 flex justify-center lg:justify-start lg:items-start">
+          <div className="order-2 lg:order-1 flex justify-center lg:justify-start lg:items-start lg:-ml-4 xl:-ml-0">
             <TamagotchiCat />
           </div>
 
           {/* Content - Right */}
-          <div className="order-1 lg:order-2 space-y-8 md:space-y-10 text-center lg:text-right">
+          <div className="order-1 lg:order-2 space-y-8 md:space-y-10 text-center lg:text-center">
             {/* Logo */}
-            <div className="flex justify-center lg:justify-end">
+            <div className="flex flex-col items-center gap-4">
               <img
                 src="/logo.png"
                 alt="$MIAO"
                 className="w-64 md:w-80 lg:w-96 h-auto"
                 loading="lazy"
               />
+
+              {/* Social Media Buttons - Between logo and cloud */}
+              <div className="flex items-center gap-1.5">
+                <a
+                  href="https://t.me/miaotokensol"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-7 h-7 rounded-lg flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-2 border-[var(--border-color)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-all"
+                >
+                  <Send size={14} />
+                </a>
+                <a
+                  href="https://x.com/miaoonsol"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-7 h-7 rounded-lg flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-2 border-[var(--border-color)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-all"
+                >
+                  <Twitter size={14} />
+                </a>
+                <a
+                  href="https://www.instagram.com/miaotoken/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-7 h-7 rounded-lg flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-2 border-[var(--border-color)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-all"
+                >
+                  <Instagram size={14} />
+                </a>
+                <a
+                  href="https://www.tiktok.com/@miaoonsol"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-7 h-7 rounded-lg flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-2 border-[var(--border-color)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-all"
+                >
+                  <TikTokIcon size={14} />
+                </a>
+              </div>
             </div>
 
             <div 
-              className={`backdrop-blur-md p-8 md:p-10 ml-auto mr-auto lg:mr-0 max-w-lg animate-cloud-float relative ${
-                isDark ? 'bg-black/30' : 'bg-white/25'
-              }`}
+              className="px-8 py-2 md:px-10 md:py-3 lg:px-12 lg:py-4 mx-auto max-w-2xl animate-cloud-float relative"
               style={{
-                clipPath: 'polygon(15% 5%, 25% 0%, 40% 2%, 55% 0%, 70% 3%, 85% 0%, 100% 8%, 100% 25%, 98% 40%, 100% 55%, 95% 70%, 100% 85%, 90% 100%, 75% 98%, 60% 100%, 45% 98%, 30% 100%, 15% 95%, 5% 85%, 0% 70%, 2% 55%, 0% 40%, 3% 25%, 0% 10%)',
-                borderRadius: '50px',
-                border: isDark ? '2px solid rgba(0, 0, 0, 0.4)' : '2px solid rgba(255, 255, 255, 0.3)',
-                opacity: isDark ? 0.8 : 0.65,
+                borderRadius: '9999px',
+                opacity: 1,
               }}
             >
-              <p className="text-base md:text-lg text-white font-medium leading-relaxed drop-shadow-lg">
-                First came the dogs, then the frogs, but the streets were never safe from the shadows. Behind every
-                bark, there's a <span className="text-[var(--duo-green)] font-bold drop-shadow-md">$MIAO</span> answered back.
+              <p className={`text-lg md:text-xl lg:text-2xl xl:text-3xl font-black leading-tight ${isDark ? 'text-white' : 'text-black'}`} style={{
+                opacity: 1,
+                WebkitTextStroke: isDark ? '2px rgba(0, 0, 0, 1)' : '2px rgba(255, 255, 255, 1)',
+                textStroke: isDark ? '2px rgba(0, 0, 0, 1)' : '2px rgba(255, 255, 255, 1)',
+                paintOrder: 'stroke fill',
+                textShadow: isDark ? '3px 3px 6px rgba(0, 0, 0, 0.7)' : '3px 3px 6px rgba(0, 0, 0, 0.4)',
+                letterSpacing: '0.5px'
+              }}>
+                {t("hero.tagline").split("$MIAO")[0]}
+                <span className="text-[var(--duo-green)] font-black" style={{ 
+                  textShadow: isDark ? '3px 3px 6px rgba(0, 0, 0, 1), -1px -1px 3px rgba(255, 255, 255, 0.5)' : '3px 3px 6px rgba(255, 255, 255, 1), -1px -1px 3px rgba(0, 0, 0, 0.5)',
+                  WebkitTextStroke: '3px var(--text-stroke)',
+                  textStroke: '3px var(--text-stroke)',
+                  paintOrder: 'stroke fill',
+                  opacity: 1,
+                  letterSpacing: '1px'
+                }}>$MIAO</span>
+                {t("hero.tagline").split("$MIAO")[1]}
               </p>
             </div>
 
-            <div className="flex justify-center lg:justify-end gap-3">
-              <a
-                href="https://t.me/miaotokensol"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-12 h-12 md:w-14 md:h-14 rounded-xl flex items-center justify-center bg-[#2DD188] text-white border-2 border-b-4 border-[#1fa068] hover:brightness-110 active:border-b-2 active:translate-y-[2px] transition-all"
-              >
-                <Send size={20} />
-              </a>
-              <a
-                href="https://x.com/miaoonsol"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-12 h-12 md:w-14 md:h-14 rounded-xl flex items-center justify-center bg-[#2DD188] text-white border-2 border-b-4 border-[#1fa068] hover:brightness-110 active:border-b-2 active:translate-y-[2px] transition-all"
-              >
-                <Twitter size={20} />
-              </a>
-              <a
-                href="https://www.instagram.com/miaotoken/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-12 h-12 md:w-14 md:h-14 rounded-xl flex items-center justify-center bg-[#2DD188] text-white border-2 border-b-4 border-[#1fa068] hover:brightness-110 active:border-b-2 active:translate-y-[2px] transition-all"
-              >
-                <Instagram size={20} />
-              </a>
-              <a
-                href="https://www.tiktok.com/@miaoonsol"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-12 h-12 md:w-14 md:h-14 rounded-xl flex items-center justify-center bg-[#2DD188] text-white border-2 border-b-4 border-[#1fa068] hover:brightness-110 active:border-b-2 active:translate-y-[2px] transition-all"
-              >
-                <TikTokIcon size={20} />
-              </a>
-            </div>
-
-            <div className="flex flex-wrap justify-center lg:justify-end gap-4">
-              <button
-                onClick={onSwapChartClick}
-                className="px-8 py-4 md:px-10 md:py-5 rounded-2xl font-bold uppercase tracking-wide text-lg md:text-xl bg-[var(--duo-green)] text-white border-2 border-b-4 border-[var(--btn-shadow)] hover:brightness-105 active:border-b-2 active:translate-y-[2px] transition-all flex items-center gap-2"
-              >
-                <ArrowDownUp size={20} />
-                Swap / Chart
-              </button>
-              <a
-                href="https://pump.fun/coin/8xpdiZ5GrnAdxpf7DSyZ1YXZxx6itvvoXPHZ4K2Epump"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-8 py-4 md:px-10 md:py-5 rounded-2xl font-bold uppercase tracking-wide text-lg md:text-xl bg-[var(--duo-orange)] text-white border-2 border-b-4 border-[var(--btn-shadow-orange)] hover:brightness-105 active:border-b-2 active:translate-y-[2px] transition-all"
-              >
-                Pump.fun
-              </a>
+            <div className="flex flex-col items-center gap-3 relative z-30">
+              {/* Capsule-style buttons container */}
+              <div className="flex flex-nowrap w-full max-w-md lg:max-w-none justify-center relative">
+                {/* Capsule wrapper with pill shape - single unified capsule */}
+                <div 
+                  className="flex items-center relative shadow-xl"
+                  style={{
+                    borderRadius: '9999px',
+                    border: '10px solid var(--capsule-border)',
+                    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1)',
+                  }}
+                >
+                  {/* Left half - Mint green/Seafoam (Swap Chart) */}
+                  <button
+                    onClick={onSwapChartClick}
+                    className="flex-1 min-w-0 px-8 py-14 md:px-10 md:py-18 lg:px-16 lg:py-22 font-bold uppercase tracking-wide text-lg md:text-xl lg:text-2xl text-white transition-all flex items-center justify-center gap-2 relative overflow-hidden"
+                    style={{
+                      background: '#52D48E',
+                      borderRight: '5px solid var(--capsule-border)',
+                      borderTopLeftRadius: '9999px',
+                      borderBottomLeftRadius: '9999px',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = '#6ee7b7'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = '#52D48E'
+                    }}
+                  >
+                    {/* Curved white highlight on green side */}
+                    <div 
+                      className="absolute top-2 left-2 w-16 h-16 rounded-full pointer-events-none opacity-30"
+                      style={{
+                        background: 'radial-gradient(circle, rgba(255,255,255,0.6) 0%, transparent 70%)',
+                        transform: 'translate(-20%, -20%)',
+                      }}
+                    />
+                    {/* Internal shadow from bottom to left and right sides */}
+                    <div 
+                      className="absolute bottom-0 left-0 right-0 pointer-events-none"
+                      style={{
+                        height: '25%',
+                        background: 'linear-gradient(to top, rgba(0, 0, 0, 0.15) 0%, transparent 100%)',
+                      }}
+                    />
+                    <div 
+                      className="absolute bottom-0 left-0 pointer-events-none"
+                      style={{
+                        width: '100%',
+                        height: '25%',
+                        background: 'linear-gradient(to right, rgba(0, 0, 0, 0.1) 0%, transparent 100%)',
+                      }}
+                    />
+                    <div 
+                      className="absolute bottom-0 right-0 pointer-events-none"
+                      style={{
+                        width: '100%',
+                        height: '25%',
+                        background: 'linear-gradient(to left, rgba(0, 0, 0, 0.1) 0%, transparent 100%)',
+                      }}
+                    />
+                    <span className="relative z-10 whitespace-nowrap">{t("hero.swapChart")}</span>
+                  </button>
+                  
+                  {/* Right half - White (Pump.Fun) */}
+                  <a
+                    href="https://pump.fun/coin/8xpdiZ5GrnAdxpf7DSyZ1YXZxx6itvvoXPHZ4K2Epump"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 min-w-0 px-8 py-14 md:px-10 md:py-18 lg:px-16 lg:py-22 font-bold uppercase tracking-wide text-lg md:text-xl lg:text-2xl text-gray-800 transition-all flex items-center justify-center relative overflow-hidden"
+                    style={{
+                      background: '#ffffff',
+                      borderLeft: '5px solid var(--capsule-border)',
+                      borderTopRightRadius: '9999px',
+                      borderBottomRightRadius: '9999px',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = '#e5e5e5'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = '#ffffff'
+                    }}
+                  >
+                    {/* Internal shadow from bottom to left and right sides */}
+                    <div 
+                      className="absolute bottom-0 left-0 right-0 pointer-events-none"
+                      style={{
+                        height: '25%',
+                        background: 'linear-gradient(to top, rgba(0, 0, 0, 0.12) 0%, transparent 100%)',
+                      }}
+                    />
+                    <div 
+                      className="absolute bottom-0 left-0 pointer-events-none"
+                      style={{
+                        width: '100%',
+                        height: '25%',
+                        background: 'linear-gradient(to right, rgba(0, 0, 0, 0.08) 0%, transparent 100%)',
+                      }}
+                    />
+                    <div 
+                      className="absolute bottom-0 right-0 pointer-events-none"
+                      style={{
+                        width: '100%',
+                        height: '25%',
+                        background: 'linear-gradient(to left, rgba(0, 0, 0, 0.08) 0%, transparent 100%)',
+                      }}
+                    />
+                    {/* Highlight effect on white side */}
+                    <div 
+                      className="absolute top-2 right-2 w-20 h-20 rounded-full pointer-events-none opacity-20"
+                      style={{
+                        background: 'radial-gradient(circle, rgba(255,255,255,0.8) 0%, transparent 70%)',
+                        transform: 'translate(20%, -20%)',
+                      }}
+                    />
+                    <span className="relative z-10 whitespace-nowrap">{t("hero.pumpfunButton")}</span>
+                  </a>
+                </div>
+              </div>
+              
+              {/* Tools, Games, Whitepaper - Smaller buttons below */}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={onToolsClick}
+                  className="px-5 py-2.5 rounded-xl font-bold text-sm uppercase tracking-wide bg-[var(--bg-secondary)] text-[var(--text-primary)] border-2 border-b-4 border-[var(--btn-shadow)] hover:bg-[var(--bg-tertiary)] hover:border-[var(--duo-green)] active:border-b-2 active:translate-y-[2px] transition-all flex items-center gap-1.5"
+                >
+                  <Wrench size={16} />
+                  Tools
+                </button>
+                <button
+                  onClick={onGamesClick}
+                  className="px-5 py-2.5 rounded-xl font-bold text-sm uppercase tracking-wide bg-[var(--bg-secondary)] text-[var(--text-primary)] border-2 border-b-4 border-[var(--btn-shadow)] hover:bg-[var(--bg-tertiary)] hover:border-[var(--duo-orange)] active:border-b-2 active:translate-y-[2px] transition-all flex items-center gap-1.5"
+                >
+                  <Gamepad2 size={16} />
+                  Games
+                </button>
+                <button
+                  onClick={onWhitepaperClick}
+                  className="px-5 py-2.5 rounded-xl font-bold text-sm uppercase tracking-wide bg-[var(--bg-secondary)] text-[var(--text-primary)] border-2 border-b-4 border-[var(--btn-shadow)] hover:bg-[var(--bg-tertiary)] hover:border-[var(--duo-blue)] active:border-b-2 active:translate-y-[2px] transition-all flex items-center gap-1.5"
+                >
+                  <FileText size={16} />
+                  Whitepaper
+                </button>
+              </div>
             </div>
           </div>
         </div>

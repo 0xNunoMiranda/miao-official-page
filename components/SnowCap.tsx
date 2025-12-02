@@ -16,7 +16,7 @@ const SnowCap: React.FC<SnowCapProps> = ({ className = "", visible = true }) => 
         className="w-full h-full text-white drop-shadow-sm" 
         fill="currentColor"
       >
-        <path d="M0 0 L100 0 L100 10 Q 90 20 80 10 T 60 10 T 40 15 T 20 5 T 0 15 Z" />
+        <path d="M 2 0 L 98 0 Q 100 0 100 2 L 100 8 Q 90 18 80 10 T 60 10 T 40 15 T 20 5 Q 10 15 0 15 Q 0 13 0 11 L 0 2 Q 0 0 2 0 Z" />
       </svg>
     </div>
   );

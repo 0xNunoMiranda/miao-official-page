@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { Utensils, Moon, Gamepad2, BookOpen, BarChart3 } from "lucide-react"
+import { useLanguage } from "../lib/language-context"
 
 const catEmotions = [
   { name: "excited", src: "/images/header-cat.png" },
@@ -21,11 +22,12 @@ interface Stats {
 }
 
 export default function TamagotchiCat() {
+  const { t } = useLanguage()
   const [currentEmotion, setCurrentEmotion] = useState(0)
-  const [isTransitioning, setIsTransitioning] = useState(false)
   const [isPaused, setIsPaused] = useState(false)
   const [showStats, setShowStats] = useState(false)
   const [isLoaded, setIsLoaded] = useState(false)
+  const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set([0]))
   const [stats, setStats] = useState<Stats>({
     hunger: 80,
     energy: 70,
@@ -38,23 +40,38 @@ export default function TamagotchiCat() {
     return () => clearTimeout(timer)
   }, [])
 
-  const changeEmotion = useCallback((newIndex: number) => {
-    setIsTransitioning(true)
-    setTimeout(() => {
-      setCurrentEmotion(newIndex)
-      setIsTransitioning(false)
-    }, 300)
+  // Preload images
+  useEffect(() => {
+    catEmotions.forEach((emotion, index) => {
+      if (index === 0) return // First image is already loaded
+      const img = new Image()
+      img.src = emotion.src
+      img.onload = () => {
+        setLoadedImages(prev => new Set([...prev, index]))
+      }
+    })
   }, [])
+
+  const changeEmotion = useCallback((newIndex: number) => {
+    // Only change if image is loaded
+    if (loadedImages.has(newIndex)) {
+      setCurrentEmotion(newIndex)
+    }
+  }, [loadedImages])
 
   useEffect(() => {
     if (isPaused) return
 
     const interval = setInterval(() => {
-      changeEmotion((currentEmotion + 1) % catEmotions.length)
+      const nextIndex = (currentEmotion + 1) % catEmotions.length
+      // Only change if next image is loaded
+      if (loadedImages.has(nextIndex)) {
+        changeEmotion(nextIndex)
+      }
     }, 5000)
 
     return () => clearInterval(interval)
-  }, [currentEmotion, isPaused, changeEmotion])
+  }, [currentEmotion, isPaused, changeEmotion, loadedImages])
 
   const handleFeed = () => {
     setIsPaused(true)
@@ -113,7 +130,7 @@ export default function TamagotchiCat() {
   }) => (
     <button
       onClick={onClick}
-      className="w-14 h-14 md:w-16 md:h-16 lg:w-18 lg:h-18 rounded-full bg-[#2DD188] hover:bg-[#25b876] border-2 border-[#1a6b4a] border-b-4 active:border-b-2 active:translate-y-[2px] flex items-center justify-center transition-all"
+      className="w-14 h-14 md:w-16 md:h-16 lg:w-18 lg:h-18 rounded-full bg-[var(--duo-green)] hover:bg-[var(--duo-green-dark)] border-2 border-[var(--tamagotchi-border)] border-b-4 active:border-b-2 active:translate-y-[2px] flex items-center justify-center transition-all"
       title={label}
     >
       <Icon size={20} className="text-white md:w-5 md:h-5 lg:w-6 lg:h-6" />
@@ -122,24 +139,24 @@ export default function TamagotchiCat() {
 
   return (
     <div
-      className={`flex flex-row items-start gap-2 md:gap-3 transition-all duration-700 ease-out relative ${
+      className={`flex flex-row items-start gap-1 sm:gap-2 md:gap-3 transition-all duration-700 ease-out relative ${
         isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
       }`}
     >
       {/* Botões verticais à esquerda */}
       <div className="flex flex-col items-center gap-3 md:gap-4 relative z-10 flex-shrink-0">
-        <ActionButton icon={Utensils} onClick={handleFeed} label="Feed" />
-        <ActionButton icon={Moon} onClick={handleSleep} label="Sleep" />
-        <ActionButton icon={Gamepad2} onClick={handlePlay} label="Play" />
-        <ActionButton icon={BookOpen} onClick={handleStudy} label="Study" />
+        <ActionButton icon={Utensils} onClick={handleFeed} label={t("tamagotchi.feed")} />
+        <ActionButton icon={Moon} onClick={handleSleep} label={t("tamagotchi.sleep")} />
+        <ActionButton icon={Gamepad2} onClick={handlePlay} label={t("tamagotchi.play")} />
+        <ActionButton icon={BookOpen} onClick={handleStudy} label={t("tamagotchi.study")} />
         <button
           onClick={() => setShowStats(!showStats)}
           className={`w-14 h-14 md:w-16 md:h-16 lg:w-18 lg:h-18 rounded-full border-2 border-b-4 active:border-b-2 active:translate-y-[2px] flex items-center justify-center transition-all ${
             showStats
-              ? "bg-[var(--duo-green)] text-white border-[#1a6b4a]"
+              ? "bg-[var(--duo-green)] text-white border-[var(--tamagotchi-border)]"
               : "bg-[var(--bg-secondary)] text-[var(--text-primary)] border-[var(--border-color)]"
           }`}
-          title="Stats"
+          title={t("tamagotchi.stats")}
         >
           <BarChart3 size={20} className="md:w-5 md:h-5 lg:w-6 lg:h-6" />
         </button>
@@ -147,20 +164,24 @@ export default function TamagotchiCat() {
 
       {/* Cat image */}
       <div
-        className="relative cursor-pointer select-none flex-shrink-0"
+        className="relative cursor-pointer select-none flex-shrink-0 z-30"
         style={{
           animation: "tamagotchi-float 3s ease-in-out infinite",
         }}
         onClick={handleClick}
-        onMouseEnter={handlePet}
-        onMouseLeave={handleMouseLeave}
       >
+        {/* Shadow circle below cat feet */}
+        <div 
+          className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-[60%] h-8 rounded-full opacity-20"
+          style={{
+            background: 'radial-gradient(ellipse, rgba(0, 0, 0, 0.4) 0%, transparent 70%)',
+            filter: 'blur(8px)',
+          }}
+        />
         <img
           src={catEmotions[currentEmotion].src || "/placeholder.svg"}
           alt={`Miao ${catEmotions[currentEmotion].name}`}
-          className={`w-full max-w-[380px] md:max-w-[480px] lg:max-w-[580px] h-auto object-contain transition-all duration-300 ease-in-out ${
-            isTransitioning ? "opacity-0 scale-95" : "opacity-100 scale-100"
-          }`}
+          className="relative w-full max-w-[280px] sm:max-w-[380px] md:max-w-[480px] lg:max-w-[580px] h-auto object-contain"
           draggable={false}
         />
       </div>
@@ -168,10 +189,10 @@ export default function TamagotchiCat() {
       {showStats && (
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[var(--bg-secondary)] border-2 border-[var(--border-color)] border-b-4 rounded-2xl p-6 md:p-8 w-full max-w-[400px] md:max-w-[450px] shadow-2xl z-50">
           <div className="space-y-4 md:space-y-5">
-            <StatBar label="Hunger" value={stats.hunger} color="#FF6B6B" />
-            <StatBar label="Energy" value={stats.energy} color="#4ECDC4" />
-            <StatBar label="Happy" value={stats.happiness} color="#FFE66D" />
-            <StatBar label="Smart" value={stats.intelligence} color="#A78BFA" />
+            <StatBar label={t("tamagotchi.hunger")} value={stats.hunger} color="#FF6B6B" />
+            <StatBar label={t("tamagotchi.energy")} value={stats.energy} color="#4ECDC4" />
+            <StatBar label={t("tamagotchi.happiness")} value={stats.happiness} color="#FFE66D" />
+            <StatBar label={t("tamagotchi.intelligence")} value={stats.intelligence} color="#A78BFA" />
           </div>
         </div>
       )}

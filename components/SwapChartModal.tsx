@@ -23,6 +23,7 @@ import {
   type SwapQuote,
   type TokenInfo,
 } from "../lib/swap-service"
+import { useLanguage } from "../lib/language-context"
 
 interface SwapChartModalProps {
   isOpen: boolean
@@ -32,6 +33,7 @@ interface SwapChartModalProps {
 }
 
 const SwapChartModal: React.FC<SwapChartModalProps> = ({ isOpen, onClose, walletBalance, walletAddress }) => {
+  const { t } = useLanguage()
   const [activeTab, setActiveTab] = useState<"swap" | "chart">("swap")
   const [isDarkMode, setIsDarkMode] = useState(false)
   const [inputToken, setInputToken] = useState<TokenInfo>(TOKENS.SOL)
@@ -165,10 +167,10 @@ const SwapChartModal: React.FC<SwapChartModalProps> = ({ isOpen, onClose, wallet
         setOutputAmount(formatTokenAmount(quoteResult.outAmount, outputToken.decimals))
       } else {
         setOutputAmount("")
-        setError("Nao foi possivel obter cotacao.")
+        setError(t("swap.quoteError"))
       }
     } catch (err) {
-      setError("Erro ao obter cotacao.")
+      setError(t("swap.error"))
     } finally {
       setIsLoadingQuote(false)
     }
@@ -204,7 +206,7 @@ const SwapChartModal: React.FC<SwapChartModalProps> = ({ isOpen, onClose, wallet
     if (isNaN(val) || val <= 0) return
 
     if (inputToken.symbol === "SOL" && val > walletBalance) {
-      setError("Saldo insuficiente.")
+      setError(t("swap.insufficientBalance"))
       return
     }
 
@@ -219,7 +221,7 @@ const SwapChartModal: React.FC<SwapChartModalProps> = ({ isOpen, onClose, wallet
     } else if (result.userRejected) {
       setIsSwapping(false)
     } else {
-      setError(result.error || "Erro ao executar swap.")
+      setError(result.error || t("swap.executeError"))
     }
 
     setIsSwapping(false)

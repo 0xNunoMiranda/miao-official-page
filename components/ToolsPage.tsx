@@ -481,14 +481,14 @@ const ToolsPage: React.FC<ToolsPageProps> = ({ onBack, walletState }) => {
                       {/* Social Share Group */}
                       <button
                         onClick={() => handleSocialShare("twitter")}
-                        className="bg-[#1DA1F2] text-white p-4 rounded-xl border-b-4 border-[#1681bf] active:border-b-0 active:translate-y-1 transition-all hover:brightness-110"
+                        className="bg-[var(--duo-blue)] text-white p-4 rounded-xl border-b-4 border-[var(--blue-button-border)] active:border-b-0 active:translate-y-1 transition-all hover:brightness-110"
                         title="Share on Twitter"
                       >
                         <Twitter size={20} fill="currentColor" />
                       </button>
                       <button
                         onClick={() => handleSocialShare("telegram")}
-                        className="bg-[#229ED9] text-white p-4 rounded-xl border-b-4 border-[#1b7db0] active:border-b-0 active:translate-y-1 transition-all hover:brightness-110"
+                        className="bg-[var(--duo-blue)] text-white p-4 rounded-xl border-b-4 border-[var(--blue-button-dark)] active:border-b-0 active:translate-y-1 transition-all hover:brightness-110"
                         title="Share on Telegram"
                       >
                         <Send size={20} fill="currentColor" />

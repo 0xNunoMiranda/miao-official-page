@@ -5,9 +5,14 @@ import { useState, useEffect, useRef } from "react"
 import type { GeneratedCat } from "@/types"
 import { Sparkles, RefreshCw, Zap, Share2, Download, X, AlertTriangle } from "lucide-react"
 import SnowCap from "./SnowCap"
+import SnowEffect from "./SnowEffect"
+import LeafEffect from "./LeafEffect"
+import { useLanguage } from "../lib/language-context"
+import { type Season } from "./SeasonSelector"
 
 interface CatGeneratorProps {
   isChristmasMode?: boolean
+  season?: Season
 }
 
 const CAT_REFERENCE_IMAGE = "/images/cat.png"
@@ -190,7 +195,8 @@ declare global {
   }
 }
 
-const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false }) => {
+const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false, season = "normal" }) => {
+  const { t } = useLanguage()
   const [cats, setCats] = useState<GeneratedCat[]>([])
   const [loading, setLoading] = useState(false)
   const [prompt, setPrompt] = useState("")
@@ -249,7 +255,7 @@ const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false }) 
   // Função para autenticar o usuário
   const handleSignIn = async () => {
     if (!window.puter?.auth) {
-      setError("Puter.js ainda não está carregado. Por favor, aguarda um momento.")
+      setError(t("generator.puterNotLoaded"))
       return
     }
 
@@ -264,7 +270,7 @@ const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false }) 
       }
     } catch (err) {
       console.error("Authentication error:", err)
-      setError(err instanceof Error ? err.message : "Falha ao autenticar. Tenta novamente.")
+      setError(err instanceof Error ? err.message : t("generator.authFailed"))
     } finally {
       setIsAuthenticating(false)
     }
@@ -272,12 +278,12 @@ const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false }) 
 
   const handleGenerate = async () => {
     if (!prompt.trim()) {
-      alert("Por favor, insere um prompt.")
+      alert(t("generator.pleaseEnterPrompt"))
       return
     }
 
     if (!puterReady) {
-      setError("Puter.js ainda não está carregado. Por favor, aguarda um momento.")
+      setError(t("generator.puterNotLoaded"))
       return
     }
 
@@ -285,13 +291,13 @@ const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false }) 
     if (!isAuthenticated) {
       if (window.puter?.auth) {
         if (!window.puter.auth.isSignedIn()) {
-          setError("Por favor, autentica-te primeiro para gerar imagens.")
+          setError(t("generator.pleaseAuthenticate"))
           return
         } else {
           setIsAuthenticated(true)
         }
       } else {
-        setError("Autenticação não disponível. Por favor, recarrega a página.")
+        setError(t("generator.authNotAvailable"))
         return
       }
     }
@@ -313,7 +319,7 @@ const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false }) 
       const finalPrompt = `${baseCharacteristics}, ${userInput}. Estilo cartoon animado, personagem mascote expressivo, fundo branco ou transparente, alta qualidade, detalhes nítidos, cores vibrantes`
 
       if (!window.puter?.ai?.txt2img) {
-        throw new Error("Puter.ai não está disponível")
+        throw new Error(t("generator.puterNotAvailable"))
       }
 
       const img = await window.puter.ai.txt2img(finalPrompt, { model, quality })
@@ -339,7 +345,7 @@ const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false }) 
       }, 300)
     } catch (err) {
       console.error("Generation error:", err)
-      setError(err instanceof Error ? err.message : "Falha ao gerar a imagem. Tenta novamente.")
+      setError(err instanceof Error ? err.message : t("generator.generationFailed"))
     } finally {
       setLoading(false)
     }
@@ -368,7 +374,7 @@ const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false }) 
       }
     } catch (e) {
       console.error(e)
-      alert("Failed to download image.")
+      alert(t("generator.downloadFailed"))
     }
   }
 
@@ -435,13 +441,13 @@ const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false }) 
         a.click()
         document.body.removeChild(a)
         window.URL.revokeObjectURL(url)
-        alert("📥 Imagem descarregada! Podes partilhá-la manualmente.")
+        alert("📥 " + t("generator.download") + "!")
       }
     } catch (e) {
       console.error(e)
       // Se o usuário cancelar o share, não mostrar erro
       if (e instanceof Error && e.name !== "AbortError") {
-        alert("❌ Erro ao partilhar: " + (e.message || "Falha desconhecida"))
+        alert("❌ " + t("generator.shareError") + " " + (e.message || t("generator.unknownError")))
       }
     }
   }
@@ -470,6 +476,16 @@ const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false }) 
         </p>
 
         <div className="max-w-3xl mx-auto bg-[var(--bg-secondary)] border-b-8 border-[var(--border-color)] rounded-[2.5rem] p-8 md:p-10 relative overflow-hidden text-left shadow-lg">
+          {isChristmasMode && (
+            <div className="absolute inset-0 rounded-[2.5rem] overflow-hidden pointer-events-none z-0">
+              <SnowEffect isActive={isChristmasMode} borderRadius="2.5rem" />
+            </div>
+          )}
+          {season === "fall" && (
+            <div className="absolute inset-0 rounded-[2.5rem] overflow-hidden pointer-events-none z-0">
+              <LeafEffect isActive={season === "fall"} />
+            </div>
+          )}
           <SnowCap className="h-12" visible={isChristmasMode} />
 
           <div className="mb-6 relative z-10 flex items-center gap-4 p-4 bg-[var(--bg-tertiary)] rounded-2xl border-2 border-[var(--border-color)]">
@@ -479,9 +495,9 @@ const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false }) 
               className="w-20 h-20 object-contain rounded-xl bg-white"
             />
             <div className="flex-1">
-              <p className="font-black text-sm uppercase text-[var(--brand)] tracking-wide">Base Character</p>
+              <p className="font-black text-sm uppercase text-[var(--brand)] tracking-wide">{t("generator.baseCharacter")}</p>
               <p className="text-[var(--text-secondary)] text-sm">
-                All generations will be based on this green cat character. Just describe what you want it to do or wear!
+                {t("generator.baseCharacterDesc")}
               </p>
             </div>
           </div>
@@ -495,14 +511,14 @@ const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false }) 
           {puterReady && !isAuthenticated && (
             <div className="mb-6 p-4 bg-yellow-100 dark:bg-yellow-900/30 border-2 border-yellow-300 dark:border-yellow-700 rounded-2xl">
               <p className="text-yellow-600 dark:text-yellow-400 font-bold text-sm mb-3">
-                ⚠️ Autenticação necessária para gerar imagens
+                {t("generator.authRequired")}
               </p>
               <button
                 onClick={handleSignIn}
                 disabled={isAuthenticating}
-                className="bg-[#1CB0F6] text-white px-6 py-3 rounded-xl font-bold uppercase tracking-wide border-b-4 border-[#1899D6] active:border-b-0 active:translate-y-1 hover:brightness-110 transition-all disabled:opacity-70 disabled:cursor-wait"
+                className="bg-[var(--duo-blue)] text-white px-6 py-3 rounded-xl font-bold uppercase tracking-wide border-b-4 border-[var(--blue-button-border)] active:border-b-0 active:translate-y-1 hover:brightness-110 transition-all disabled:opacity-70 disabled:cursor-wait"
               >
-                {isAuthenticating ? "A autenticar..." : "Autenticar com Puter"}
+                {isAuthenticating ? t("generator.authenticating") : t("generator.authenticate")}
               </button>
             </div>
           )}
@@ -513,10 +529,10 @@ const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false }) 
               <div className="flex items-center justify-between">
                 <div>
                   <p className="font-black text-sm uppercase text-[var(--text-secondary)] tracking-wide mb-1">
-                    Gerações Hoje
+                    {t("generator.generationsToday")}
                   </p>
                   <p className="text-[var(--text-primary)] font-bold">
-                    {dailyCount} / {MAX_GENERATIONS_PER_DAY} utilizadas
+                    {dailyCount} / {MAX_GENERATIONS_PER_DAY} {t("generator.used")}
                   </p>
                 </div>
                 <div className="flex gap-1">
@@ -536,7 +552,7 @@ const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false }) 
               </div>
               {dailyCount >= MAX_GENERATIONS_PER_DAY && (
                 <p className="mt-2 text-sm font-bold text-red-500">
-                  Limite diário atingido. Volta amanhã!
+                  {t("generator.dailyLimit")}
                 </p>
               )}
             </div>
@@ -544,25 +560,25 @@ const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false }) 
 
           <div className="mb-6 relative z-10">
             <label className="block font-black text-sm uppercase text-[var(--text-secondary)] mb-3 tracking-widest">
-              Prompt (texto)
+              {t("generator.prompt")}
             </label>
             <input
               type="text"
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && !loading && handleGenerate()}
-              placeholder="Escreve algo para gerar a imagem"
+              placeholder={t("generator.promptPlaceholder")}
               className="w-full bg-[var(--bg-tertiary)] border-2 border-[var(--border-color)] rounded-2xl p-5 font-bold text-lg text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-none focus:border-[var(--brand)] focus:ring-4 focus:ring-[var(--brand)]/20 transition-all"
             />
             <p className="mt-2 text-sm text-[var(--text-secondary)]">
-              Dica: Descreve ações, trajes ou cenários para o gato verde!
+              {t("generator.promptHint")}
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 relative z-10">
             <div>
               <label className="block font-black text-sm uppercase text-[var(--text-secondary)] mb-3 tracking-widest">
-                Modelo
+                {t("generator.model")}
               </label>
               <select
                 value={model}
@@ -576,16 +592,16 @@ const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false }) 
             </div>
             <div>
               <label className="block font-black text-sm uppercase text-[var(--text-secondary)] mb-3 tracking-widest">
-                Qualidade
+                {t("generator.quality")}
               </label>
               <select
                 value={quality}
                 onChange={(e) => setQuality(e.target.value)}
                 className="w-full bg-[var(--bg-tertiary)] border-2 border-[var(--border-color)] rounded-2xl p-4 font-bold text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand)] focus:ring-4 focus:ring-[var(--brand)]/20 transition-all"
               >
-                <option value="low">Baixa</option>
-                <option value="medium">Média</option>
-                <option value="high">Alta</option>
+                <option value="low">{t("generator.quality.low")}</option>
+                <option value="medium">{t("generator.quality.medium")}</option>
+                <option value="high">{t("generator.quality.high")}</option>
               </select>
             </div>
           </div>
@@ -607,14 +623,14 @@ const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false }) 
               <Sparkles size={28} className="text-yellow-300 fill-current" />
             )}
             {loading
-              ? "A gerar imagem..."
+              ? t("generator.generating")
               : !puterReady
-              ? "A carregar..."
+              ? t("generator.loading")
               : !isAuthenticated
-              ? "Autentica-te primeiro"
+              ? t("generator.authenticateFirst")
               : dailyCount >= MAX_GENERATIONS_PER_DAY
-              ? "Limite diário atingido"
-              : "Gerar Imagem"}
+              ? t("generator.dailyLimitReached")
+              : t("generator.generate")}
           </button>
         </div>
 
@@ -640,15 +656,15 @@ const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false }) 
                   <div className="flex gap-2">
                     <button
                       onClick={() => downloadImage(cat)}
-                      className="bg-[var(--brand)] text-white p-3 rounded-xl border-b-4 border-[#2a9d6a] active:border-b-0 active:translate-y-1 transition-all"
-                      title="Descarregar Imagem"
+                      className="bg-[var(--brand)] text-white p-3 rounded-xl border-b-4 border-[var(--btn-shadow)] active:border-b-0 active:translate-y-1 transition-all"
+                      title={t("generator.download")}
                     >
                       <Download size={18} />
                     </button>
                     <button
                       onClick={() => shareImage(cat)}
-                      className="bg-[#229ED9] text-white p-3 rounded-xl border-b-4 border-[#1b7db0] active:border-b-0 active:translate-y-1 transition-all"
-                      title="Partilhar em Redes Sociais"
+                      className="bg-[var(--duo-blue)] text-white p-3 rounded-xl border-b-4 border-[var(--blue-button-dark)] active:border-b-0 active:translate-y-1 transition-all"
+                      title={t("generator.share")}
                     >
                       <Share2 size={18} />
                     </button>
@@ -671,11 +687,11 @@ const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false }) 
                 <div className="w-10 h-10 rounded-xl bg-yellow-500 flex items-center justify-center">
                   <AlertTriangle className="text-white" size={20} />
                 </div>
-                Limite Diário Atingido
+                {t("generator.limitModalTitle")}
               </h2>
               <button
                 onClick={() => setShowLimitModal(false)}
-                className="w-10 h-10 flex items-center justify-center rounded-xl bg-[var(--bg-tertiary)] border-2 border-[var(--border-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-red-500/10 hover:border-red-500 hover:text-red-500 transition-all"
+                className="w-10 h-10 flex items-center justify-center rounded-xl bg-[var(--bg-tertiary)] border-2 border-b-4 border-[var(--btn-shadow)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-red-500/10 hover:border-red-500 hover:text-red-500 active:border-b-2 active:translate-y-[2px] transition-all"
               >
                 <X size={20} />
               </button>
@@ -687,23 +703,23 @@ const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false }) 
               </div>
               
               <h3 className="text-2xl font-black text-[var(--text-primary)] mb-4">
-                Limite de Gerações Atingido
+                {t("generator.limitModalTitle")}
               </h3>
               
               <div className="space-y-3 mb-6">
                 <p className="text-[var(--text-secondary)] font-bold">
-                  Já geraste <span className="text-[var(--brand)] font-black">{MAX_GENERATIONS_PER_DAY}</span> imagens hoje!
+                  {t("generator.limitModalText1").replace("{count}", String(MAX_GENERATIONS_PER_DAY))}
                 </p>
                 <p className="text-sm text-[var(--text-secondary)]">
-                  O limite diário é de <span className="font-black text-[var(--brand)]">{MAX_GENERATIONS_PER_DAY}</span> gerações por dia.
+                  {t("generator.limitModalText2").replace("{count}", String(MAX_GENERATIONS_PER_DAY))}
                 </p>
                 <p className="text-sm text-[var(--text-secondary)] font-bold">
-                  Volta amanhã para gerar mais imagens! 🐱
+                  {t("generator.limitModalText3")}
                 </p>
               </div>
 
               <div className="bg-[var(--bg-tertiary)] rounded-2xl p-4 border-2 border-[var(--border-color)] mb-4">
-                <p className="text-xs font-bold text-[var(--text-secondary)] mb-2">Gerações de Hoje</p>
+                <p className="text-xs font-bold text-[var(--text-secondary)] mb-2">{t("generator.limitModalGenerations")}</p>
                 <div className="flex justify-center gap-2">
                   {Array.from({ length: MAX_GENERATIONS_PER_DAY }).map((_, index) => (
                     <div
@@ -720,7 +736,7 @@ const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false }) 
                 onClick={() => setShowLimitModal(false)}
                 className="w-full bg-[var(--brand)] text-white font-black py-4 rounded-xl border-[3px] border-[var(--comic-outline)] shadow-[4px_4px_0_0_var(--comic-outline)] hover:shadow-[6px_6px_0_0_var(--comic-outline)] active:shadow-none active:translate-x-[4px] active:translate-y-[4px] transition-all"
               >
-                Entendido
+                {t("generator.limitModalUnderstood")}
               </button>
             </div>
           </div>

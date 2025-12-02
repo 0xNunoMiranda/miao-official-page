@@ -3,9 +3,14 @@
 import type React from "react"
 import { useState, useEffect, useCallback, useRef } from "react"
 import SnowCap from "./SnowCap"
+import SnowEffect from "./SnowEffect"
+import LeafEffect from "./LeafEffect"
+import { useLanguage } from "../lib/language-context"
+import { type Season } from "./SeasonSelector"
 
 interface NFTSectionProps {
   isChristmasMode?: boolean
+  season?: Season
 }
 
 const NFT_BASE_URL =
@@ -77,7 +82,8 @@ interface DisplayNFT {
   animationDuration: number
 }
 
-const NFTSection: React.FC<NFTSectionProps> = ({ isChristmasMode = false }) => {
+const NFTSection: React.FC<NFTSectionProps> = ({ isChristmasMode = false, season = "normal" }) => {
+  const { t } = useLanguage()
   const [displayNFTs, setDisplayNFTs] = useState<DisplayNFT[]>([])
   const [isVisible, setIsVisible] = useState(true)
   const [currentExitAnim, setCurrentExitAnim] = useState("")
@@ -393,17 +399,26 @@ const NFTSection: React.FC<NFTSectionProps> = ({ isChristmasMode = false }) => {
             border: "2px solid var(--border-color)",
           }}
         >
+          {isChristmasMode && (
+            <div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none z-0">
+              <SnowEffect isActive={isChristmasMode} borderRadius="1rem" />
+            </div>
+          )}
+          {season === "fall" && (
+            <div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none z-0">
+              <LeafEffect isActive={season === "fall"} />
+            </div>
+          )}
           <SnowCap className="h-6 opacity-90" visible={isChristmasMode} />
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 lg:gap-6">
             {/* Column 1: Mint Info */}
             <div className="flex flex-col justify-center">
               <h3 className="text-xl md:text-2xl lg:text-3xl font-black mb-2" style={{ color: "var(--text-primary)" }}>
-                Mint MIAO NFT
+                {t("nft.title")}
               </h3>
               <p className="text-sm font-medium leading-relaxed mb-4" style={{ color: "var(--text-secondary)" }}>
-                Born from the shadows of the meme wars, the $MIAO NFTs embody stealth and energy. Own a symbol of power
-                in the streets.
+                {t("nft.description")}
               </p>
 
               <div className="flex flex-col sm:flex-row gap-2.5">
@@ -411,17 +426,17 @@ const NFTSection: React.FC<NFTSectionProps> = ({ isChristmasMode = false }) => {
                   href="https://launchmynft.io/sol/20841"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm font-bold py-2.5 px-5 text-center uppercase tracking-wide rounded-xl bg-[var(--brand)] text-white border-[3px] border-[var(--comic-outline)] shadow-[4px_4px_0_0_var(--comic-outline)] hover:shadow-[6px_6px_0_0_var(--comic-outline)] hover:-translate-y-0.5 active:shadow-none active:translate-x-[4px] active:translate-y-[4px] transition-all"
+                  className="flex-1 text-sm font-bold py-2.5 px-5 text-center uppercase tracking-wide rounded-xl bg-[var(--brand)] text-white border-[3px] border-[var(--btn-shadow)] shadow-[4px_4px_0_0_var(--btn-shadow)] hover:shadow-[6px_6px_0_0_var(--btn-shadow)] hover:-translate-y-0.5 active:shadow-none active:translate-x-[4px] active:translate-y-[4px] transition-all"
                 >
-                  MINT V1
+                  {t("nft.mintV1")}
                 </a>
                 <a
                   href="https://launchmynft.io/sol/20841"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm font-bold py-2.5 px-5 text-center uppercase tracking-wide rounded-xl bg-[var(--bg-tertiary)] text-[var(--text-primary)] border-[3px] border-[var(--border-color)] shadow-[4px_4px_0_0_var(--border-color)] hover:shadow-[6px_6px_0_0_var(--border-color)] hover:-translate-y-0.5 active:shadow-none active:translate-x-[4px] active:translate-y-[4px] transition-all"
+                  className="flex-1 text-sm font-bold py-2.5 px-5 text-center uppercase tracking-wide rounded-xl bg-[var(--bg-tertiary)] text-[var(--text-primary)] border-[3px] border-[var(--btn-shadow)] shadow-[4px_4px_0_0_var(--btn-shadow)] hover:shadow-[6px_6px_0_0_var(--btn-shadow)] hover:-translate-y-0.5 active:shadow-none active:translate-x-[4px] active:translate-y-[4px] transition-all"
                 >
-                  MINT V2
+                  {t("nft.mintV2")}
                 </a>
               </div>
             </div>

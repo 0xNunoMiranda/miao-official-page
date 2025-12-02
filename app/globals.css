@@ -135,9 +135,9 @@
 :root,
 [data-theme="light"] {
   /* Duolingo-inspired light palette */
-  --primary: #2dd188;
+  --primary: #2CD387;
   --primary-hover: #25b374;
-  --primary-dark: #2dd188;
+  --primary-dark: #2CD387;
   --primary-foreground: #ffffff;
 
   --background: #ffffff;
@@ -155,7 +155,7 @@
   --accent-foreground: #1899d6;
 
   /* Duolingo fun colors */
-  --duo-green: #2dd188;
+  --duo-green: #2CD387;
   --duo-green-dark: #25b374;
   --duo-blue: #1cb0f6;
   --duo-blue-dark: #1899d6;
@@ -173,9 +173,9 @@
   --border: #e5e5e5;
   --border-strong: #afafaf;
   --input: #ffffff;
-  --ring: #2dd188;
+  --ring: #2CD387;
 
-  --chart-1: #2dd188;
+  --chart-1: #2CD387;
   --chart-2: #1cb0f6;
   --chart-3: #ff9600;
   --chart-4: #ff4b4b;
@@ -185,14 +185,14 @@
 
   --sidebar: #ffffff;
   --sidebar-foreground: #3c3c3c;
-  --sidebar-primary: #2dd188;
+  --sidebar-primary: #2CD387;
   --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: #f7f7f7;
   --sidebar-accent-foreground: #3c3c3c;
   --sidebar-border: #e5e5e5;
   --sidebar-ring: #2dd188;
 
-  /* Theme variables */
+  /* Theme variables - Spring (normal) - greenish tones */
   --bg-primary: #ffffff;
   --bg-secondary: #f7f7f7;
   --bg-tertiary: #e5e5e5;
@@ -200,23 +200,109 @@
   --text-primary: #3c3c3c;
   --text-secondary: #777777;
   --text-muted: #afafaf;
-  --brand: #2dd188;
+  --brand: #2CD387;
   --brand-dark: #25b374;
   --brand-light: #5ee0a8;
   --border-color: #e5e5e5;
-
-  /* 3D button shadows */
+  
+  /* 3D button shadows - Spring (normal) */
   --btn-shadow: #25b374;
   --btn-shadow-blue: #1899d6;
   --btn-shadow-red: #ea2b2b;
   --btn-shadow-orange: #e68600;
   --btn-shadow-purple: #9333ea;
   --btn-shadow-gray: #afafaf;
+  
+  /* Text stroke color - Spring (normal) */
+  --text-stroke: #ffffff;
+  
+  /* Additional border colors - Spring (normal) */
+  --capsule-border: #15413B;
+  --tamagotchi-border: #1a6b4a;
+  --telegram-border: #1e2a35;
+  --blue-button-border: #1899d6;
+  --blue-button-dark: #1b7db0;
+}
+
+/* Fall season - warm orange/yellow tones */
+[data-theme="light"][data-season="fall"] {
+  --background: #fff7ed;
+  --card: #fff7ed;
+  --popover: #fff7ed;
+  --secondary: #ffedd5;
+  --muted: #ffedd5;
+  --accent: #fed7aa;
+  --sidebar: #fff7ed;
+  --sidebar-accent: #ffedd5;
+  --sidebar-border: #fed7aa;
+  --bg-primary: #fff7ed;
+  --bg-secondary: #ffedd5;
+  --bg-tertiary: #fed7aa;
+  --bg-elevated: #fff7ed;
+  --border-color: #fed7aa;
+  --input: #fff7ed;
+  --border: #fed7aa;
+  
+  /* 3D button shadows - Fall */
+  --btn-shadow: #fb923c;
+  --btn-shadow-blue: #1899d6;
+  --btn-shadow-red: #ea2b2b;
+  --btn-shadow-orange: #e68600;
+  --btn-shadow-purple: #9333ea;
+  --btn-shadow-gray: #afafaf;
+  
+  /* Text stroke color - Fall */
+  --text-stroke: #fff7ed;
+  
+  /* Additional border colors - Fall */
+  --capsule-border: #15413B;
+  --tamagotchi-border: #c2410c;
+  --telegram-border: #1e2a35;
+  --blue-button-border: #1899d6;
+  --blue-button-dark: #1b7db0;
+}
+
+/* Winter season - cool blue/white tones */
+[data-theme="light"][data-season="winter"] {
+  --background: #f0f9ff;
+  --card: #f0f9ff;
+  --popover: #f0f9ff;
+  --secondary: #e0f2fe;
+  --muted: #e0f2fe;
+  --accent: #bae6fd;
+  --sidebar: #f0f9ff;
+  --sidebar-accent: #e0f2fe;
+  --sidebar-border: #bae6fd;
+  --bg-primary: #f0f9ff;
+  --bg-secondary: #e0f2fe;
+  --bg-tertiary: #bae6fd;
+  --bg-elevated: #f0f9ff;
+  --border-color: #bae6fd;
+  --input: #f0f9ff;
+  --border: #bae6fd;
+
+  /* 3D button shadows - Winter */
+  --btn-shadow: #0ea5e9;
+  --btn-shadow-blue: #1899d6;
+  --btn-shadow-red: #ea2b2b;
+  --btn-shadow-orange: #e68600;
+  --btn-shadow-purple: #9333ea;
+  --btn-shadow-gray: #afafaf;
+  
+  /* Text stroke color - Winter */
+  --text-stroke: #f0f9ff;
+  
+  /* Additional border colors - Winter */
+  --capsule-border: #15413B;
+  --tamagotchi-border: #0369a1;
+  --telegram-border: #1e2a35;
+  --blue-button-border: #1899d6;
+  --blue-button-dark: #1b7db0;
 }
 
 [data-theme="dark"] {
   /* Duolingo-inspired dark palette */
-  --primary: #2dd188;
+  --primary: #2CD387;
   --primary-hover: #5ee0a8;
   --primary-dark: #25b374;
   --primary-foreground: #ffffff;
@@ -254,9 +340,9 @@
   --border: #233a42;
   --border-strong: #3d5a66;
   --input: #1a2c33;
-  --ring: #2dd188;
+  --ring: #2CD387;
 
-  --chart-1: #2dd188;
+  --chart-1: #2CD387;
   --chart-2: #1cb0f6;
   --chart-3: #ff9600;
   --chart-4: #ff4b4b;
@@ -264,7 +350,7 @@
 
   --sidebar: #1a2c33;
   --sidebar-foreground: #ffffff;
-  --sidebar-primary: #2dd188;
+  --sidebar-primary: #2CD387;
   --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: #233a42;
   --sidebar-accent-foreground: #ffffff;
@@ -279,7 +365,7 @@
   --text-primary: #ffffff;
   --text-secondary: #9ca3af;
   --text-muted: #6b7280;
-  --brand: #2dd188;
+  --brand: #2CD387;
   --brand-dark: #25b374;
   --brand-light: #5ee0a8;
   --border-color: #233a42;
@@ -718,4 +804,10 @@ section,
     0 6px 12px rgba(0, 0, 0, 0.4),
     inset 0 2px 4px rgba(255, 255, 255, 0.2),
     inset 0 -2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.truncate {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  /* overflow: hidden; */
 }
