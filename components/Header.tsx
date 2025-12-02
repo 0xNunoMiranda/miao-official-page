@@ -386,7 +386,7 @@ const Header: React.FC<HeaderProps> = ({
 
               {/* Version */}
               <div className="px-4 py-2 border-t-2 border-[var(--border-color)]">
-                <p className="text-xs font-medium text-[var(--text-secondary)] text-center">v1.0.6</p>
+                <p className="text-xs font-medium text-[var(--text-secondary)] text-center">v1.0.7</p>
               </div>
 
               {/* Social Media Buttons - Only in menu when very tight */}
