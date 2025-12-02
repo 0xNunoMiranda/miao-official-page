@@ -130,10 +130,10 @@ export default function TamagotchiCat() {
   }) => (
     <button
       onClick={onClick}
-      className="w-14 h-14 md:w-16 md:h-16 lg:w-18 lg:h-18 rounded-full bg-[var(--duo-green)] hover:bg-[var(--duo-green-dark)] border-2 border-[var(--tamagotchi-border)] border-b-4 active:border-b-2 active:translate-y-[2px] flex items-center justify-center transition-all"
+      className="w-14 h-14 md:w-16 md:h-16 lg:w-18 lg:h-18 rounded-full bg-[var(--bg-secondary)] hover:bg-[var(--bg-tertiary)] border-2 border-[var(--border-color)] border-b-4 active:border-b-2 active:translate-y-[2px] flex items-center justify-center transition-all"
       title={label}
     >
-      <Icon size={20} className="text-white md:w-5 md:h-5 lg:w-6 lg:h-6" />
+      <Icon size={20} className="text-[var(--text-primary)] md:w-5 md:h-5 lg:w-6 lg:h-6" />
     </button>
   )
 
@@ -153,7 +153,7 @@ export default function TamagotchiCat() {
           onClick={() => setShowStats(!showStats)}
           className={`w-14 h-14 md:w-16 md:h-16 lg:w-18 lg:h-18 rounded-full border-2 border-b-4 active:border-b-2 active:translate-y-[2px] flex items-center justify-center transition-all ${
             showStats
-              ? "bg-[var(--duo-green)] text-white border-[var(--tamagotchi-border)]"
+              ? "bg-[var(--bg-tertiary)] text-[var(--text-primary)] border-[var(--border-color)]"
               : "bg-[var(--bg-secondary)] text-[var(--text-primary)] border-[var(--border-color)]"
           }`}
           title={t("tamagotchi.stats")}
