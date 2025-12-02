@@ -164,7 +164,7 @@ export default function TamagotchiCat() {
 
       {/* Cat image */}
       <div
-        className="relative cursor-pointer select-none flex-shrink-0 z-30"
+        className="relative cursor-pointer select-none flex-shrink-0 z-30 w-full"
         style={{
           animation: "tamagotchi-float 3s ease-in-out infinite",
         }}
@@ -181,7 +181,8 @@ export default function TamagotchiCat() {
         <img
           src={catEmotions[currentEmotion].src || "/placeholder.svg"}
           alt={`Miao ${catEmotions[currentEmotion].name}`}
-          className="relative w-full max-w-[280px] sm:max-w-[380px] md:max-w-[480px] lg:max-w-[580px] h-auto object-contain"
+          className="relative w-full max-w-[280px] sm:max-w-[320px] md:max-w-[400px] lg:max-w-[500px] xl:max-w-[580px] h-auto object-contain mx-auto"
+          style={{ maxHeight: '90vh' }}
           draggable={false}
         />
       </div>
