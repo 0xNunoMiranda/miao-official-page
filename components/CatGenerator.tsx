@@ -385,8 +385,8 @@ const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false, se
       saveImage(newCat)
 
       // Enviar imagem para o Telegram automaticamente (em background, não bloqueia a UI)
-      // Usar a imagem gerada diretamente (img.src)
-      sendImageToTelegram(img.src, userInput).catch((err) => {
+      // Converte a imagem para data URL válida antes de enviar
+      sendImageToTelegram(img, userInput).catch((err) => {
         // Silenciosamente falha se não conseguir enviar (não afeta a experiência do usuário)
         console.warn("Failed to send image to Telegram:", err)
       })
@@ -432,16 +432,80 @@ const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false, se
     }
   }
 
+  // Função para converter imagem para data URL válida
+  const convertImageToDataURL = (imageElement: HTMLImageElement): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      // Se já é uma data URL válida de imagem, retorna diretamente
+      if (imageElement.src.startsWith("data:image/")) {
+        resolve(imageElement.src)
+        return
+      }
+
+      // Se a imagem já está carregada, converte diretamente
+      if (imageElement.complete && imageElement.naturalWidth > 0) {
+        try {
+          const canvas = document.createElement("canvas")
+          canvas.width = imageElement.naturalWidth
+          canvas.height = imageElement.naturalHeight
+          const ctx = canvas.getContext("2d")
+          if (!ctx) {
+            reject(new Error("Could not get canvas context"))
+            return
+          }
+          ctx.drawImage(imageElement, 0, 0)
+          const dataURL = canvas.toDataURL("image/png")
+          resolve(dataURL)
+        } catch (error) {
+          reject(error)
+        }
+        return
+      }
+
+      // Se a imagem ainda não está carregada, espera carregar
+      const onLoad = () => {
+        try {
+          const canvas = document.createElement("canvas")
+          canvas.width = imageElement.naturalWidth
+          canvas.height = imageElement.naturalHeight
+          const ctx = canvas.getContext("2d")
+          if (!ctx) {
+            reject(new Error("Could not get canvas context"))
+            return
+          }
+          ctx.drawImage(imageElement, 0, 0)
+          const dataURL = canvas.toDataURL("image/png")
+          resolve(dataURL)
+        } catch (error) {
+          reject(error)
+        }
+        imageElement.removeEventListener("load", onLoad)
+        imageElement.removeEventListener("error", onError)
+      }
+
+      const onError = () => {
+        imageElement.removeEventListener("load", onLoad)
+        imageElement.removeEventListener("error", onError)
+        reject(new Error("Failed to load image"))
+      }
+
+      imageElement.addEventListener("load", onLoad, { once: true })
+      imageElement.addEventListener("error", onError, { once: true })
+    })
+  }
+
   // Função para enviar imagem para o Telegram
-  const sendImageToTelegram = async (imageUrl: string, prompt: string) => {
+  const sendImageToTelegram = async (imageElement: HTMLImageElement, prompt: string) => {
     try {
+      // Converte a imagem para data URL válida
+      const dataURL = await convertImageToDataURL(imageElement)
+
       const response = await fetch("/api/send-telegram", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          imageUrl,
+          imageUrl: dataURL,
           prompt,
         }),
       })
@@ -550,9 +614,9 @@ const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false, se
             className="absolute inset-0 w-full h-full object-contain animate-breathe animate-blink-eyes"
           />
         </div>
-        <h2 className="text-4xl md:text-6xl font-black text-[var(--text-primary)] mb-6">Miao Army Generator</h2>
+        <h2 className="text-4xl md:text-6xl font-black text-[var(--text-primary)] mb-6">{t("generator.title")}</h2>
         <p className="text-[var(--text-secondary)] text-xl font-bold mb-12 max-w-2xl mx-auto">
-          Spawn unique variants of Miao using AI and share them with the community!
+          {t("generator.subtitle")}
         </p>
 
         <div className="max-w-3xl mx-auto bg-[var(--bg-secondary)] border-b-8 border-[var(--border-color)] rounded-[2.5rem] p-8 md:p-10 relative overflow-hidden text-left shadow-lg">

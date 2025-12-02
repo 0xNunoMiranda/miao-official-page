@@ -169,8 +169,8 @@ export const translations: Record<Language, Record<string, string>> = {
     "tokenomics.roadmap.more": "Mais...",
 
     // Cat Generator
-    "generator.title": "Gerador do Exército Miao",
-    "generator.subtitle": "Gera variantes únicas de Miao usando IA e partilha-as com a comunidade!",
+    "generator.title": "Gerador do Exército Miao - GRATUITO",
+    "generator.subtitle": "Gera variantes únicas de Miao usando IA e partilha-as com a comunidade! 100% GRATUITO!",
     "generator.baseCharacter": "Personagem Base",
     "generator.baseCharacterDesc": "Todas as gerações serão baseadas neste personagem de gato verde. Apenas descreve o que queres que ele faça ou vista!",
     "generator.authRequired": "⚠️ Autenticação necessária para gerar imagens",
@@ -465,8 +465,8 @@ export const translations: Record<Language, Record<string, string>> = {
     "tokenomics.roadmap.more": "More...",
 
     // Cat Generator
-    "generator.title": "Miao Army Generator",
-    "generator.subtitle": "Spawn unique variants of Miao using AI and share them with the community!",
+    "generator.title": "Miao Army Generator - FREE",
+    "generator.subtitle": "Spawn unique variants of Miao using AI and share them with the community! 100% FREE!",
     "generator.baseCharacter": "Base Character",
     "generator.baseCharacterDesc": "All generations will be based on this green cat character. Just describe what you want it to do or wear!",
     "generator.authRequired": "⚠️ Authentication required to generate images",
@@ -761,8 +761,8 @@ export const translations: Record<Language, Record<string, string>> = {
     "tokenomics.roadmap.more": "Más...",
 
     // Cat Generator
-    "generator.title": "Generador del Ejército Miao",
-    "generator.subtitle": "¡Genera variantes únicas de Miao usando IA y compártelas con la comunidad!",
+    "generator.title": "Generador del Ejército Miao - GRATIS",
+    "generator.subtitle": "¡Genera variantes únicas de Miao usando IA y compártelas con la comunidad! ¡100% GRATIS!",
     "generator.baseCharacter": "Personaje Base",
     "generator.baseCharacterDesc": "Todas las generaciones se basarán en este personaje de gato verde. ¡Solo describe lo que quieres que haga o use!",
     "generator.authRequired": "⚠️ Autenticación necesaria para generar imágenes",
@@ -1057,8 +1057,8 @@ export const translations: Record<Language, Record<string, string>> = {
     "tokenomics.roadmap.more": "Plus...",
 
     // Cat Generator
-    "generator.title": "Générateur de l'Armée Miao",
-    "generator.subtitle": "Générez des variantes uniques de Miao en utilisant l'IA et partagez-les avec la communauté!",
+    "generator.title": "Générateur de l'Armée Miao - GRATUIT",
+    "generator.subtitle": "Générez des variantes uniques de Miao en utilisant l'IA et partagez-les avec la communauté! 100% GRATUIT!",
     "generator.baseCharacter": "Personnage de Base",
     "generator.baseCharacterDesc": "Toutes les générations seront basées sur ce personnage de chat vert. Décrivez simplement ce que vous voulez qu'il fasse ou porte!",
     "generator.authRequired": "⚠️ Authentification requise pour générer des images",
@@ -1354,8 +1354,8 @@ export const translations: Record<Language, Record<string, string>> = {
     "tokenomics.roadmap.more": "Mehr...",
 
     // Cat Generator
-    "generator.title": "Miao Armee Generator",
-    "generator.subtitle": "Erstelle einzigartige Varianten von Miao mit KI und teile sie mit der Community!",
+    "generator.title": "Miao Armee Generator - KOSTENLOS",
+    "generator.subtitle": "Erstelle einzigartige Varianten von Miao mit KI und teile sie mit der Community! 100% KOSTENLOS!",
     "generator.baseCharacter": "Basis-Charakter",
     "generator.baseCharacterDesc": "Alle Generationen basieren auf diesem grünen Katzen-Charakter. Beschreibe einfach, was er tun oder tragen soll!",
     "generator.authRequired": "⚠️ Authentifizierung erforderlich, um Bilder zu generieren",
@@ -1649,8 +1649,8 @@ export const translations: Record<Language, Record<string, string>> = {
     "tokenomics.roadmap.more": "更多...",
 
     // Cat Generator
-    "generator.title": "Miao军队生成器",
-    "generator.subtitle": "使用AI生成独特的Miao变体并与社区分享！",
+    "generator.title": "Miao军队生成器 - 免费",
+    "generator.subtitle": "使用AI生成独特的Miao变体并与社区分享！100%免费！",
     "generator.baseCharacter": "基础角色",
     "generator.baseCharacterDesc": "所有生成都将基于这个绿色猫角色。只需描述你想要它做什么或穿什么！",
     "generator.authRequired": "⚠️ 需要身份验证才能生成图像",
@@ -1944,8 +1944,8 @@ export const translations: Record<Language, Record<string, string>> = {
     "tokenomics.roadmap.more": "المزيد...",
 
     // Cat Generator
-    "generator.title": "مولد جيش Miao",
-    "generator.subtitle": "أنشئ متغيرات فريدة من Miao باستخدام الذكاء الاصطناعي وشاركها مع المجتمع!",
+    "generator.title": "مولد جيش Miao - مجاني",
+    "generator.subtitle": "أنشئ متغيرات فريدة من Miao باستخدام الذكاء الاصطناعي وشاركها مع المجتمع! 100% مجاني!",
     "generator.baseCharacter": "الشخصية الأساسية",
     "generator.baseCharacterDesc": "ستكون جميع الأجيال مبنية على شخصية القط الأخضر هذه. فقط صف ما تريده أن يفعل أو يرتدي!",
     "generator.authRequired": "⚠️ مطلوب المصادقة لتوليد الصور",

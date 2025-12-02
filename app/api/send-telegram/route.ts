@@ -24,32 +24,36 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Log para debug (remover em produção se necessário)
-    console.log("Received image URL type:", imageUrl.substring(0, 50) + "...")
+    // Log para debug
+    const urlPreview = imageUrl.substring(0, 100)
+    console.log("Received image URL type:", urlPreview + "...")
     console.log("Is data URL:", imageUrl.startsWith("data:image"))
 
-    // Converter data URL para base64
-    // A imagem deve vir como data URL do Puter
-    let imageBase64: string
+    // Validar que é uma data URL de imagem
     if (!imageUrl.startsWith("data:image")) {
+      console.error("Invalid image format received:", urlPreview)
       return NextResponse.json(
-        { error: "Invalid image format. Expected data URL." },
+        { 
+          error: "Invalid image format. Expected data:image URL.",
+          receivedType: imageUrl.substring(0, 30)
+        },
         { status: 400 }
       )
     }
 
     // Extrair o base64 da data URL
     // Formato esperado: data:image/png;base64,iVBORw0KGgo...
-    const base64Match = imageUrl.match(/^data:image\/\w+;base64,(.+)$/)
-    if (!base64Match || !base64Match[1]) {
-      console.error("Failed to extract base64 from data URL")
+    const base64Match = imageUrl.match(/^data:image\/(\w+);base64,(.+)$/)
+    if (!base64Match || !base64Match[2]) {
+      console.error("Failed to extract base64 from data URL. Format:", urlPreview)
       return NextResponse.json(
         { error: "Invalid image format. Could not extract base64 data." },
         { status: 400 }
       )
     }
     
-    imageBase64 = base64Match[1]
+    const imageFormat = base64Match[1] // png, jpeg, webp, etc.
+    const imageBase64 = base64Match[2]
     
     // Validar que temos dados
     if (!imageBase64 || imageBase64.length === 0) {
@@ -66,6 +70,10 @@ export async function POST(request: NextRequest) {
 
     // Converter base64 para Buffer
     const imageBuffer = Buffer.from(imageBase64, "base64")
+
+    // Normalizar o formato da imagem (jpeg -> jpg para o filename)
+    const normalizedFormat = imageFormat === "jpeg" ? "jpg" : imageFormat
+    const mimeType = imageFormat === "jpeg" ? "image/jpeg" : `image/${imageFormat}`
 
     // Enviar para o Telegram usando sendPhoto
     // O Telegram aceita multipart/form-data
@@ -84,8 +92,8 @@ export async function POST(request: NextRequest) {
     
     // photo
     parts.push(Buffer.from(`--${boundary}\r\n`))
-    parts.push(Buffer.from(`Content-Disposition: form-data; name="photo"; filename="miao-generated.png"\r\n`))
-    parts.push(Buffer.from(`Content-Type: image/png\r\n\r\n`))
+    parts.push(Buffer.from(`Content-Disposition: form-data; name="photo"; filename="miao-generated.${normalizedFormat}"\r\n`))
+    parts.push(Buffer.from(`Content-Type: ${mimeType}\r\n\r\n`))
     parts.push(imageBuffer)
     parts.push(Buffer.from(`\r\n`))
     
