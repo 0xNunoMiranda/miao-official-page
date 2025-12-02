@@ -3,7 +3,7 @@
 import type React from "react"
 import { useState, useEffect } from "react"
 import { X } from "lucide-react"
-import { LanguageProvider } from "@/lib/language-context"
+import { LanguageProvider, useLanguage } from "@/lib/language-context"
 import Header from "@/components/Header"
 import Hero from "@/components/Hero"
 import About from "@/components/About"
@@ -17,7 +17,7 @@ import ToolsPage from "@/components/ToolsPage"
 import WalletModal from "@/components/WalletModal"
 import SwapModal from "@/components/SwapModal"
 import SwapChartModal from "@/components/SwapChartModal"
-import WhitepaperModal from "@/components/WhitepaperModal"
+import { redirectToWhitepaper } from "@/components/WhitepaperModal"
 import SnowEffect from "@/components/SnowEffect"
 import LeafEffect from "@/components/LeafEffect"
 import SeasonSelector, { type Season } from "@/components/SeasonSelector"
@@ -29,8 +29,8 @@ const BG_FALL = "/images/grass3d-fall.png"
 const BG_CHRISTMAS = "/images/grass3d-christmas.png"
 
 const AppContent: React.FC = () => {
+  const { language } = useLanguage()
   const [currentView, setCurrentView] = useState<"home" | "games" | "tools">("home")
-  const [showWhitepaper, setShowWhitepaper] = useState(false)
   const [season, setSeason] = useState<Season>(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("season")
@@ -111,6 +111,24 @@ const AppContent: React.FC = () => {
   }, [season])
 
   return (
+    <>
+      <Header
+        walletState={walletState}
+        onConnectClick={() => setIsWalletModalOpen(true)}
+        onDisconnectClick={handleDisconnect}
+        onSwapClick={() => setIsSwapModalOpen(true)}
+        soundEnabled={soundEnabled}
+        toggleSound={() => {
+          const newValue = !soundEnabled
+          setSoundEnabled(newValue)
+          localStorage.setItem("soundEnabled", String(newValue))
+        }}
+        onToolsClick={() => setCurrentView("tools")}
+        onGamesClick={() => setCurrentView("games")}
+        onWhitepaperClick={() => redirectToWhitepaper(language)}
+        season={season}
+        onSeasonChange={handleSeasonChange}
+      />
     <div
       className="min-h-screen text-[var(--text-primary)] transition-colors duration-500 relative"
       style={{
@@ -138,23 +156,7 @@ const AppContent: React.FC = () => {
         </div>
       )}
 
-      <div className="relative z-[10]">
-        <Header
-          walletState={walletState}
-          onConnectClick={() => setIsWalletModalOpen(true)}
-          onDisconnectClick={handleDisconnect}
-          onSwapClick={() => setIsSwapModalOpen(true)}
-          soundEnabled={soundEnabled}
-          toggleSound={() => {
-            const newValue = !soundEnabled
-            setSoundEnabled(newValue)
-            localStorage.setItem("soundEnabled", String(newValue))
-          }}
-          onWhitepaperClick={() => setShowWhitepaper(true)}
-          season={season}
-          onSeasonChange={handleSeasonChange}
-        />
-
+      <div className="relative">
         <main>
           {currentView === "home" && (
             <>
@@ -169,7 +171,7 @@ const AppContent: React.FC = () => {
                 }}
                 onToolsClick={() => setCurrentView("tools")}
                 onGamesClick={() => setCurrentView("games")}
-                onWhitepaperClick={() => setShowWhitepaper(true)}
+                onWhitepaperClick={() => redirectToWhitepaper(language)}
               />
               <About isChristmasMode={isChristmasMode} season={season} />
               <Tokenomics 
@@ -206,12 +208,8 @@ const AppContent: React.FC = () => {
         walletBalance={walletState.balance}
         walletAddress={walletState.address || undefined}
       />
-
-      <WhitepaperModal
-        isOpen={showWhitepaper}
-        onClose={() => setShowWhitepaper(false)}
-      />
     </div>
+    </>
   )
 }
 

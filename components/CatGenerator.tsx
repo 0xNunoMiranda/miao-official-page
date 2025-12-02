@@ -241,16 +241,31 @@ const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false, se
     const checkPuter = () => {
       if (window.puter && window.puter.ai && window.puter.auth) {
         setPuterReady(true)
-        // Verifica se o usuário já está autenticado
+        // Verifica se o usuário já está autenticado - AUTENTICAÇÃO OBRIGATÓRIA
         if (window.puter.auth.isSignedIn()) {
           setIsAuthenticated(true)
+        } else {
+          // Garante que o estado está sincronizado se não estiver autenticado
+          setIsAuthenticated(false)
         }
       } else {
         setTimeout(checkPuter, 100)
       }
     }
     checkPuter()
-  }, [])
+    
+    // Verifica periodicamente o estado de autenticação
+    const authCheckInterval = setInterval(() => {
+      if (window.puter?.auth) {
+        const signedIn = window.puter.auth.isSignedIn()
+        if (signedIn !== isAuthenticated) {
+          setIsAuthenticated(signedIn)
+        }
+      }
+    }, 1000)
+    
+    return () => clearInterval(authCheckInterval)
+  }, [isAuthenticated])
 
   // Função para autenticar o usuário
   const handleSignIn = async () => {
@@ -282,24 +297,29 @@ const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false, se
       return
     }
 
+    // Verifica se Puter está carregado
     if (!puterReady) {
       setError(t("generator.puterNotLoaded"))
       return
     }
 
-    // Verifica se o usuário está autenticado
+    // Verifica se Puter.auth está disponível
+    if (!window.puter?.auth) {
+      setError(t("generator.puterNotLoaded"))
+      return
+    }
+
+    // AUTENTICAÇÃO OBRIGATÓRIA: Verifica se o usuário está autenticado no Puter
+    if (!window.puter.auth.isSignedIn()) {
+      setError(t("generator.pleaseAuthenticate") || "Por favor, autentique-se primeiro")
+      // Atualiza o estado de autenticação
+      setIsAuthenticated(false)
+      return
+    }
+
+    // Atualiza o estado de autenticação se estiver autenticado
     if (!isAuthenticated) {
-      if (window.puter?.auth) {
-        if (!window.puter.auth.isSignedIn()) {
-          setError(t("generator.pleaseAuthenticate"))
-          return
-        } else {
-          setIsAuthenticated(true)
-        }
-      } else {
-        setError(t("generator.authNotAvailable"))
-        return
-      }
+      setIsAuthenticated(true)
     }
 
     // Verifica o limite diário

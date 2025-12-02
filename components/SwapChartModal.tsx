@@ -266,15 +266,15 @@ const SwapChartModal: React.FC<SwapChartModalProps> = ({ isOpen, onClose, wallet
       <div className="relative">
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="flex items-center gap-3 bg-[var(--bg-secondary)] px-4 py-3 rounded-xl border-2 border-[var(--border-color)] hover:bg-[var(--bg-tertiary)] transition-colors min-w-[200px]"
+          className="flex items-center gap-3 bg-(--bg-secondary) px-4 py-3 rounded-xl border-2 border-(--border-color) hover:bg-(--bg-tertiary) transition-colors min-w-[200px]"
         >
           <img
             src={token.logo || "/placeholder.svg"}
             alt={token.symbol}
-            className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+            className="w-8 h-8 rounded-full object-cover shrink-0"
           />
-          <span className="font-black text-[var(--text-primary)] text-base truncate flex-1 text-left">{token.symbol}</span>
-          <ChevronDown size={18} className="text-[var(--text-secondary)] flex-shrink-0" />
+          <span className="font-black text-(--text-primary) text-base truncate flex-1 text-left">{token.symbol}</span>
+          <ChevronDown size={18} className="text-(--text-secondary) shrink-0" />
         </button>
 
         {isOpen && (
@@ -286,21 +286,21 @@ const SwapChartModal: React.FC<SwapChartModalProps> = ({ isOpen, onClose, wallet
                 onSearchChange("")
               }}
             />
-            <div className="absolute top-full left-0 mt-2 bg-[var(--bg-secondary)] border-2 border-[var(--border-color)] rounded-xl shadow-lg z-20 w-[280px] overflow-hidden">
-              <div className="p-3 border-b-8 border-[var(--border-color)]">
+            <div className="absolute top-full left-0 mt-2 bg-(--bg-secondary) border-2 border-(--border-color) rounded-xl shadow-lg z-20 w-[280px] overflow-hidden">
+              <div className="p-3 border-b-8 border-(--border-color)">
                 <div className="relative">
-                  <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
+                  <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-(--text-muted)" />
                   <input
                     type="text"
                     placeholder="Pesquisar nome ou endereco..."
                     value={searchValue}
                     onChange={(e) => onSearchChange(e.target.value)}
-                    className="w-full bg-[var(--bg-tertiary)] border-2 border-[var(--border-color)] rounded-lg pl-9 pr-3 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--brand)]"
+                    className="w-full bg-(--bg-tertiary) border-2 border-(--border-color) rounded-lg pl-9 pr-3 py-2 text-sm text-(--text-primary) placeholder:text-(--text-muted) focus:outline-none focus:border-(--brand)"
                     autoFocus
                   />
                 </div>
                 {isLoadingCustomToken && (
-                  <p className="text-xs text-[var(--text-muted)] mt-2 flex items-center gap-1">
+                  <p className="text-xs text-(--text-muted) mt-2 flex items-center gap-1">
                     <RefreshCw size={12} className="animate-spin" />A procurar token...
                   </p>
                 )}
@@ -319,26 +319,26 @@ const SwapChartModal: React.FC<SwapChartModalProps> = ({ isOpen, onClose, wallet
                         setOutputAmount("")
                         setQuote(null)
                       }}
-                      className="flex items-center gap-3 w-full px-4 py-3 hover:bg-[var(--bg-tertiary)] transition-colors"
+                      className="flex items-center gap-3 w-full px-4 py-3 hover:bg-(--bg-tertiary) transition-colors"
                     >
                       <img
                         src={t.logo || "/placeholder.svg"}
                         alt={t.symbol}
-                        className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+                        className="w-8 h-8 rounded-full object-cover shrink-0"
                       />
                       <div className="text-left flex-1 min-w-0">
-                        <div className="font-bold text-[var(--text-primary)] text-sm">{t.symbol}</div>
-                        <div className="text-xs text-[var(--text-muted)] truncate">{t.name}</div>
+                        <div className="font-bold text-(--text-primary) text-sm">{t.symbol}</div>
+                        <div className="text-xs text-(--text-muted) truncate">{t.name}</div>
                       </div>
                       {t.mint !== TOKENS.SOL.mint && (
-                        <span className="text-[10px] text-[var(--text-muted)] font-mono truncate max-w-[60px]">
+                        <span className="text-[10px] text-(--text-muted) font-mono truncate max-w-[60px]">
                           {t.mint.slice(0, 4)}...{t.mint.slice(-4)}
                         </span>
                       )}
                     </button>
                   ))
                 ) : (
-                  <div className="p-4 text-center text-sm text-[var(--text-muted)]">
+                  <div className="p-4 text-center text-sm text-(--text-muted)">
                     {searchValue.length >= 32
                       ? isLoadingCustomToken
                         ? "A carregar..."
@@ -348,8 +348,8 @@ const SwapChartModal: React.FC<SwapChartModalProps> = ({ isOpen, onClose, wallet
                 )}
               </div>
 
-              <div className="p-2 border-t-8 border-[var(--border-color)] bg-[var(--bg-tertiary)]">
-                <p className="text-[10px] text-[var(--text-muted)] text-center">
+              <div className="p-2 border-t-8 border-(--border-color) bg-(--bg-tertiary)">
+                <p className="text-[10px] text-(--text-muted) text-center">
                   Cole um endereco de contrato para adicionar qualquer token
                 </p>
               </div>
@@ -363,11 +363,11 @@ const SwapChartModal: React.FC<SwapChartModalProps> = ({ isOpen, onClose, wallet
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
+    <div className="fixed inset-0 z-100 flex items-center justify-center px-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose}></div>
 
       <div
-        className={`relative w-full bg-[var(--bg-secondary)] border-4 border-[var(--border-color)] rounded-3xl p-6 shadow-[6px_6px_0_0_var(--border-color)] h-[90vh] flex flex-col transition-all duration-500 ease-in-out ${
+        className={`relative w-full bg-(--bg-secondary) border-4 border-(--border-color) rounded-3xl p-6 shadow-[6px_6px_0_0_var(--border-color)] h-[90vh] flex flex-col transition-all duration-500 ease-in-out ${
           activeTab === "chart" ? "max-w-6xl" : "max-w-2xl"
         }`}
         style={{
@@ -375,13 +375,13 @@ const SwapChartModal: React.FC<SwapChartModalProps> = ({ isOpen, onClose, wallet
         }}
       >
         <div className="flex justify-between items-center mb-4">
-          <div className="flex gap-2 border-2 border-[var(--border-color)] rounded-xl p-1 bg-[var(--bg-tertiary)]">
+          <div className="flex gap-2 border-2 border-(--border-color) rounded-xl p-1 bg-(--bg-tertiary)">
             <button
               onClick={() => setActiveTab("swap")}
               className={`px-4 py-2 rounded-lg font-black text-sm uppercase transition-all flex items-center gap-2 ${
                 activeTab === "swap"
-                  ? "bg-[var(--brand)] text-white"
-                  : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                  ? "bg-(--brand) text-white"
+                  : "text-(--text-secondary) hover:text-(--text-primary)"
               }`}
             >
               <ArrowDownUp size={16} />
@@ -391,8 +391,8 @@ const SwapChartModal: React.FC<SwapChartModalProps> = ({ isOpen, onClose, wallet
               onClick={() => setActiveTab("chart")}
               className={`px-4 py-2 rounded-lg font-black text-sm uppercase transition-all flex items-center gap-2 ${
                 activeTab === "chart"
-                  ? "bg-[var(--brand)] text-white"
-                  : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                  ? "bg-(--brand) text-white"
+                  : "text-(--text-secondary) hover:text-(--text-primary)"
               }`}
             >
               <BarChart3 size={16} />
@@ -403,14 +403,14 @@ const SwapChartModal: React.FC<SwapChartModalProps> = ({ isOpen, onClose, wallet
             {activeTab === "swap" && (
               <button
                 onClick={() => setShowSettings(!showSettings)}
-                className={`p-2 rounded-full hover:bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:scale-110 transition-all ${showSettings ? "bg-[var(--bg-tertiary)]" : ""}`}
+                className={`p-2 rounded-full hover:bg-(--bg-tertiary) text-(--text-secondary) hover:scale-110 transition-all ${showSettings ? "bg-(--bg-tertiary)" : ""}`}
               >
                 <Settings size={20} />
               </button>
             )}
             <button
               onClick={onClose}
-              className="p-2 rounded-full hover:bg-[var(--bg-tertiary)] text-[var(--text-primary)] hover:scale-110 transition-all"
+              className="p-2 rounded-full hover:bg-(--bg-tertiary) text-(--text-primary) hover:scale-110 transition-all"
             >
               <X size={20} />
             </button>
@@ -428,9 +428,9 @@ const SwapChartModal: React.FC<SwapChartModalProps> = ({ isOpen, onClose, wallet
           >
             <div className="h-full flex flex-col">
               {showSettings && (
-                <div className="mb-3 p-3 bg-[var(--bg-tertiary)] rounded-xl border-4 border-[var(--border-color)]">
+                <div className="mb-3 p-3 bg-(--bg-tertiary) rounded-xl border-4 border-(--border-color)">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-bold text-[var(--text-primary)]">Slippage</span>
+                    <span className="text-sm font-bold text-(--text-primary)">Slippage</span>
                     <div className="flex gap-2">
                       {[0.5, 1, 2, 3].map((val) => (
                         <button
@@ -438,8 +438,8 @@ const SwapChartModal: React.FC<SwapChartModalProps> = ({ isOpen, onClose, wallet
                           onClick={() => setSlippage(val)}
                           className={`px-3 py-1 rounded-lg text-sm font-bold transition-all ${
                             slippage === val
-                              ? "bg-[var(--brand)] text-white"
-                              : "bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-[var(--bg-primary)]"
+                              ? "bg-(--brand) text-white"
+                              : "bg-(--bg-secondary) text-(--text-secondary) hover:bg-(--bg-primary)"
                           }`}
                         >
                           {val}%
@@ -455,8 +455,8 @@ const SwapChartModal: React.FC<SwapChartModalProps> = ({ isOpen, onClose, wallet
                   <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-green-500 animate-bounce">
                     <Check size={40} className="text-green-600" />
                   </div>
-                  <h3 className="text-2xl font-black text-[var(--text-primary)] mb-2">Swap Concluido!</h3>
-                  <p className="text-[var(--text-secondary)] font-bold mb-4">
+                  <h3 className="text-2xl font-black text-(--text-primary) mb-2">Swap Concluido!</h3>
+                  <p className="text-(--text-secondary) font-bold mb-4">
                     Recebeu {outputAmount} ${outputToken.symbol}
                   </p>
                   {signature && (
@@ -464,14 +464,14 @@ const SwapChartModal: React.FC<SwapChartModalProps> = ({ isOpen, onClose, wallet
                       href={`https://solscan.io/tx/${signature}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 text-[var(--brand)] font-bold hover:underline mb-6"
+                      className="inline-flex items-center gap-2 text-(--brand) font-bold hover:underline mb-6"
                     >
                       Ver no Solscan <ExternalLink size={16} />
                     </a>
                   )}
                   <button
                     onClick={reset}
-                    className="w-full bg-[var(--brand)] text-white font-black py-3 rounded-xl border-[3px] border-[var(--comic-outline)] shadow-[4px_4px_0_0_var(--comic-outline)] hover:shadow-[6px_6px_0_0_var(--comic-outline)] active:shadow-none active:translate-x-[4px] active:translate-y-[4px] transition-all"
+                    className="w-full bg-(--brand) text-white font-black py-3 rounded-xl border-[3px] border-(--comic-outline) shadow-[4px_4px_0_0_var(--comic-outline)] hover:shadow-[6px_6px_0_0_var(--comic-outline)] active:shadow-none active:translate-x-1 active:translate-y-1 transition-all"
                   >
                     Fechar
                   </button>
@@ -492,15 +492,15 @@ const SwapChartModal: React.FC<SwapChartModalProps> = ({ isOpen, onClose, wallet
                     </div>
                   )}
 
-                  <div className="bg-[var(--bg-tertiary)] rounded-2xl p-3 border-4 border-[var(--border-color)] mb-2">
+                  <div className="bg-(--bg-tertiary) rounded-2xl p-3 border-4 border-(--border-color) mb-2">
                     <div className="flex justify-between mb-3">
-                      <span className="text-xs font-bold text-[var(--text-secondary)]">Voce paga</span>
+                      <span className="text-xs font-bold text-(--text-secondary)">Voce paga</span>
                       {inputToken.symbol === "SOL" && (
-                        <span className="text-xs font-bold text-[var(--text-secondary)] flex items-center gap-1">
+                        <span className="text-xs font-bold text-(--text-secondary) flex items-center gap-1">
                           Saldo: {walletBalance.toFixed(4)}
                           <button
                             onClick={() => setInputAmount((walletBalance - 0.01).toFixed(4))}
-                            className="text-[var(--brand)] uppercase hover:underline ml-1"
+                            className="text-(--brand) uppercase hover:underline ml-1"
                           >
                             Max
                           </button>
@@ -522,7 +522,7 @@ const SwapChartModal: React.FC<SwapChartModalProps> = ({ isOpen, onClose, wallet
                         placeholder="0.0"
                         value={inputAmount}
                         onChange={(e) => setInputAmount(e.target.value)}
-                        className="flex-1 bg-transparent text-right text-2xl font-black text-[var(--text-primary)] focus:outline-none min-w-0"
+                        className="flex-1 bg-transparent text-right text-2xl font-black text-(--text-primary) focus:outline-none min-w-0"
                       />
                     </div>
                   </div>
@@ -530,19 +530,19 @@ const SwapChartModal: React.FC<SwapChartModalProps> = ({ isOpen, onClose, wallet
                   <div className="flex justify-center -my-3 relative z-10">
                     <button
                       onClick={swapTokens}
-                      className="bg-[var(--bg-secondary)] border-2 border-[var(--border-color)] p-2 rounded-xl hover:bg-[var(--bg-tertiary)] transition-all hover:rotate-180 duration-300"
+                      className="bg-(--bg-secondary) border-2 border-(--border-color) p-2 rounded-xl hover:bg-(--bg-tertiary) transition-all hover:rotate-180 duration-300"
                     >
-                      <ArrowDownUp size={20} className="text-[var(--text-primary)]" />
+                      <ArrowDownUp size={20} className="text-(--text-primary)" />
                     </button>
                   </div>
 
-                  <div className="bg-[var(--bg-tertiary)] rounded-2xl p-3 border-4 border-[var(--border-color)] mt-2 mb-3">
+                  <div className="bg-(--bg-tertiary) rounded-2xl p-3 border-4 border-(--border-color) mt-2 mb-3">
                     <div className="flex justify-between mb-3">
-                      <span className="text-xs font-bold text-[var(--text-secondary)]">Voce recebe</span>
+                      <span className="text-xs font-bold text-(--text-secondary)">Voce recebe</span>
                       <button
                         onClick={refreshQuote}
                         disabled={isLoadingQuote}
-                        className="text-xs font-bold text-[var(--brand)] hover:underline flex items-center gap-1"
+                        className="text-xs font-bold text-(--brand) hover:underline flex items-center gap-1"
                       >
                         <RefreshCw size={12} className={isLoadingQuote ? "animate-spin" : ""} />
                         Atualizar
@@ -563,24 +563,24 @@ const SwapChartModal: React.FC<SwapChartModalProps> = ({ isOpen, onClose, wallet
                         readOnly
                         placeholder="0.0"
                         value={isLoadingQuote ? "..." : outputAmount}
-                        className="flex-1 bg-transparent text-right text-2xl font-black text-[var(--text-primary)] focus:outline-none min-w-0"
+                        className="flex-1 bg-transparent text-right text-2xl font-black text-(--text-primary) focus:outline-none min-w-0"
                       />
                     </div>
                   </div>
 
                   {quote && (
                     <div className="space-y-1.5 mb-3 px-2">
-                      <div className="flex justify-between text-xs font-bold text-[var(--text-secondary)]">
+                      <div className="flex justify-between text-xs font-bold text-(--text-secondary)">
                         <span>Price Impact</span>
                         <span className={Number.parseFloat(quote.priceImpactPct) > 1 ? "text-red-500" : ""}>
                           {Number.parseFloat(quote.priceImpactPct).toFixed(2)}%
                         </span>
                       </div>
-                      <div className="flex justify-between text-xs font-bold text-[var(--text-secondary)]">
+                      <div className="flex justify-between text-xs font-bold text-(--text-secondary)">
                         <span>Slippage</span>
                         <span>{slippage}%</span>
                       </div>
-                      <div className="flex justify-between text-xs font-bold text-[var(--text-secondary)]">
+                      <div className="flex justify-between text-xs font-bold text-(--text-secondary)">
                         <span className="flex items-center gap-1">
                           Network Fee <Info size={12} />
                         </span>
@@ -592,10 +592,10 @@ const SwapChartModal: React.FC<SwapChartModalProps> = ({ isOpen, onClose, wallet
                   <button
                     onClick={handleSwap}
                     disabled={isSwapping || !inputAmount || !walletAddress || isLoadingQuote}
-                    className={`w-full py-4 rounded-xl font-black text-xl flex items-center justify-center gap-2 border-[3px] border-[var(--comic-outline)] shadow-[4px_4px_0_0_var(--comic-outline)] transition-all ${
+                    className={`w-full py-4 rounded-xl font-black text-xl flex items-center justify-center gap-2 border-[3px] border-(--comic-outline) shadow-[4px_4px_0_0_var(--comic-outline)] transition-all ${
                       isSwapping || !inputAmount || !walletAddress || isLoadingQuote
                         ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                        : "bg-[var(--brand)] text-white hover:shadow-[6px_6px_0_0_var(--comic-outline)] active:shadow-none active:translate-x-[4px] active:translate-y-[4px]"
+                        : "bg-(--brand) text-white hover:shadow-[6px_6px_0_0_var(--comic-outline)] active:shadow-none active:translate-x-1 active:translate-y-1"
                     }`}
                   >
                     {isSwapping ? (
@@ -609,7 +609,7 @@ const SwapChartModal: React.FC<SwapChartModalProps> = ({ isOpen, onClose, wallet
                     )}
                   </button>
 
-                  <p className="text-center text-xs text-[var(--text-muted)] mt-2">Powered by Jupiter Aggregator</p>
+                  <p className="text-center text-xs text-(--text-muted) mt-2">Powered by Jupiter Aggregator</p>
                 </>
               )}
             </div>
@@ -624,7 +624,7 @@ const SwapChartModal: React.FC<SwapChartModalProps> = ({ isOpen, onClose, wallet
             }`}
           >
             <div className="flex flex-col h-full min-h-[600px]">
-              <div className="flex-1 border-2 border-[var(--border-color)] rounded-xl overflow-hidden bg-[var(--bg-tertiary)]">
+              <div className="flex-1 border-2 border-(--border-color) rounded-xl overflow-hidden bg-(--bg-tertiary)">
                 <iframe
                   key={DEXSCREENER_URL}
                   src={DEXSCREENER_URL}
@@ -638,7 +638,7 @@ const SwapChartModal: React.FC<SwapChartModalProps> = ({ isOpen, onClose, wallet
                   href={DEXSCREENER_BASE_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[var(--brand)] font-bold hover:underline text-sm flex items-center gap-1"
+                  className="text-(--brand) font-bold hover:underline text-sm flex items-center gap-1"
                 >
                   Abrir no DexScreener
                   <ExternalLink size={16} />

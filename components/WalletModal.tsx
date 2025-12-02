@@ -134,20 +134,20 @@ const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, onConnect })
   ]
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
+    <div className="fixed inset-0 z-100 flex items-center justify-center px-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onClick={onClose} />
 
-      <div className="relative w-full max-w-md bg-[var(--bg-primary)] border-2 border-[var(--border-color)] rounded-3xl overflow-hidden shadow-2xl animate-fade-up">
-        <div className="flex justify-between items-center p-5 border-b-2 border-[var(--border-color)] bg-[var(--bg-secondary)]">
-          <h2 className="text-xl font-black text-[var(--text-primary)] flex items-center gap-2">
-            <div className="w-10 h-10 rounded-xl bg-[var(--brand)] flex items-center justify-center">
+      <div className="relative w-full max-w-md bg-(--bg-primary) border-2 border-(--border-color) rounded-3xl overflow-hidden shadow-2xl animate-fade-up">
+        <div className="flex justify-between items-center p-5 border-b-2 border-(--border-color) bg-(--bg-secondary)">
+          <h2 className="text-xl font-black text-(--text-primary) flex items-center gap-2">
+            <div className="w-10 h-10 rounded-xl bg-(--brand) flex items-center justify-center">
               <Wallet className="text-white" size={20} />
             </div>
             {t("wallet.title")}
           </h2>
           <button
             onClick={onClose}
-            className="w-10 h-10 flex items-center justify-center rounded-xl bg-[var(--bg-tertiary)] border-2 border-[var(--border-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-red-500/10 hover:border-red-500 hover:text-red-500 transition-all"
+            className="w-10 h-10 flex items-center justify-center rounded-xl bg-(--bg-tertiary) border-2 border-(--border-color) text-(--text-secondary) hover:bg-red-500/10 hover:border-red-500 hover:text-red-500 transition-all"
           >
             <X size={20} />
           </button>
@@ -173,15 +173,15 @@ const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, onConnect })
                 disabled={connecting !== null || isDisabled}
                 className={`w-full flex items-center justify-between p-4 rounded-2xl border-2 transition-all group ${
                   isDisabled
-                    ? "opacity-50 cursor-not-allowed border-[var(--border-color)] bg-[var(--bg-tertiary)]"
+                    ? "opacity-50 cursor-not-allowed border-(--border-color) bg-(--bg-tertiary)"
                     : isConnecting
-                      ? "border-[var(--brand)] bg-[var(--brand)]/5"
-                      : "border-[var(--border-color)] hover:border-[var(--brand)] hover:bg-[var(--bg-secondary)]"
+                      ? "border-(--brand) bg-(--brand)/5"
+                      : "border-(--border-color) hover:border-(--brand) hover:bg-(--bg-secondary)"
                 } ${connecting !== null && !isConnecting && !isDisabled ? "opacity-50 cursor-not-allowed" : ""}`}
               >
                 <div className="flex items-center gap-4">
                   <div
-                    className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl border-2 border-[var(--border-color)] overflow-hidden ${isDisabled ? "grayscale" : ""}`}
+                    className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl border-2 border-(--border-color) overflow-hidden ${isDisabled ? "grayscale" : ""}`}
                     style={{ backgroundColor: `${wallet.color}20` }}
                   >
                     <img
@@ -206,12 +206,12 @@ const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, onConnect })
                   <div className="text-left">
                     <div className="flex items-center gap-2">
                       <span
-                        className={`font-bold text-lg ${isDisabled ? "text-[var(--text-tertiary)]" : "text-[var(--text-primary)]"}`}
+                        className={`font-bold text-lg ${isDisabled ? "text-(--text-tertiary)" : "text-(--text-primary)"}`}
                       >
                         {wallet.name}
                       </span>
                       {wallet.recommended && (
-                        <span className="px-2 py-0.5 text-xs font-bold bg-[var(--brand)] text-white rounded-full">
+                        <span className="px-2 py-0.5 text-xs font-bold bg-(--brand) text-white rounded-full">
                           {t("wallet.recommended")}
                         </span>
                       )}
@@ -222,13 +222,13 @@ const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, onConnect })
                       )}
                     </div>
                     <div
-                      className={`text-xs ${isDisabled ? "text-[var(--text-tertiary)]" : "text-[var(--text-tertiary)]"}`}
+                      className={`text-xs ${isDisabled ? "text-(--text-tertiary)" : "text-(--text-tertiary)"}`}
                     >
                       {wallet.description}
                     </div>
                     {!isDisabled && (
                       <div
-                        className={`text-xs font-bold flex items-center gap-1 ${isInstalled ? "text-[var(--brand)]" : "text-[var(--text-tertiary)]"}`}
+                        className={`text-xs font-bold flex items-center gap-1 ${isInstalled ? "text-(--brand)" : "text-(--text-tertiary)"}`}
                       >
                         {isInstalled ? (
                           <>
@@ -249,8 +249,8 @@ const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, onConnect })
                 <div className="flex items-center gap-2">
                   {isConnecting ? (
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-[var(--text-secondary)]">{countdown}s</span>
-                      <div className="w-6 h-6 border-2 border-[var(--brand)] border-t-transparent rounded-full animate-spin" />
+                      <span className="text-xs font-bold text-(--text-secondary)">{countdown}s</span>
+                      <div className="w-6 h-6 border-2 border-(--brand) border-t-transparent rounded-full animate-spin" />
                     </div>
                   ) : (
                     <div
@@ -258,8 +258,8 @@ const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, onConnect })
                         isDisabled
                           ? "border-gray-400 bg-gray-200"
                           : isInstalled
-                            ? "border-[var(--brand)] group-hover:bg-[var(--brand)]"
-                            : "border-[var(--border-color)]"
+                            ? "border-(--brand) group-hover:bg-(--brand)"
+                            : "border-(--border-color)"
                       }`}
                     >
                       {isDisabled && (
@@ -279,10 +279,10 @@ const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, onConnect })
           })}
         </div>
 
-        <div className="p-5 border-t-2 border-[var(--border-color)] bg-[var(--bg-secondary)]">
-          <div className="text-center p-3 rounded-xl bg-[var(--bg-tertiary)] border-2 border-dashed border-[var(--border-color)]">
-            <p className="text-xs text-[var(--text-secondary)] font-bold flex items-center justify-center gap-2">
-              <Shield size={14} className="text-[var(--brand)]" />
+        <div className="p-5 border-t-2 border-(--border-color) bg-(--bg-secondary)">
+          <div className="text-center p-3 rounded-xl bg-(--bg-tertiary) border-2 border-dashed border-(--border-color)">
+            <p className="text-xs text-(--text-secondary) font-bold flex items-center justify-center gap-2">
+              <Shield size={14} className="text-(--brand)" />
               {t("wallet.newToCrypto")}
             </p>
           </div>

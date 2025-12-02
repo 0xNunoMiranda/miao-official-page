@@ -379,7 +379,8 @@ const NFTSection: React.FC<NFTSectionProps> = ({ isChristmasMode = false, season
     >
       <style dangerouslySetInnerHTML={{ __html: animationStyles }} />
 
-      <div className="absolute inset-0 w-full h-full z-0 opacity-15 pointer-events-none">
+      {/* Video background removido - estava causando erro 403 */}
+      {/* <div className="absolute inset-0 w-full h-full z-0 opacity-15 pointer-events-none">
         <video
           autoPlay
           muted
@@ -390,7 +391,7 @@ const NFTSection: React.FC<NFTSectionProps> = ({ isChristmasMode = false, season
           style={{ filter: "grayscale(100%) contrast(1.1)" }}
           src="https://miaotoken.vip/wp-content/uploads/2025/11/final.mp4"
         />
-      </div>
+      </div> */}
 
       <div className="relative z-10 max-w-5xl mx-auto px-4 md:px-8 w-full">
         <div

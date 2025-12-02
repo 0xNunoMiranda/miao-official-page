@@ -84,12 +84,12 @@ const Header: React.FC<HeaderProps> = ({
     <>
       <nav
         className={`fixed w-full z-50 top-0 transition-all duration-300 ${
-          scrolled ? "bg-[var(--bg-primary)] shadow-lg" : "bg-transparent"
+          scrolled ? "bg-(--bg-primary)/80 backdrop-blur-md shadow-lg" : "bg-transparent"
         }`}
       >
         <div className="max-w-[1400px] mx-auto px-4 md:px-8 lg:px-12 relative">
           <div className="flex items-center justify-between h-20">
-            {/* Logo - só aparece quando navbar tem fundo (scrolled) */}
+            {/* Logo visível apenas após scroll */}
             <a href="#hero" className={`flex items-center group h-full transition-opacity duration-300 ${scrolled ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
               <img
                 src="/logo.png"
@@ -100,12 +100,12 @@ const Header: React.FC<HeaderProps> = ({
             </a>
 
             {/* Desktop Nav Links */}
-            <div className="hidden lg:flex items-center gap-0.5 bg-[var(--bg-secondary)] rounded-xl p-1 border-2 border-[var(--border-color)]" style={{ direction: 'ltr' }}>
+            <div className="hidden lg:flex items-center gap-0.5 bg-(--bg-secondary) rounded-xl p-1 border-2 border-(--border-color)" style={{ direction: 'ltr' }}>
               {navLinks.map((link) => (
                 <a
                   key={link.name}
                   href={link.href}
-                  className="px-3 py-1.5 rounded-lg font-bold text-[10px] uppercase tracking-wide text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-all"
+                  className="px-3 py-1.5 rounded-lg font-bold text-[10px] uppercase tracking-wide text-(--text-secondary) hover:bg-(--bg-tertiary) hover:text-(--text-primary) transition-all"
                   style={{ direction: 'ltr', textAlign: 'center' }}
                 >
                   {link.name}
@@ -122,7 +122,7 @@ const Header: React.FC<HeaderProps> = ({
 
                 <button
                   onClick={toggleTheme}
-                  className="w-11 h-11 rounded-2xl bg-[var(--bg-secondary)] border-2 border-[var(--border-color)] border-b-4 flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--duo-yellow)] active:border-b-2 active:translate-y-[2px] transition-all"
+                  className="w-11 h-11 rounded-2xl bg-(--bg-secondary) border-2 border-(--border-color) border-b-4 flex items-center justify-center text-(--text-secondary) hover:text-(--duo-yellow) active:border-b-2 active:translate-y-0.5 transition-all"
                   aria-label="Toggle Theme"
                 >
                   {isDark ? <Sun size={20} /> : <Moon size={20} />}
@@ -130,10 +130,10 @@ const Header: React.FC<HeaderProps> = ({
 
                 <button
                   onClick={toggleSound}
-                  className={`w-11 h-11 rounded-2xl border-2 border-b-4 items-center justify-center transition-all active:border-b-2 active:translate-y-[2px] flex ${
+                  className={`w-11 h-11 rounded-2xl border-2 border-b-4 items-center justify-center transition-all active:border-b-2 active:translate-y-0.5 flex ${
                     soundEnabled
-                      ? "bg-[var(--bg-secondary)] border-[var(--border-color)] text-[var(--text-secondary)] hover:text-[var(--duo-green)]"
-                      : "bg-[var(--bg-tertiary)] border-[var(--border-color)] text-[var(--text-muted)]"
+                      ? "bg-(--bg-secondary) border-(--border-color) text-(--text-secondary) hover:text-(--duo-green)"
+                      : "bg-(--bg-tertiary) border-(--border-color) text-(--text-muted)"
                   }`}
                   aria-label="Toggle Sound"
                 >
@@ -144,17 +144,17 @@ const Header: React.FC<HeaderProps> = ({
                   <div className="flex items-center gap-2">
                     <button
                       onClick={onSwapClick}
-                      className="px-5 py-2.5 rounded-2xl font-bold text-sm uppercase tracking-wide bg-[var(--duo-green)] text-white border-2 border-b-4 border-[var(--btn-shadow)] hover:brightness-105 active:border-b-2 active:translate-y-[2px] transition-all flex items-center gap-2"
+                      className="h-11 px-5 rounded-2xl font-bold text-sm uppercase tracking-wide bg-(--duo-green) text-white border-2 border-b-4 border-(--btn-shadow) hover:brightness-105 active:border-b-2 active:translate-y-0.5 transition-all flex items-center gap-2"
                     >
                       {t("header.buy")}
                     </button>
-                    <div className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-[var(--bg-secondary)] border-2 border-[var(--duo-green)]">
-                      <span className="text-[var(--duo-green)] font-mono font-bold text-sm">
+                    <div className="flex items-center gap-2 h-11 px-4 rounded-2xl bg-(--bg-secondary) border-2 border-(--duo-green)">
+                      <span className="text-(--duo-green) font-mono font-bold text-sm">
                         {walletState.address?.slice(0, 4)}...{walletState.address?.slice(-4)}
                       </span>
                       <button
                         onClick={onDisconnectClick}
-                        className="w-7 h-7 rounded-lg bg-[var(--bg-tertiary)] flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--duo-red)] transition-all"
+                        className="w-7 h-7 rounded-lg bg-(--bg-tertiary) flex items-center justify-center text-(--text-secondary) hover:text-(--duo-red) transition-all"
                         title={t("header.disconnect")}
                       >
                         <LogOut size={14} />
@@ -164,7 +164,7 @@ const Header: React.FC<HeaderProps> = ({
                 ) : (
                   <button
                     onClick={onConnectClick}
-                    className="px-6 py-2.5 rounded-2xl font-bold text-sm uppercase tracking-wide bg-[var(--duo-green)] text-white border-2 border-b-4 border-[var(--btn-shadow)] hover:brightness-105 active:border-b-2 active:translate-y-[2px] transition-all flex items-center gap-2"
+                    className="h-11 px-6 rounded-2xl font-bold text-sm uppercase tracking-wide bg-(--duo-green) text-white border-2 border-b-4 border-(--btn-shadow) hover:brightness-105 active:border-b-2 active:translate-y-0.5 transition-all flex items-center gap-2"
                   >
                     <Wallet size={18} />
                     {t("header.connect")}
@@ -174,14 +174,14 @@ const Header: React.FC<HeaderProps> = ({
             </div>
 
             {/* Mobile/Tablet Controls */}
-            <div className="flex lg:hidden items-center gap-2">
+            <div className="flex lg:hidden items-center gap-2 ml-auto">
               <LanguageSelector compact />
               
               <SeasonSelector season={season} onSeasonChange={onSeasonChange} compact />
 
               <button
                 onClick={toggleTheme}
-                className="w-11 h-11 rounded-2xl bg-[var(--bg-secondary)] border-2 border-[var(--border-color)] border-b-4 flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--duo-yellow)] active:border-b-2 active:translate-y-[2px] transition-all"
+                className="w-11 h-11 rounded-2xl bg-(--bg-secondary) border-2 border-(--border-color) border-b-4 flex items-center justify-center text-(--text-secondary) hover:text-(--duo-yellow) active:border-b-2 active:translate-y-0.5 transition-all"
                 aria-label="Toggle Theme"
               >
                 {isDark ? <Sun size={20} /> : <Moon size={20} />}
@@ -189,10 +189,10 @@ const Header: React.FC<HeaderProps> = ({
 
               <button
                 onClick={toggleSound}
-                className={`hidden md:flex w-11 h-11 rounded-2xl border-2 border-b-4 items-center justify-center transition-all active:border-b-2 active:translate-y-[2px] ${
+                className={`hidden md:flex w-11 h-11 rounded-2xl border-2 border-b-4 items-center justify-center transition-all active:border-b-2 active:translate-y-0.5 ${
                   soundEnabled
-                    ? "bg-[var(--bg-secondary)] border-[var(--border-color)] text-[var(--text-secondary)] hover:text-[var(--duo-green)]"
-                    : "bg-[var(--bg-tertiary)] border-[var(--border-color)] text-[var(--text-muted)]"
+                    ? "bg-(--bg-secondary) border-(--border-color) text-(--text-secondary) hover:text-(--duo-green)"
+                    : "bg-(--bg-tertiary) border-(--border-color) text-(--text-muted)"
                 }`}
                 aria-label="Toggle Sound"
               >
@@ -204,17 +204,17 @@ const Header: React.FC<HeaderProps> = ({
                   <div className="flex items-center gap-2">
                     <button
                       onClick={onSwapClick}
-                      className="px-5 py-2.5 rounded-2xl font-bold text-sm uppercase tracking-wide bg-[var(--duo-green)] text-white border-2 border-b-4 border-[var(--btn-shadow)] hover:brightness-105 active:border-b-2 active:translate-y-[2px] transition-all flex items-center gap-2"
+                      className="h-11 px-5 rounded-2xl font-bold text-sm uppercase tracking-wide bg-(--duo-green) text-white border-2 border-b-4 border-(--btn-shadow) hover:brightness-105 active:border-b-2 active:translate-y-0.5 transition-all flex items-center gap-2"
                     >
                       {t("header.buy")}
                     </button>
-                    <div className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-[var(--bg-secondary)] border-2 border-[var(--duo-green)]">
-                      <span className="text-[var(--duo-green)] font-mono font-bold text-sm">
+                    <div className="flex items-center gap-2 h-11 px-4 rounded-2xl bg-(--bg-secondary) border-2 border-(--duo-green)">
+                      <span className="text-(--duo-green) font-mono font-bold text-sm">
                         {walletState.address?.slice(0, 4)}...{walletState.address?.slice(-4)}
                       </span>
                       <button
                         onClick={onDisconnectClick}
-                        className="w-7 h-7 rounded-lg bg-[var(--bg-tertiary)] flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--duo-red)] transition-all"
+                        className="w-7 h-7 rounded-lg bg-(--bg-tertiary) flex items-center justify-center text-(--text-secondary) hover:text-(--duo-red) transition-all"
                         title={t("header.disconnect")}
                       >
                         <LogOut size={14} />
@@ -224,7 +224,7 @@ const Header: React.FC<HeaderProps> = ({
                 ) : (
                   <button
                     onClick={onConnectClick}
-                    className="px-6 py-2.5 rounded-2xl font-bold text-sm uppercase tracking-wide bg-[var(--duo-green)] text-white border-2 border-b-4 border-[var(--btn-shadow)] hover:brightness-105 active:border-b-2 active:translate-y-[2px] transition-all flex items-center gap-2"
+                    className="h-11 px-6 rounded-2xl font-bold text-sm uppercase tracking-wide bg-(--duo-green) text-white border-2 border-b-4 border-(--btn-shadow) hover:brightness-105 active:border-b-2 active:translate-y-0.5 transition-all flex items-center gap-2"
                   >
                     <Wallet size={18} />
                     {t("header.connect")}
@@ -234,7 +234,7 @@ const Header: React.FC<HeaderProps> = ({
 
               <button
                 onClick={() => setIsOpen(true)}
-                className="w-11 h-11 rounded-2xl bg-[var(--duo-green)] border-2 border-b-4 border-[var(--btn-shadow)] flex items-center justify-center text-white active:border-b-2 active:translate-y-[2px] transition-all"
+                className="w-11 h-11 rounded-2xl bg-(--duo-green) border-2 border-b-4 border-(--btn-shadow) flex items-center justify-center text-white active:border-b-2 active:translate-y-0.5 transition-all"
               >
                 <Menu size={22} />
               </button>
@@ -386,7 +386,7 @@ const Header: React.FC<HeaderProps> = ({
 
               {/* Version */}
               <div className="px-4 py-2 border-t-2 border-[var(--border-color)]">
-                <p className="text-xs font-medium text-[var(--text-secondary)] text-center">v1.0.5</p>
+                <p className="text-xs font-medium text-[var(--text-secondary)] text-center">v1.0.6</p>
               </div>
 
               {/* Social Media Buttons - Only in menu when very tight */}

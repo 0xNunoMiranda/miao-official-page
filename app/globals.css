@@ -484,8 +484,7 @@
     /* Otimizações de scroll */
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
-    /* Força aceleração de hardware */
-    transform: translateZ(0);
+    /* Removido translateZ(0) para não quebrar position: fixed em navegadores móveis */
   }
   
   /* Otimização para elementos com animações */
@@ -971,4 +970,37 @@ footer {
   text-overflow: ellipsis;
   white-space: nowrap;
   /* overflow: hidden; */
+}
+
+/* Navbar isolada e independente da página - sempre no topo */
+nav {
+  z-index: 9999 !important;
+  isolation: isolate !important;
+  will-change: transform !important;
+  transform: translateZ(0) !important;
+  contain: layout style paint !important;
+  pointer-events: auto !important;
+  position: fixed !important;
+}
+
+/* Garantir que elementos da página não interfiram com a navbar */
+main,
+section,
+div[id]:not([class*="fixed"]):not(nav *),
+article,
+aside {
+  position: relative;
+  z-index: auto;
+}
+
+/* Menu mobile isolado - acima da navbar */
+div[class*="fixed"][class*="inset-0"][style*="z-index: 10000"],
+div[class*="fixed"][class*="inset-0"]:has(> div[class*="animate-fade-left"]) {
+  z-index: 10000 !important;
+  isolation: isolate !important;
+  will-change: transform !important;
+  transform: translateZ(0) !important;
+  contain: layout style paint !important;
+  pointer-events: auto !important;
+  position: fixed !important;
 }
