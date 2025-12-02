@@ -107,6 +107,16 @@ const Tokenomics: React.FC<TokenomicsProps> = ({ isChristmasMode = false, season
   const { t } = useLanguage()
   const [copied, setCopied] = useState(false)
   const [swapCardClicked, setSwapCardClicked] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+  
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
   
   // Gera imagens aleatórias do LaunchMyNFT para o roadmap usando IDs reais (1-100)
   const roadmapItemsWithNFTImages = useMemo(() => {
@@ -266,12 +276,12 @@ const Tokenomics: React.FC<TokenomicsProps> = ({ isChristmasMode = false, season
 
 
   return (
-    <section id="overview" className="py-20">
-      <div className="max-w-6xl mx-auto px-4 md:px-8">
+    <section id="overview" className="py-20 overflow-x-hidden">
+      <div className="max-w-6xl mx-auto px-4 md:px-8 w-full">
         {/* Tokenomics + How to Buy Grid */}
-        <div className="grid lg:grid-cols-2 gap-6 mb-8">
+        <div className="grid lg:grid-cols-2 gap-6 mb-8 justify-items-center lg:justify-items-stretch">
           {/* Tokenomics Card */}
-          <div className="bg-[var(--bg-secondary)]/95 backdrop-blur-sm rounded-3xl p-4 md:p-6 border-2 border-[var(--border-color)] border-b-4 relative overflow-visible">
+          <div className="bg-[var(--bg-secondary)]/95 backdrop-blur-sm rounded-3xl p-4 md:p-6 border-2 border-[var(--border-color)] border-b-4 relative overflow-visible w-full max-w-full">
             {isChristmasMode && (
               <div className="absolute -inset-4 rounded-3xl pointer-events-none z-[20]">
                 <SnowEffect isActive={isChristmasMode} borderRadius="1.5rem" />
@@ -299,17 +309,18 @@ const Tokenomics: React.FC<TokenomicsProps> = ({ isChristmasMode = false, season
             </div>
             <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-[var(--text-primary)] mb-4 md:mb-6 relative z-[30] pr-20 sm:pr-0">Tokenomics</h2>
 
-            <div className="grid grid-cols-3 gap-2 sm:gap-2.5 relative z-[30]">
+            <div className="grid grid-cols-3 gap-2 sm:gap-2.5 relative z-[30] auto-rows-fr">
               {tokenomicsItems.map((item, i) => {
                 const IconComponent = item.icon
                 const isLiquidityBurned = item.k === "Liquidity Burned"
                 return (
                   <div
                     key={i}
-                    className="aspect-square bg-[var(--bg-primary)] rounded-xl p-1.5 sm:p-2 md:p-2.5 flex flex-col items-center justify-center text-center cursor-pointer border-2 border-b-4 border-[var(--btn-shadow)] hover:scale-105 active:border-b-2 active:translate-y-[2px] transition-all relative z-[30]"
+                    className="bg-[var(--bg-primary)] rounded-xl p-1.5 sm:p-2 md:p-2.5 flex flex-col items-center justify-between text-center cursor-pointer border-2 border-b-4 border-[var(--btn-shadow)] hover:scale-105 active:border-b-2 active:translate-y-[2px] transition-all relative z-[30] h-full min-h-0"
                   >
-                    <div
-                      className={`w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center mb-1 sm:mb-2 border-2 ${item.shadow} icon-3d relative`}
+                    <div className="flex-shrink-0">
+                      <div
+                        className={`w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center mb-1 sm:mb-2 border-2 ${item.shadow} icon-3d relative`}
                       style={{
                         transform: 'perspective(1000px) rotateX(8deg) rotateY(-8deg)',
                         transformStyle: 'preserve-3d',
@@ -333,11 +344,14 @@ const Tokenomics: React.FC<TokenomicsProps> = ({ isChristmasMode = false, season
                           }}
                         />
                       )}
+                      </div>
                     </div>
-                    <span className="font-bold text-[var(--text-secondary)] text-[10px] sm:text-xs uppercase tracking-tight leading-tight px-0.5">
-                      {item.k}
-                    </span>
-                    <span className="font-black text-[var(--duo-green)] text-xs sm:text-sm leading-tight px-0.5">{item.v}</span>
+                    <div className="flex-1 flex flex-col justify-center min-h-0 w-full">
+                      <span className="font-bold text-[var(--text-secondary)] text-[10px] sm:text-xs uppercase tracking-tight leading-tight px-0.5">
+                        {item.k}
+                      </span>
+                      <span className="font-black text-[var(--duo-green)] text-xs sm:text-sm leading-tight px-0.5 mt-0.5">{item.v}</span>
+                    </div>
                   </div>
                 )
               })}
@@ -345,7 +359,7 @@ const Tokenomics: React.FC<TokenomicsProps> = ({ isChristmasMode = false, season
           </div>
 
           {/* How to Buy Card */}
-          <div className="bg-[var(--bg-secondary)]/95 backdrop-blur-sm rounded-3xl p-4 md:p-6 border-2 border-[var(--border-color)] border-b-4 relative overflow-visible">
+          <div className="bg-[var(--bg-secondary)]/95 backdrop-blur-sm rounded-3xl p-4 md:p-6 border-2 border-[var(--border-color)] border-b-4 relative overflow-visible w-full max-w-full">
             {isChristmasMode && (
               <div className="absolute -inset-4 rounded-3xl pointer-events-none z-[20]">
                 <SnowEffect isActive={isChristmasMode} borderRadius="1.5rem" />
@@ -373,7 +387,7 @@ const Tokenomics: React.FC<TokenomicsProps> = ({ isChristmasMode = false, season
             </div>
             <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-[var(--text-primary)] mb-4 md:mb-6 relative z-[30] pr-20 sm:pr-0">How to Buy</h2>
 
-            <div className="grid grid-cols-2 gap-2 sm:gap-3 relative z-[30]">
+            <div className="grid grid-cols-2 gap-2 sm:gap-3 relative z-[30] auto-rows-fr">
               {howToBuySteps.map((step, i) => {
                 const IconComponent = step.icon
                 const numberImage = `/assets/numbers/${i + 1}.png`
@@ -390,7 +404,7 @@ const Tokenomics: React.FC<TokenomicsProps> = ({ isChristmasMode = false, season
                           }
                         : undefined
                     }
-                    className={`bg-[var(--bg-primary)]/70 backdrop-blur-sm p-3 sm:p-4 rounded-2xl border-2 border-b-4 transition-all relative z-20 ${
+                    className={`bg-[var(--bg-primary)]/70 backdrop-blur-sm p-3 sm:p-4 rounded-2xl border-2 border-b-4 transition-all relative z-20 h-full flex flex-col ${
                       isSwapStep && onSwapClick
                         ? `cursor-pointer hover:scale-[1.02] active:border-b-2 active:translate-y-[2px] ${
                             swapCardClicked
@@ -400,7 +414,7 @@ const Tokenomics: React.FC<TokenomicsProps> = ({ isChristmasMode = false, season
                         : "border-[var(--btn-shadow)] hover:scale-[1.02] active:border-b-2 active:translate-y-[2px]"
                     }`}
                   >
-                    <div className="flex items-start gap-2 sm:gap-3">
+                    <div className="flex items-start gap-2 sm:gap-3 flex-1">
                       <div className="flex-shrink-0 relative z-10">
                         <img
                           src={numberImage}
@@ -408,14 +422,14 @@ const Tokenomics: React.FC<TokenomicsProps> = ({ isChristmasMode = false, season
                           className="w-10 h-10 sm:w-12 sm:h-12 object-contain"
                         />
                       </div>
-                      <div className="flex-1 min-w-0 pt-0.5 sm:pt-1">
+                      <div className="flex-1 min-w-0 pt-0.5 sm:pt-1 flex flex-col">
                         <h4 className="font-black text-sm sm:text-base text-[var(--text-primary)] leading-tight mb-0.5 sm:mb-1">{step.title}</h4>
-                        <p className="text-[var(--text-secondary)] font-medium text-xs sm:text-sm leading-tight">
+                        <p className="text-[var(--text-secondary)] font-medium text-xs sm:text-sm leading-tight flex-1">
                           {step.desc}
                         </p>
                       </div>
                       <div
-                        className={`flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 ${step.color} rounded-xl text-white flex items-center justify-center border-2 ${step.shadow}`}
+                        className={`hidden min-[500px]:flex flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 ${step.color} rounded-xl text-white items-center justify-center border-2 ${step.shadow}`}
                       >
                         <IconComponent className="w-4 h-4 sm:w-5 sm:h-5" strokeWidth={2.5} />
                       </div>
@@ -471,18 +485,18 @@ const Tokenomics: React.FC<TokenomicsProps> = ({ isChristmasMode = false, season
                 backgroundRepeat: "no-repeat"
               }}
             >
-              {isChristmasMode && (
+              {!isMobile && isChristmasMode && (
                 <div className="absolute inset-0 rounded-3xl overflow-hidden pointer-events-none z-0">
                   <SnowEffect isActive={isChristmasMode} borderRadius="1.5rem" />
                 </div>
               )}
-              {season === "fall" && (
+              {!isMobile && season === "fall" && (
                 <div className="absolute inset-0 rounded-3xl overflow-hidden pointer-events-none z-0">
                   <LeafEffect isActive={season === "fall"} />
                 </div>
               )}
-              {/* Overlay sutil para melhorar legibilidade */}
-              <div className="absolute inset-0 bg-[var(--bg-tertiary)]/30 backdrop-blur-[2px] pointer-events-none"></div>
+              {/* Overlay sutil para melhorar legibilidade - reduzido blur em mobile */}
+              <div className={`absolute inset-0 bg-[var(--bg-tertiary)]/30 ${isMobile ? '' : 'backdrop-blur-[2px]'} pointer-events-none`}></div>
               <div className="relative z-10" style={{ height: "400px" }}>
                 <svg
                   className="absolute inset-0 w-full h-full"
@@ -497,7 +511,7 @@ const Tokenomics: React.FC<TokenomicsProps> = ({ isChristmasMode = false, season
                     fill="none"
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    className="animate-path-dash"
+                    className={isMobile ? "" : "animate-path-dash"}
                   />
                 </svg>
 
@@ -509,8 +523,9 @@ const Tokenomics: React.FC<TokenomicsProps> = ({ isChristmasMode = false, season
                       left: `${(item.x / 1000) * 100}%`,
                       top: `${(item.y / 400) * 100}%`,
                       transform: "translate(-50%, -50%)",
-                      animation: `roadmap-float 4s ease-in-out infinite`,
-                      animationDelay: `${i * 0.4}s`,
+                      animation: isMobile ? "none" : `roadmap-float 4s ease-in-out infinite`,
+                      animationDelay: isMobile ? "0s" : `${i * 0.4}s`,
+                      willChange: isMobile ? "auto" : "transform",
                     }}
                   >
                     {/* Label above for items at y=200 or y=60, below for y=280 */}
@@ -538,6 +553,8 @@ const Tokenomics: React.FC<TokenomicsProps> = ({ isChristmasMode = false, season
                           }
                         }}
                         loading="lazy"
+                        decoding="async"
+                        fetchPriority={i < 3 ? "high" : "low"}
                       />
                     </div>
 

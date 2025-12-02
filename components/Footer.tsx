@@ -27,14 +27,14 @@ const Footer: React.FC = () => {
         <div className="flex flex-col items-start justify-between">
           <div className="text-left w-full">
             <p className="font-bold text-[var(--text-primary)] text-lg mb-4">{t("footer.rights")}</p>
-            <p className="text-sm font-medium text-[var(--text-secondary)] mb-4">v1.0.0</p>
             <a
               href="mailto:miaotokenonsol@gmail.com"
-              className="inline-flex items-center gap-2 px-8 py-3 rounded-2xl font-bold uppercase bg-[var(--duo-green)] text-white border-2 border-b-4 border-[var(--btn-shadow)] hover:brightness-105 active:border-b-2 active:translate-y-[2px] transition-all"
+              className="inline-flex items-center gap-2 px-8 py-3 rounded-2xl font-bold uppercase bg-[var(--duo-green)] text-white border-2 border-b-4 border-[var(--btn-shadow)] hover:brightness-105 active:border-b-2 active:translate-y-[2px] transition-all mb-4"
             >
               <Mail size={18} />
               {t("footer.sendEmail")}
             </a>
+            <p className="text-sm font-medium text-[var(--text-secondary)]">v1.0.1</p>
           </div>
         </div>
       </div>

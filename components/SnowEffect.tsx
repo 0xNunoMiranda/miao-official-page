@@ -36,7 +36,9 @@ const SnowEffect: React.FC<SnowEffectProps> = ({ isActive, className = "", borde
     }
 
     const snowflakes: { x: number; y: number; r: number; d: number; speed: number; shape: 'circle' | 'star' | 'hex' | 'diamond'; opacity: number; rotation: number; rotationSpeed: number }[] = [];
-    const maxFlakes = 70; // Reduced for calmer, serene effect
+    // Reduced particles for better performance - adapt based on screen size
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+    const maxFlakes = isMobile ? 20 : 35; // Much fewer particles for better performance
 
     // Initialize flakes with different shapes, sizes, opacities, and rotations
     const shapes: ('circle' | 'star' | 'hex' | 'diamond')[] = ['circle', 'star', 'hex', 'diamond'];
@@ -113,8 +115,20 @@ const SnowEffect: React.FC<SnowEffectProps> = ({ isActive, className = "", borde
       ctx.restore();
     }
 
-    function draw() {
+    let lastTime = 0;
+    const targetFPS = 30; // Reduced FPS for better performance
+    const frameInterval = 1000 / targetFPS;
+
+    function draw(currentTime: number) {
       if (!ctx || !canvas) return;
+      
+      // Throttle animation to target FPS
+      if (currentTime - lastTime < frameInterval) {
+        animationFrameId = requestAnimationFrame(draw);
+        return;
+      }
+      lastTime = currentTime;
+      
       ctx.clearRect(0, 0, parentWidth, parentHeight);
       
       for (let i = 0; i < maxFlakes; i++) {
@@ -157,7 +171,7 @@ const SnowEffect: React.FC<SnowEffectProps> = ({ isActive, className = "", borde
       }
     }
 
-    draw();
+    animationFrameId = requestAnimationFrame(draw);
 
     return () => {
       cancelAnimationFrame(animationFrameId);

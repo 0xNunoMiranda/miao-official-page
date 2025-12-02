@@ -54,7 +54,9 @@ const LeafEffect: React.FC<LeafEffectProps> = ({ isActive, className = "" }) => 
       speed: number;
       color: string;
     }[] = [];
-    const maxLeaves = 50; // Reduced for calmer effect
+    // Reduced particles for better performance - adapt based on screen size
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+    const maxLeaves = isMobile ? 15 : 25; // Much fewer particles for better performance
 
     // Initialize leaves
     for (let i = 0; i < maxLeaves; i++) {
@@ -97,8 +99,20 @@ const LeafEffect: React.FC<LeafEffectProps> = ({ isActive, className = "" }) => 
       ctx.restore();
     }
 
-    function draw() {
+    let lastTime = 0;
+    const targetFPS = 30; // Reduced FPS for better performance
+    const frameInterval = 1000 / targetFPS;
+
+    function draw(currentTime: number) {
       if (!ctx || !canvas) return;
+      
+      // Throttle animation to target FPS
+      if (currentTime - lastTime < frameInterval) {
+        animationFrameId = requestAnimationFrame(draw);
+        return;
+      }
+      lastTime = currentTime;
+      
       ctx.clearRect(0, 0, parentWidth, parentHeight);
       
       for (let i = 0; i < maxLeaves; i++) {
@@ -136,7 +150,7 @@ const LeafEffect: React.FC<LeafEffectProps> = ({ isActive, className = "" }) => 
       }
     }
 
-    draw();
+    animationFrameId = requestAnimationFrame(draw);
 
     return () => {
       cancelAnimationFrame(animationFrameId);

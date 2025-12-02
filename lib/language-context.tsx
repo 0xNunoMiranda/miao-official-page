@@ -34,8 +34,16 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
   useEffect(() => {
     if (typeof window === "undefined") return
     
+    // Não aplicar dir no elemento raiz para não inverter o layout
+    // Apenas textos serão afetados via CSS
     const langConfig = languages.find((l) => l.code === language)
-    document.documentElement.setAttribute("dir", langConfig?.dir || "ltr")
+    if (langConfig?.dir === "rtl") {
+      document.documentElement.classList.add("rtl-text")
+      document.documentElement.classList.remove("ltr-text")
+    } else {
+      document.documentElement.classList.add("ltr-text")
+      document.documentElement.classList.remove("rtl-text")
+    }
   }, [language])
 
   const setLanguage = (lang: Language) => {

@@ -7,10 +7,10 @@ const Community: React.FC = () => {
   return (
     <section id="community" className="py-24 px-6 md:px-12 lg:px-24 bg-[var(--bg-secondary)]">
       <div className="max-w-4xl mx-auto text-center">
-        <h2 className="text-4xl md:text-5xl font-black text-[var(--text-primary)] mb-8">{t("community.title")}</h2>
+        <h2 className="text-4xl md:text-5xl font-black text-[var(--text-primary)] mb-8">100% Community Owned</h2>
 
         <div className="bg-[var(--bg-primary)] rounded-3xl p-8 md:p-12 border-2 border-[var(--border-color)] border-b-4">
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-4 md:gap-8">
             {[
               {
                 title: t("community.liquidityBurned"),
@@ -31,9 +31,9 @@ const Community: React.FC = () => {
                 shadow: "border-[var(--btn-shadow-orange)]",
               },
             ].map((item, i) => (
-              <div key={i} className="flex flex-col items-center group">
+              <div key={i} className="flex flex-row md:flex-col items-start md:items-center gap-3 md:gap-0 group">
                 {item.title === "Liquidity Burned" ? (
-                  <div className="relative w-24 h-24 md:w-28 md:h-28 rounded-2xl flex items-center justify-center mb-4 border-2 border-b-4 border-[var(--btn-shadow-red)]/60 group-hover:scale-105 transition-all overflow-hidden animate-subtle-float">
+                  <div className="relative w-20 h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 flex-shrink-0 rounded-2xl flex items-center justify-center md:mb-4 border-2 border-b-4 border-[var(--btn-shadow-red)]/60 group-hover:scale-105 transition-all overflow-hidden animate-subtle-float">
                     <div className="absolute inset-0 animate-shimmer rounded-2xl pointer-events-none"></div>
                     <img 
                       src="/images/icons/miao-burns.png" 
@@ -42,7 +42,7 @@ const Community: React.FC = () => {
                     />
                   </div>
                 ) : item.title === "Contract Renounced" ? (
-                  <div className="relative w-24 h-24 md:w-28 md:h-28 rounded-2xl flex items-center justify-center mb-4 border-2 border-b-4 border-[var(--btn-shadow-blue)]/60 group-hover:scale-105 transition-all overflow-hidden animate-subtle-float" style={{ animationDelay: `${i * 0.2}s` }}>
+                  <div className="relative w-20 h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 flex-shrink-0 rounded-2xl flex items-center justify-center md:mb-4 border-2 border-b-4 border-[var(--btn-shadow-blue)]/60 group-hover:scale-105 transition-all overflow-hidden animate-subtle-float" style={{ animationDelay: `${i * 0.2}s` }}>
                     <div className="absolute inset-0 animate-shimmer rounded-2xl pointer-events-none"></div>
                     <img 
                       src="/images/icons/miao-renouces.png" 
@@ -51,7 +51,7 @@ const Community: React.FC = () => {
                     />
                   </div>
                 ) : item.title === "No Treasury" ? (
-                  <div className="relative w-24 h-24 md:w-28 md:h-28 rounded-2xl flex items-center justify-center mb-4 border-2 border-b-4 border-[var(--btn-shadow-orange)]/60 group-hover:scale-105 transition-all overflow-hidden animate-subtle-float" style={{ animationDelay: `${i * 0.2}s` }}>
+                  <div className="relative w-20 h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 flex-shrink-0 rounded-2xl flex items-center justify-center md:mb-4 border-2 border-b-4 border-[var(--btn-shadow-orange)]/60 group-hover:scale-105 transition-all overflow-hidden animate-subtle-float" style={{ animationDelay: `${i * 0.2}s` }}>
                     <div className="absolute inset-0 animate-shimmer rounded-2xl pointer-events-none"></div>
                     <img 
                       src="/images/icons/miao-caos.png" 
@@ -61,11 +61,13 @@ const Community: React.FC = () => {
                   </div>
                 ) : (
                   <div
-                    className={`w-16 h-16 ${item.color} rounded-2xl flex items-center justify-center mb-4 border-2 border-b-4 ${item.shadow} group-hover:scale-105 transition-transform`}
+                    className={`w-16 h-16 md:w-16 md:h-16 flex-shrink-0 ${item.color} rounded-2xl flex items-center justify-center md:mb-4 border-2 border-b-4 ${item.shadow} group-hover:scale-105 transition-transform`}
                   />
                 )}
-                <h3 className="text-lg font-black text-[var(--text-primary)]">{item.title}</h3>
-                <p className="text-sm text-[var(--text-secondary)] mt-2 font-medium">{item.desc}</p>
+                <div className="flex-1 min-w-0 md:text-center">
+                  <h3 className="text-base md:text-lg font-black text-[var(--text-primary)]">{item.title}</h3>
+                  <p className="text-xs md:text-sm text-[var(--text-secondary)] mt-1 md:mt-2 font-medium">{item.desc}</p>
+                </div>
               </div>
             ))}
           </div>

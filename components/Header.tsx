@@ -50,10 +50,18 @@ const Header: React.FC<HeaderProps> = ({
     const currentTheme = document.documentElement.getAttribute("data-theme")
     setIsDark(currentTheme === "dark")
 
+    // Otimização: usar requestAnimationFrame para scroll suave
+    let ticking = false
     const handleScroll = () => {
-      setScrolled(window.scrollY > 20)
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          setScrolled(window.scrollY > 20)
+          ticking = false
+        })
+        ticking = true
+      }
     }
-    window.addEventListener("scroll", handleScroll)
+    window.addEventListener("scroll", handleScroll, { passive: true })
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
@@ -81,8 +89,8 @@ const Header: React.FC<HeaderProps> = ({
       >
         <div className="max-w-[1400px] mx-auto px-4 md:px-8 lg:px-12 relative">
           <div className="flex items-center justify-between h-20">
-            {/* Logo */}
-            <a href="#hero" className="flex items-center group h-full">
+            {/* Logo - só aparece quando navbar tem fundo (scrolled) */}
+            <a href="#hero" className={`flex items-center group h-full transition-opacity duration-300 ${scrolled ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
               <img
                 src="/logo.png"
                 alt="MIAO"
@@ -92,12 +100,13 @@ const Header: React.FC<HeaderProps> = ({
             </a>
 
             {/* Desktop Nav Links */}
-            <div className="hidden lg:flex items-center gap-1 bg-[var(--bg-secondary)] rounded-2xl p-1.5 border-2 border-[var(--border-color)]">
+            <div className="hidden lg:flex items-center gap-0.5 bg-[var(--bg-secondary)] rounded-xl p-1 border-2 border-[var(--border-color)]" style={{ direction: 'ltr' }}>
               {navLinks.map((link) => (
                 <a
                   key={link.name}
                   href={link.href}
-                  className="px-4 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wide text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-all"
+                  className="px-3 py-1.5 rounded-lg font-bold text-[10px] uppercase tracking-wide text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-all"
+                  style={{ direction: 'ltr', textAlign: 'center' }}
                 >
                   {link.name}
                 </a>
@@ -258,13 +267,14 @@ const Header: React.FC<HeaderProps> = ({
               </button>
             </div>
 
-            <div className="flex-1 p-5 space-y-2 overflow-y-auto">
+            <div className="flex-1 p-5 space-y-2 overflow-y-auto" style={{ direction: 'ltr' }}>
               {navLinks.map((link) => (
                 <a
                   key={link.name}
                   href={link.href}
                   onClick={() => setIsOpen(false)}
                   className="flex items-center gap-3 px-4 py-3 rounded-xl text-lg font-bold text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] transition-all"
+                  style={{ direction: 'ltr', textAlign: 'left' }}
                 >
                   {link.name}
                 </a>
@@ -276,9 +286,10 @@ const Header: React.FC<HeaderProps> = ({
                   onToolsClick?.()
                 }}
                 className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-lg font-bold text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] transition-all"
+                style={{ direction: 'ltr', textAlign: 'left' }}
               >
                 <Wrench size={20} />
-                MIAO Tools
+                {t("nav.tools")}
               </button>
               <button
                 onClick={() => {
@@ -286,9 +297,10 @@ const Header: React.FC<HeaderProps> = ({
                   onGamesClick?.()
                 }}
                 className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-lg font-bold text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] transition-all"
+                style={{ direction: 'ltr', textAlign: 'left' }}
               >
                 <Gamepad2 size={20} />
-                MIAO Games
+                {t("nav.games")}
               </button>
               <button
                 onClick={() => {
@@ -296,9 +308,10 @@ const Header: React.FC<HeaderProps> = ({
                   onWhitepaperClick?.()
                 }}
                 className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-lg font-bold text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] transition-all"
+                style={{ direction: 'ltr', textAlign: 'left' }}
               >
                 <FileText size={20} />
-                Whitepaper
+                {t("nav.whitepaper")}
               </button>
 
               <hr className="my-4 border-2 border-[var(--border-color)]" />
@@ -373,7 +386,7 @@ const Header: React.FC<HeaderProps> = ({
 
               {/* Version */}
               <div className="px-4 py-2 border-t-2 border-[var(--border-color)]">
-                <p className="text-xs font-medium text-[var(--text-secondary)] text-center">v1.0.0</p>
+                <p className="text-xs font-medium text-[var(--text-secondary)] text-center">v1.0.1</p>
               </div>
 
               {/* Social Media Buttons - Only in menu when very tight */}

@@ -208,7 +208,7 @@ const Hero: React.FC<HeroProps> = ({ onSwapChartClick, isChristmasMode = false, 
   }, [season])
 
   return (
-    <section id="hero" className="relative min-h-screen pt-28 pb-12 flex items-center overflow-hidden">
+    <section id="hero" className="relative min-h-screen pt-28 pb-12 flex items-center overflow-x-hidden overflow-y-auto">
       {/* Image Placeholder - Normal */}
       <img
         src="/assets/page/summer.jpg"
@@ -254,7 +254,7 @@ const Hero: React.FC<HeroProps> = ({ onSwapChartClick, isChristmasMode = false, 
         loop
         muted={true}
         playsInline
-        preload="auto"
+        preload={season === "normal" ? "metadata" : "none"}
         className="absolute inset-0 w-full h-full object-cover z-0 transition-opacity duration-1000 ease-in-out"
         style={{ 
           objectFit: 'cover', 
@@ -275,7 +275,7 @@ const Hero: React.FC<HeroProps> = ({ onSwapChartClick, isChristmasMode = false, 
         loop
         muted={true}
         playsInline
-        preload="auto"
+        preload={season === "fall" ? "metadata" : "none"}
         className="absolute inset-0 w-full h-full object-cover z-0 transition-opacity duration-1000 ease-in-out"
         style={{ 
           objectFit: 'cover', 
@@ -296,7 +296,7 @@ const Hero: React.FC<HeroProps> = ({ onSwapChartClick, isChristmasMode = false, 
         loop
         muted={true}
         playsInline
-        preload="auto"
+        preload={season === "winter" ? "metadata" : "none"}
         className="absolute inset-0 w-full h-full object-cover z-0 transition-opacity duration-1000 ease-in-out"
         style={{ 
           objectFit: 'cover', 
@@ -311,20 +311,21 @@ const Hero: React.FC<HeroProps> = ({ onSwapChartClick, isChristmasMode = false, 
         />
       </video>
       
-      <div className="max-w-[1400px] mx-auto px-3 sm:px-6 md:px-8 lg:px-12 xl:px-24 w-full relative z-20">
-        <div className="grid lg:grid-cols-2 gap-6 sm:gap-8 md:gap-6 lg:gap-8 items-center">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-24 w-full relative z-20">
+        <div className="grid lg:grid-cols-2 gap-6 sm:gap-8 md:gap-6 lg:gap-8 items-center justify-items-center lg:justify-items-stretch">
           {/* Cat Image - Left */}
-          <div className="order-2 lg:order-1 flex justify-center lg:justify-start lg:items-start lg:-ml-4 xl:-ml-0">
+          <div className="order-2 lg:order-1 flex justify-center lg:justify-start lg:items-start lg:-ml-4 xl:-ml-0 w-full max-w-full overflow-hidden">
             <TamagotchiCat />
           </div>
 
           {/* Content - Right */}
-          <div className="order-1 lg:order-2 space-y-8 md:space-y-10 text-center lg:text-center">
+            <div className="order-1 lg:order-2 space-y-8 md:space-y-10 text-center lg:text-center w-full max-w-full px-2 sm:px-0">
             {/* Logo */}
             <div className="flex flex-col items-center gap-4">
+              <h1 className="sr-only">MIAO - The Green Cat Token - Community Owned Memecoin</h1>
               <img
                 src="/logo.png"
-                alt="$MIAO"
+                alt="MIAO - The Green Cat Token"
                 className="w-64 md:w-80 lg:w-96 h-auto"
                 loading="lazy"
               />
@@ -396,25 +397,36 @@ const Hero: React.FC<HeroProps> = ({ onSwapChartClick, isChristmasMode = false, 
 
             <div className="flex flex-col items-center gap-3 relative z-30">
               {/* Capsule-style buttons container */}
-              <div className="flex flex-nowrap w-full max-w-md lg:max-w-none justify-center relative">
+              <div className="flex flex-nowrap w-full justify-center relative" style={{ direction: 'ltr' }}>
                 {/* Capsule wrapper with pill shape - single unified capsule */}
                 <div 
-                  className="flex items-center relative shadow-xl"
+                  className="flex items-stretch relative shadow-xl"
                   style={{
                     borderRadius: '9999px',
-                    border: '10px solid var(--capsule-border)',
-                    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1)',
+                    border: '6px solid var(--capsule-border)',
+                    boxShadow: '0 6px 10px -3px rgba(0, 0, 0, 0.2), 0 2px 4px -2px rgba(0, 0, 0, 0.1)',
+                    direction: 'ltr',
+                    width: '100%',
+                    maxWidth: '100%',
                   }}
                 >
                   {/* Left half - Mint green/Seafoam (Swap Chart) */}
                   <button
                     onClick={onSwapChartClick}
-                    className="flex-1 min-w-0 px-8 py-14 md:px-10 md:py-18 lg:px-16 lg:py-22 font-bold uppercase tracking-wide text-lg md:text-xl lg:text-2xl text-white transition-all flex items-center justify-center gap-2 relative overflow-hidden"
+                    className="font-bold uppercase tracking-wide text-sm md:text-base lg:text-lg text-white transition-all relative overflow-hidden"
                     style={{
                       background: '#52D48E',
-                      borderRight: '5px solid var(--capsule-border)',
+                      borderRight: '3px solid var(--capsule-border)',
                       borderTopLeftRadius: '9999px',
                       borderBottomLeftRadius: '9999px',
+                      direction: 'ltr',
+                      padding: '16px 16px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: '50%',
+                      flex: '1 1 50%',
+                      minHeight: '100%',
                     }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.background = '#6ee7b7'
@@ -425,7 +437,7 @@ const Hero: React.FC<HeroProps> = ({ onSwapChartClick, isChristmasMode = false, 
                   >
                     {/* Curved white highlight on green side */}
                     <div 
-                      className="absolute top-2 left-2 w-16 h-16 rounded-full pointer-events-none opacity-30"
+                      className="absolute top-1 left-1 w-12 h-12 rounded-full pointer-events-none opacity-30"
                       style={{
                         background: 'radial-gradient(circle, rgba(255,255,255,0.6) 0%, transparent 70%)',
                         transform: 'translate(-20%, -20%)',
@@ -455,7 +467,7 @@ const Hero: React.FC<HeroProps> = ({ onSwapChartClick, isChristmasMode = false, 
                         background: 'linear-gradient(to left, rgba(0, 0, 0, 0.1) 0%, transparent 100%)',
                       }}
                     />
-                    <span className="relative z-10 whitespace-nowrap">{t("hero.swapChart")}</span>
+                    <span className="relative z-10 text-center w-full" style={{ padding: '0 8px', lineHeight: '1.2', wordBreak: 'break-word', hyphens: 'auto', display: 'block' }}>{t("hero.swapChart")}</span>
                   </button>
                   
                   {/* Right half - White (Pump.Fun) */}
@@ -463,12 +475,20 @@ const Hero: React.FC<HeroProps> = ({ onSwapChartClick, isChristmasMode = false, 
                     href="https://pump.fun/coin/8xpdiZ5GrnAdxpf7DSyZ1YXZxx6itvvoXPHZ4K2Epump"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex-1 min-w-0 px-8 py-14 md:px-10 md:py-18 lg:px-16 lg:py-22 font-bold uppercase tracking-wide text-lg md:text-xl lg:text-2xl text-gray-800 transition-all flex items-center justify-center relative overflow-hidden"
+                    className="font-bold uppercase tracking-wide text-sm md:text-base lg:text-lg text-gray-800 transition-all relative overflow-hidden"
                     style={{
                       background: '#ffffff',
-                      borderLeft: '5px solid var(--capsule-border)',
+                      borderLeft: '3px solid var(--capsule-border)',
                       borderTopRightRadius: '9999px',
                       borderBottomRightRadius: '9999px',
+                      direction: 'ltr',
+                      padding: '16px 16px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: '50%',
+                      flex: '1 1 50%',
+                      minHeight: '100%',
                     }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.background = '#e5e5e5'
@@ -503,39 +523,42 @@ const Hero: React.FC<HeroProps> = ({ onSwapChartClick, isChristmasMode = false, 
                     />
                     {/* Highlight effect on white side */}
                     <div 
-                      className="absolute top-2 right-2 w-20 h-20 rounded-full pointer-events-none opacity-20"
+                      className="absolute top-1 right-1 w-14 h-14 rounded-full pointer-events-none opacity-20"
                       style={{
                         background: 'radial-gradient(circle, rgba(255,255,255,0.8) 0%, transparent 70%)',
                         transform: 'translate(20%, -20%)',
                       }}
                     />
-                    <span className="relative z-10 whitespace-nowrap">{t("hero.pumpfunButton")}</span>
+                    <span className="relative z-10 text-center w-full" style={{ padding: '0 8px', lineHeight: '1.2', wordBreak: 'break-word', hyphens: 'auto', display: 'block' }}>{t("hero.pumpfunButton")}</span>
                   </a>
                 </div>
               </div>
               
               {/* Tools, Games, Whitepaper - Smaller buttons below */}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap justify-center max-w-full px-2 sm:px-0" style={{ direction: 'ltr' }}>
                 <button
                   onClick={onToolsClick}
-                  className="px-5 py-2.5 rounded-xl font-bold text-sm uppercase tracking-wide bg-[var(--bg-secondary)] text-[var(--text-primary)] border-2 border-b-4 border-[var(--btn-shadow)] hover:bg-[var(--bg-tertiary)] hover:border-[var(--duo-green)] active:border-b-2 active:translate-y-[2px] transition-all flex items-center gap-1.5"
+                  className="px-3 py-2 sm:px-4 sm:py-2.5 md:px-5 rounded-xl font-bold text-xs sm:text-sm uppercase tracking-wide bg-[var(--bg-secondary)] text-[var(--text-primary)] border-2 border-b-4 border-[var(--btn-shadow)] hover:bg-[var(--bg-tertiary)] hover:border-[var(--duo-green)] active:border-b-2 active:translate-y-[2px] transition-all flex items-center gap-1 sm:gap-1.5"
+                  style={{ direction: 'ltr' }}
                 >
-                  <Wrench size={16} />
-                  Tools
+                  <Wrench size={14} className="sm:w-4 sm:h-4" />
+                  <span className="whitespace-nowrap">{t("nav.tools")}</span>
                 </button>
                 <button
                   onClick={onGamesClick}
-                  className="px-5 py-2.5 rounded-xl font-bold text-sm uppercase tracking-wide bg-[var(--bg-secondary)] text-[var(--text-primary)] border-2 border-b-4 border-[var(--btn-shadow)] hover:bg-[var(--bg-tertiary)] hover:border-[var(--duo-orange)] active:border-b-2 active:translate-y-[2px] transition-all flex items-center gap-1.5"
+                  className="px-3 py-2 sm:px-4 sm:py-2.5 md:px-5 rounded-xl font-bold text-xs sm:text-sm uppercase tracking-wide bg-[var(--bg-secondary)] text-[var(--text-primary)] border-2 border-b-4 border-[var(--btn-shadow)] hover:bg-[var(--bg-tertiary)] hover:border-[var(--duo-orange)] active:border-b-2 active:translate-y-[2px] transition-all flex items-center gap-1 sm:gap-1.5"
+                  style={{ direction: 'ltr' }}
                 >
-                  <Gamepad2 size={16} />
-                  Games
+                  <Gamepad2 size={14} className="sm:w-4 sm:h-4" />
+                  <span className="whitespace-nowrap">{t("nav.games")}</span>
                 </button>
                 <button
                   onClick={onWhitepaperClick}
-                  className="px-5 py-2.5 rounded-xl font-bold text-sm uppercase tracking-wide bg-[var(--bg-secondary)] text-[var(--text-primary)] border-2 border-b-4 border-[var(--btn-shadow)] hover:bg-[var(--bg-tertiary)] hover:border-[var(--duo-blue)] active:border-b-2 active:translate-y-[2px] transition-all flex items-center gap-1.5"
+                  className="px-3 py-2 sm:px-4 sm:py-2.5 md:px-5 rounded-xl font-bold text-xs sm:text-sm uppercase tracking-wide bg-[var(--bg-secondary)] text-[var(--text-primary)] border-2 border-b-4 border-[var(--btn-shadow)] hover:bg-[var(--bg-tertiary)] hover:border-[var(--duo-blue)] active:border-b-2 active:translate-y-[2px] transition-all flex items-center gap-1 sm:gap-1.5"
+                  style={{ direction: 'ltr' }}
                 >
-                  <FileText size={16} />
-                  Whitepaper
+                  <FileText size={14} className="sm:w-4 sm:h-4" />
+                  <span className="whitespace-nowrap">{t("nav.whitepaper")}</span>
                 </button>
               </div>
             </div>

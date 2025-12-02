@@ -374,7 +374,7 @@ const NFTSection: React.FC<NFTSectionProps> = ({ isChristmasMode = false, season
   return (
     <section
       id="nfts"
-      className="relative py-16 md:py-24 overflow-hidden flex items-center justify-center"
+      className="relative py-24 md:py-32 lg:py-40 overflow-hidden flex items-center justify-center min-h-[600px] md:min-h-[700px] lg:min-h-[800px]"
       style={{ background: "var(--bg-tertiary)" }}
     >
       <style dangerouslySetInnerHTML={{ __html: animationStyles }} />
@@ -385,6 +385,7 @@ const NFTSection: React.FC<NFTSectionProps> = ({ isChristmasMode = false, season
           muted
           loop
           playsInline
+          preload="metadata"
           className="w-full h-full object-cover"
           style={{ filter: "grayscale(100%) contrast(1.1)" }}
           src="https://miaotoken.vip/wp-content/uploads/2025/11/final.mp4"
@@ -511,9 +512,9 @@ const NFTSection: React.FC<NFTSectionProps> = ({ isChristmasMode = false, season
                 ))}
               </div>
 
-              {/* Floating particles */}
+              {/* Floating particles - reduced for performance */}
               <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                {[...Array(6)].map((_, i) => (
+                {[...Array(3)].map((_, i) => (
                   <div
                     key={i}
                     className="absolute w-1.5 h-1.5 rounded-full"

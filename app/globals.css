@@ -6,10 +6,10 @@
 @keyframes tamagotchi-float {
   0%,
   100% {
-    transform: translateY(0px);
+    transform: translate3d(0, 0, 0);
   }
   50% {
-    transform: translateY(-10px);
+    transform: translate3d(0, -10px, 0);
   }
 }
 
@@ -75,35 +75,35 @@
   }
 }
 
-/* Added roadmap-float animation - slow vertical smooth movement */
+/* Added roadmap-float animation - slow vertical smooth movement - Otimizada para GPU */
 @keyframes roadmap-float {
   0%,
   100% {
-    transform: translate(-50%, -50%) translateY(0px);
+    transform: translate3d(-50%, calc(-50% + 0px), 0);
   }
   50% {
-    transform: translate(-50%, -50%) translateY(-12px);
+    transform: translate3d(-50%, calc(-50% + -12px), 0);
   }
 }
 
-/* Improved roadmap wave animation - vertical smooth and slow */
+/* Improved roadmap wave animation - vertical smooth and slow - Otimizada para GPU */
 @keyframes roadmap-wave {
   0%,
   100% {
-    transform: translateY(0px);
+    transform: translate3d(0, 0, 0);
   }
   50% {
-    transform: translateY(-15px);
+    transform: translate3d(0, -15px, 0);
   }
 }
 
 @keyframes roadmap-wave-reverse {
   0%,
   100% {
-    transform: translateY(0px);
+    transform: translate3d(0, 0, 0);
   }
   50% {
-    transform: translateY(15px);
+    transform: translate3d(0, 15px, 0);
   }
 }
 
@@ -116,15 +116,15 @@
   }
 }
 
-/* Added fade-in animation for character images */
+/* Added fade-in animation for character images - Otimizada para GPU */
 @keyframes fade-in-up {
   0% {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translate3d(0, 20px, 0);
   }
   100% {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
 }
 
@@ -421,13 +421,97 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
+/* RTL apenas para textos, não para layout */
+.rtl-text p,
+.rtl-text span,
+.rtl-text h1,
+.rtl-text h2,
+.rtl-text h3,
+.rtl-text h4,
+.rtl-text h5,
+.rtl-text h6,
+.rtl-text div[class*="text"],
+.rtl-text button:not([style*="direction: ltr"]),
+.rtl-text a:not([style*="direction: ltr"]):not(nav a):not([class*="nav"]),
+.rtl-text label,
+.rtl-text li,
+.rtl-text td,
+.rtl-text th {
+  direction: rtl;
+  text-align: right;
+}
+
+/* Exceções: manter LTR para elementos de navegação e controles */
+.rtl-text nav,
+.rtl-text nav *,
+.rtl-text [class*="nav"],
+.rtl-text [class*="Nav"],
+.rtl-text header,
+.rtl-text header > *,
+.rtl-text [style*="direction: ltr"],
+.rtl-text [style*="direction: ltr"] * {
+  direction: ltr !important;
+  text-align: left !important;
+}
+
+.rtl-text input,
+.rtl-text textarea {
+  direction: rtl;
+  text-align: right;
+}
+
+/* Manter layout LTR para elementos estruturais */
+.rtl-text {
+  direction: ltr;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+  
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    overscroll-behavior: none;
+  }
+  
   body {
     @apply bg-background text-foreground;
     transition: background-color 0.3s ease, color 0.3s ease;
+    /* Otimizações de scroll */
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    /* Força aceleração de hardware */
+    transform: translateZ(0);
+  }
+  
+  /* Otimização para elementos com animações */
+  [class*="animate-"],
+  [class*="animation"] {
+    backface-visibility: hidden;
+    perspective: 1000px;
+    transform: translateZ(0);
+  }
+  
+  /* Otimização para imagens */
+  img {
+    content-visibility: auto;
+    image-rendering: -webkit-optimize-contrast;
+  }
+  
+  /* Otimização para vídeos */
+  video {
+    transform: translateZ(0);
+    will-change: auto;
+  }
+  
+  /* Otimização para seções */
+  section {
+    contain: layout style paint;
+    content-visibility: auto;
   }
 }
 
@@ -435,12 +519,14 @@
 .duo-btn {
   position: relative;
   border-bottom-width: 4px;
-  transition: all 0.1s ease;
+  transition: transform 0.1s ease, border-bottom-width 0.1s ease;
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
 .duo-btn:active {
   border-bottom-width: 0;
-  transform: translateY(4px);
+  transform: translate3d(0, 4px, 0);
 }
 
 .duo-btn-green {
@@ -471,31 +557,33 @@
   background-color: var(--bg-secondary);
   border: 2px solid var(--border-color);
   border-radius: 1rem;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease;
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
 .duo-card:hover {
-  transform: translateY(-2px);
+  transform: translate3d(0, -2px, 0);
 }
 
-/* Animations */
+/* Animations - Otimizadas para GPU */
 @keyframes float {
   0%,
   100% {
-    transform: translateY(0px);
+    transform: translate3d(0, 0, 0);
   }
   50% {
-    transform: translateY(-10px);
+    transform: translate3d(0, -10px, 0);
   }
 }
 
 @keyframes bounce-soft {
   0%,
   100% {
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
   50% {
-    transform: translateY(-5px);
+    transform: translate3d(0, -5px, 0);
   }
 }
 
@@ -512,22 +600,22 @@
 @keyframes fade-up {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translate3d(0, 20px, 0);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
 }
 
 @keyframes fade-left {
   from {
     opacity: 0;
-    transform: translateX(100%);
+    transform: translate3d(100%, 0, 0);
   }
   to {
     opacity: 1;
-    transform: translateX(0);
+    transform: translate3d(0, 0, 0);
   }
 }
 
@@ -543,48 +631,68 @@
 
 .animate-float {
   animation: float 3s ease-in-out infinite;
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
 .animate-bounce-soft {
   animation: bounce-soft 2s ease-in-out infinite;
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
 .animate-wiggle {
   animation: wiggle 0.5s ease-in-out infinite;
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
 .animate-fade-up {
   animation: fade-up 0.5s ease-out;
+  will-change: opacity, transform;
+  backface-visibility: hidden;
 }
 
 .animate-fade-left {
   animation: fade-left 0.3s ease-out;
+  will-change: opacity, transform;
+  backface-visibility: hidden;
 }
 
 .animate-pulse-soft {
   animation: pulse-soft 2s ease-in-out infinite;
+  will-change: opacity;
 }
 
 /* Updated roadmap wave animations - slower and smoother */
 .animate-wave-1 {
   animation: roadmap-wave 4s ease-in-out infinite;
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
 .animate-wave-2 {
   animation: roadmap-wave-reverse 4.5s ease-in-out infinite;
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
 .animate-wave-3 {
   animation: roadmap-wave 5s ease-in-out infinite;
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
 .animate-path-dash {
   animation: roadmap-path-dash 3s linear infinite;
+  will-change: stroke-dashoffset;
 }
 
 .animate-breathe {
   animation: breathe 4s ease-in-out infinite;
   transform-origin: center;
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
 /* Animação de brilho (shimmer) */
@@ -606,40 +714,46 @@
   );
   background-size: 200% 100%;
   animation: shimmer 3s ease-in-out infinite;
+  will-change: background-position;
+  backface-visibility: hidden;
 }
 
-/* Animação sutil de flutuação */
+/* Animação sutil de flutuação - Otimizada para GPU */
 @keyframes subtle-float {
   0%, 100% {
-    transform: translateY(0px);
+    transform: translate3d(0, 0, 0);
   }
   50% {
-    transform: translateY(-8px);
+    transform: translate3d(0, -8px, 0);
   }
 }
 
 .animate-subtle-float {
   animation: subtle-float 4s ease-in-out infinite;
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
-/* Animação suave de nuvem flutuando */
+/* Animação suave de nuvem flutuando - Otimizada para GPU */
 @keyframes cloud-float {
   0%, 100% {
-    transform: translateY(0px) translateX(0px);
+    transform: translate3d(0, 0, 0);
     opacity: 0.7;
   }
   33% {
-    transform: translateY(-5px) translateX(3px);
+    transform: translate3d(3px, -5px, 0);
     opacity: 0.75;
   }
   66% {
-    transform: translateY(-3px) translateX(-2px);
+    transform: translate3d(-2px, -3px, 0);
     opacity: 0.7;
   }
 }
 
 .animate-cloud-float {
   animation: cloud-float 6s ease-in-out infinite;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
 }
 
 .animate-blink-main {
@@ -650,9 +764,10 @@
   animation: blink-eyes 5.2s step-end infinite;
 }
 
-/* Custom scrollbar */
+/* Custom scrollbar - Otimizada */
 .custom-scrollbar::-webkit-scrollbar {
   height: 8px;
+  width: 8px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
@@ -663,12 +778,58 @@
 .custom-scrollbar::-webkit-scrollbar-thumb {
   background: var(--brand);
   border-radius: 4px;
+  transition: background 0.2s ease;
 }
 
-/* Section transitions */
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--brand);
+  filter: brightness(1.2);
+}
+
+/* Otimização global de scroll */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--brand) var(--bg-tertiary);
+}
+
+/* Previne layout shift durante scroll */
+[data-scroll-container] {
+  contain: layout style paint;
+  content-visibility: auto;
+}
+
+/* Otimização para elementos com position fixed/sticky */
+[class*="fixed"],
+[class*="sticky"] {
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Section transitions - Otimizadas */
 section,
 .card {
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  contain: layout style paint;
+}
+
+/* Otimização para elementos fixos */
+header,
+footer {
+  contain: layout style paint;
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+/* Cards com altura igual em grid */
+.auto-rows-fr {
+  grid-auto-rows: 1fr;
+}
+
+.auto-rows-fr > * {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Efeito 3D para ícones do Tokenomics - adaptável a light/dark mode */
