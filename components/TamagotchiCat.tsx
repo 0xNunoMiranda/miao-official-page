@@ -42,21 +42,42 @@ export default function TamagotchiCat() {
 
   // Preload images
   useEffect(() => {
+    const loadPromises: Promise<void>[] = []
+    
     catEmotions.forEach((emotion, index) => {
-      if (index === 0) return // First image is already loaded
-      const img = new Image()
-      img.src = emotion.src
-      img.onload = () => {
+      if (index === 0) {
+        // First image - mark as loaded immediately
         setLoadedImages(prev => new Set([...prev, index]))
+        return
       }
+      
+      const img = new Image()
+      const loadPromise = new Promise<void>((resolve) => {
+        img.onload = () => {
+          setLoadedImages(prev => {
+            const newSet = new Set([...prev, index])
+            return newSet
+          })
+          resolve()
+        }
+        img.onerror = () => {
+          // If image fails to load, still mark as loaded to avoid blocking
+          setLoadedImages(prev => new Set([...prev, index]))
+          resolve()
+        }
+      })
+      img.src = emotion.src
+      loadPromises.push(loadPromise)
     })
   }, [])
 
   const changeEmotion = useCallback((newIndex: number) => {
-    // Only change if image is loaded
-    if (loadedImages.has(newIndex)) {
+    // Only change if image is loaded and index is valid
+    if (newIndex >= 0 && newIndex < catEmotions.length && loadedImages.has(newIndex)) {
       setCurrentEmotion(newIndex)
+      return true
     }
+    return false
   }, [loadedImages])
 
   useEffect(() => {
@@ -68,6 +89,7 @@ export default function TamagotchiCat() {
       if (loadedImages.has(nextIndex)) {
         changeEmotion(nextIndex)
       }
+      // If not loaded, wait for next interval (image will be loaded by then)
     }, 5000)
 
     return () => clearInterval(interval)
@@ -75,44 +97,64 @@ export default function TamagotchiCat() {
 
   const handleFeed = () => {
     setIsPaused(true)
-    changeEmotion(1) // happy
-    setStats((prev) => ({ ...prev, hunger: Math.min(100, prev.hunger + 20) }))
+    // Only change if image is loaded
+    if (loadedImages.has(1)) {
+      changeEmotion(1) // happy
+      setStats((prev) => ({ ...prev, hunger: Math.min(100, prev.hunger + 20) }))
+    }
     setTimeout(() => setIsPaused(false), 3000)
   }
 
   const handleSleep = () => {
     setIsPaused(true)
-    changeEmotion(4) // sleepy
-    setStats((prev) => ({ ...prev, energy: Math.min(100, prev.energy + 30) }))
+    // Only change if image is loaded
+    if (loadedImages.has(4)) {
+      changeEmotion(4) // sleepy
+      setStats((prev) => ({ ...prev, energy: Math.min(100, prev.energy + 30) }))
+    }
     setTimeout(() => setIsPaused(false), 3000)
   }
 
   const handlePlay = () => {
     setIsPaused(true)
-    changeEmotion(2) // laugh
-    setStats((prev) => ({ ...prev, happiness: Math.min(100, prev.happiness + 25) }))
+    // Only change if image is loaded
+    if (loadedImages.has(2)) {
+      changeEmotion(2) // laugh
+      setStats((prev) => ({ ...prev, happiness: Math.min(100, prev.happiness + 25) }))
+    }
     setTimeout(() => setIsPaused(false), 3000)
   }
 
   const handleStudy = () => {
     setIsPaused(true)
-    changeEmotion(3) // surprise
-    setStats((prev) => ({ ...prev, intelligence: Math.min(100, prev.intelligence + 15) }))
+    // Only change if image is loaded
+    if (loadedImages.has(3)) {
+      changeEmotion(3) // surprise
+      setStats((prev) => ({ ...prev, intelligence: Math.min(100, prev.intelligence + 15) }))
+    }
     setTimeout(() => setIsPaused(false), 3000)
   }
 
   const handleClick = () => {
     setIsPaused(true)
-    const randomIndex = Math.floor(Math.random() * catEmotions.length)
-    changeEmotion(randomIndex)
+    // Try random emotions until we find one that's loaded
+    const availableEmotions = Array.from({ length: catEmotions.length }, (_, i) => i)
+      .filter(index => loadedImages.has(index))
+    
+    if (availableEmotions.length > 0) {
+      const randomIndex = availableEmotions[Math.floor(Math.random() * availableEmotions.length)]
+      changeEmotion(randomIndex)
+    }
     setTimeout(() => setIsPaused(false), 10000)
   }
 
   const handlePet = () => {
     setIsPaused(true)
-    const happyEmotions = [0, 1, 2]
-    const randomHappy = happyEmotions[Math.floor(Math.random() * happyEmotions.length)]
-    changeEmotion(randomHappy)
+    const happyEmotions = [0, 1, 2].filter(index => loadedImages.has(index))
+    if (happyEmotions.length > 0) {
+      const randomHappy = happyEmotions[Math.floor(Math.random() * happyEmotions.length)]
+      changeEmotion(randomHappy)
+    }
   }
 
   const handleMouseLeave = () => {
@@ -142,7 +184,7 @@ export default function TamagotchiCat() {
 
   return (
     <div
-      className={`flex flex-row items-start gap-1 sm:gap-2 md:gap-3 transition-all duration-700 ease-out relative ${
+      className={`flex flex-row items-center justify-center lg:justify-start gap-1 sm:gap-2 md:gap-3 transition-all duration-700 ease-out relative mx-auto lg:mx-0 ${
         isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
       }`}
     >
