@@ -187,9 +187,10 @@ export default function TamagotchiCat() {
       className={`flex flex-row items-center justify-center lg:justify-start gap-1 sm:gap-2 md:gap-3 transition-all duration-700 ease-out relative mx-auto lg:mx-0 ${
         isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
       }`}
+      style={{ overflow: 'visible' }}
     >
       {/* Botões verticais à esquerda */}
-      <div className="flex flex-col items-center gap-3 md:gap-4 relative z-10 flex-shrink-0">
+      <div className="flex flex-col items-center gap-3 md:gap-4 relative z-40 flex-shrink-0" style={{ position: 'relative' }}>
         <ActionButton icon={Utensils} onClick={handleFeed} label={t("tamagotchi.feed")} />
         <ActionButton icon={Moon} onClick={handleSleep} label={t("tamagotchi.sleep")} />
         <ActionButton icon={Gamepad2} onClick={handlePlay} label={t("tamagotchi.play")} />
@@ -215,6 +216,7 @@ export default function TamagotchiCat() {
         className="relative cursor-pointer select-none flex-shrink-0 z-30 w-full"
         style={{
           animation: "tamagotchi-float 3s ease-in-out infinite",
+          position: 'relative',
         }}
         onClick={handleClick}
       >

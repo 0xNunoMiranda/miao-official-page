@@ -314,7 +314,7 @@ const Hero: React.FC<HeroProps> = ({ onSwapChartClick, isChristmasMode = false, 
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-24 w-full relative z-20">
         <div className="grid lg:grid-cols-2 gap-4 sm:gap-6 md:gap-6 lg:gap-8 items-center justify-items-center lg:justify-items-stretch">
           {/* Cat Image - Left */}
-          <div className="order-2 lg:order-1 flex justify-center lg:justify-start lg:items-start w-full max-w-full min-w-0">
+          <div className="order-2 lg:order-1 flex justify-center lg:justify-start lg:items-start w-full max-w-full min-w-0" style={{ overflow: 'visible' }}>
             <TamagotchiCat />
           </div>
 
