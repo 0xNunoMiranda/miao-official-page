@@ -210,9 +210,19 @@ const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false, se
   const [showLimitModal, setShowLimitModal] = useState(false)
   const latestCatRef = useRef<HTMLDivElement | null>(null)
 
-  // Carrega a contagem diária e imagens salvas ao montar o componente
+  // Carrega a contagem diária do servidor e imagens salvas ao montar o componente
   useEffect(() => {
-    setDailyCount(getDailyCount())
+    // Buscar rate limit do servidor (por IP)
+    fetch("/api/generate")
+      .then((res) => res.json())
+      .then((data) => {
+        setDailyCount(data.count || 0)
+      })
+      .catch((err) => {
+        console.warn("Failed to fetch rate limit:", err)
+        // Fallback para localStorage se o servidor falhar
+        setDailyCount(getDailyCount())
+      })
     
     // Carrega imagens salvas
     const storedImages = getStoredImages()
@@ -322,17 +332,38 @@ const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false, se
       setIsAuthenticated(true)
     }
 
-    // Verifica o limite diário
-    const currentCount = getDailyCount()
-    if (currentCount >= MAX_GENERATIONS_PER_DAY) {
-      setShowLimitModal(true)
-      return
-    }
-
     setLoading(true)
     setError(null)
 
     try {
+      // Verificar rate limit no servidor (por IP)
+      const rateLimitResponse = await fetch("/api/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+
+      if (!rateLimitResponse.ok) {
+        if (rateLimitResponse.status === 429) {
+          const errorData = await rateLimitResponse.json()
+          setShowLimitModal(true)
+          setLoading(false)
+          return
+        }
+        throw new Error("Failed to check rate limit")
+      }
+
+      const rateLimitData = await rateLimitResponse.json()
+      if (!rateLimitData.allowed) {
+        setShowLimitModal(true)
+        setLoading(false)
+        return
+      }
+
+      // Atualizar contador local baseado na resposta do servidor
+      setDailyCount(MAX_GENERATIONS_PER_DAY - rateLimitData.remaining)
+
       // Constrói o prompt final garantindo que tudo que o usuário digitar seja sobre o gato
       const userInput = prompt.trim()
       // Usa "está" ou "tem" dependendo do contexto, mas sempre referindo-se ao gato
@@ -352,10 +383,13 @@ const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false, se
       
       // Salva a imagem no localStorage com expiração de 24h
       saveImage(newCat)
-      
-      // Incrementa a contagem diária
-      const newCount = incrementDailyCount()
-      setDailyCount(newCount)
+
+      // Enviar imagem para o Telegram automaticamente (em background, não bloqueia a UI)
+      // Usar a imagem gerada diretamente (img.src)
+      sendImageToTelegram(img.src, userInput).catch((err) => {
+        // Silenciosamente falha se não conseguir enviar (não afeta a experiência do usuário)
+        console.warn("Failed to send image to Telegram:", err)
+      })
 
       // Scroll para a nova imagem após um pequeno delay para garantir que foi renderizada
       setTimeout(() => {
@@ -395,6 +429,32 @@ const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false, se
     } catch (e) {
       console.error(e)
       alert(t("generator.downloadFailed"))
+    }
+  }
+
+  // Função para enviar imagem para o Telegram
+  const sendImageToTelegram = async (imageUrl: string, prompt: string) => {
+    try {
+      const response = await fetch("/api/send-telegram", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          imageUrl,
+          prompt,
+        }),
+      })
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}))
+        throw new Error(error.error || "Failed to send to Telegram")
+      }
+
+      return await response.json()
+    } catch (error) {
+      console.error("Error sending to Telegram:", error)
+      throw error
     }
   }
 
