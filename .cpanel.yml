@@ -1,10 +1,11 @@
 ---
 deployment:
   tasks:
-    - /bin/rm -rf .next node_modules/.cache .swc
-    - /bin/npm ci || /bin/npm install
+    - /bin/pwd
+    - /bin/test -f package.json
+    - /bin/rm -rf .next
+    - /bin/npm install
     - /bin/npm run build
+    - /bin/test -d .next
     - /bin/chmod -R 755 .next
     - /bin/chmod -R 755 public
-    - /bin/mkdir -p logs
-    - /bin/chmod 755 logs
