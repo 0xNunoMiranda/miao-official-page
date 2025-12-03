@@ -10,10 +10,10 @@ deployment:
     # 3) Instalar dependências (usa package-lock.json)
     - /bin/npm ci || /bin/npm install
 
-    # 4) Build de produção (Next.js)
+    # 4) Build de produção (Next.js + TypeScript)
     - /bin/npm run build
 
-    # 5) Copiar tudo (código + .next + public, etc.) para a pasta de deploy
+    # 5) Copiar todos os arquivos da app para a pasta de deploy
     - /bin/rsync -aP --delete-after \
         --exclude ".git" \
         --exclude ".cpanel.yml" \
@@ -23,5 +23,9 @@ deployment:
     - /bin/mkdir -p $DEPLOYPATH/tmp
     - /bin/touch $DEPLOYPATH/tmp/restart.txt
 
-    # 7) Mensagem final
-    - echo "Deploy Next.js concluído com sucesso!"
+    # 7) Executar a app em Node.js via npm start
+    - cd $DEPLOYPATH
+    - /bin/npm run start &
+
+    # 8) Mensagem final
+    - echo "Deploy Next.js + TypeScript (TSX) concluído com sucesso!"
