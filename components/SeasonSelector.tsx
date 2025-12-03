@@ -2,6 +2,7 @@
 
 import type React from "react"
 import { useState, useRef, useEffect } from "react"
+import { createPortal } from "react-dom"
 import { ChevronDown, Wind, Leaf, Snowflake } from "lucide-react"
 
 export type Season = "normal" | "fall" | "winter"
@@ -26,23 +27,56 @@ interface SeasonSelectorProps {
 
 const SeasonSelector: React.FC<SeasonSelectorProps> = ({ season, onSeasonChange, compact = false }) => {
   const [isOpen, setIsOpen] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const buttonRef = useRef<HTMLButtonElement>(null)
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, right: 0 })
 
   const currentSeason = seasons.find((s) => s.value === season)
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false)
+      const target = event.target as Node
+      if (
+        buttonRef.current?.contains(target) ||
+        dropdownRef.current?.contains(target)
+      ) {
+        return
+      }
+      setIsOpen(false)
+    }
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside)
+      return () => document.removeEventListener("mousedown", handleClickOutside)
+    }
+  }, [isOpen])
+
+  useEffect(() => {
+    const updatePosition = () => {
+      if (isOpen && buttonRef.current) {
+        const rect = buttonRef.current.getBoundingClientRect()
+        setDropdownPosition({
+          top: rect.bottom + 8,
+          right: window.innerWidth - rect.right
+        })
       }
     }
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [])
+    
+    if (isOpen) {
+      updatePosition()
+      window.addEventListener('scroll', updatePosition, true)
+      window.addEventListener('resize', updatePosition)
+      return () => {
+        window.removeEventListener('scroll', updatePosition, true)
+        window.removeEventListener('resize', updatePosition)
+      }
+    }
+  }, [isOpen])
 
   return (
-    <div className="relative" ref={dropdownRef}>
+    <div className="relative overflow-visible" ref={containerRef}>
       <button
+        ref={buttonRef}
         onClick={() => setIsOpen(!isOpen)}
         className={`
           flex items-center gap-2 rounded-xl border-2 border-[var(--border-color)] border-b-4 
@@ -67,8 +101,15 @@ const SeasonSelector: React.FC<SeasonSelectorProps> = ({ season, onSeasonChange,
         )}
       </button>
 
-      {isOpen && (
-        <div className="absolute top-full mt-2 right-0 bg-[var(--bg-primary)] border-2 border-[var(--border-color)] rounded-xl shadow-xl overflow-hidden z-50 min-w-[180px]">
+      {isOpen && typeof window !== 'undefined' && createPortal(
+        <div 
+          ref={dropdownRef}
+          className="fixed bg-[var(--bg-primary)] border-2 border-[var(--border-color)] rounded-xl shadow-xl overflow-hidden z-[9999] min-w-[180px]"
+          style={{
+            top: `${dropdownPosition.top}px`,
+            right: `${dropdownPosition.right}px`
+          }}
+        >
           {seasons.map((seasonOption) => (
             <button
               key={seasonOption.value}
@@ -87,7 +128,8 @@ const SeasonSelector: React.FC<SeasonSelectorProps> = ({ season, onSeasonChange,
               {season === seasonOption.value && <span className="ml-auto text-[var(--brand)]">✓</span>}
             </button>
           ))}
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   )

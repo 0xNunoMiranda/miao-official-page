@@ -34,7 +34,7 @@ const Footer: React.FC = () => {
               <Mail size={18} />
               {t("footer.sendEmail")}
             </a>
-            <p className="text-sm font-medium text-[var(--text-secondary)]">v1.0.8</p>
+            <p className="text-sm font-medium text-[var(--text-secondary)]">v1.0.9</p>
           </div>
         </div>
       </div>
