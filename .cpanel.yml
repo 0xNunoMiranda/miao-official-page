@@ -1,8 +1,11 @@
 ---
 deployment:
   tasks:
+    - /bin/pwd
+    - /bin/test -f package.json
     - /bin/rm -rf .next
     - /bin/npm install
     - /bin/npm run build
+    - /bin/test -d .next
     - /bin/chmod -R 755 .next
     - /bin/chmod -R 755 public
