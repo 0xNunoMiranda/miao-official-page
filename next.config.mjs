@@ -34,14 +34,24 @@ const nextConfig = {
     // Desabilitar otimizações pesadas que consomem muita memória
     webpackBuildWorker: false,
   },
-  // Configurações para reduzir uso de memória
-  swcMinify: true,
   // Desabilitar source maps em produção para economizar memória
   productionBrowserSourceMaps: false,
   // Configurações adicionais do webpack para reduzir memória
-  webpack: (config) => {
+  webpack: (config, { isServer }) => {
     // Reduzir paralelismo para economizar memória
     config.parallelism = 1
+    
+    // Desabilitar otimizações pesadas que usam WebAssembly
+    if (!isServer) {
+      config.optimization = {
+        ...config.optimization,
+        minimize: false, // Desabilitar minificação para economizar memória
+      }
+    }
+    
+    // Reduzir cache para economizar memória
+    config.cache = false
+    
     return config
   },
   // Adicionar rewrites para servir favicon.ico
