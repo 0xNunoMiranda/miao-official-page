@@ -8,7 +8,7 @@
     "npm": ">=9.0.0"
   },
   "scripts": {
-    "build": "NODE_OPTIONS='--max-old-space-size=1024' NEXT_TELEMETRY_DISABLED=1 next build",
+    "build": "cross-env NODE_OPTIONS=--max-old-space-size=1024 NEXT_TELEMETRY_DISABLED=1 next build --webpack",
     "dev": "next dev",
     "lint": "next lint",
     "start": "node app.js"
@@ -33,6 +33,7 @@
     "@types/node": "^22",
     "@types/react": "19.2.7",
     "@types/react-dom": "19.2.3",
+    "cross-env": "^7.0.3",
     "postcss": "^8.5",
     "tailwindcss": "^4.1.9",
     "typescript": "^5"
