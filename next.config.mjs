@@ -29,6 +29,20 @@ const nextConfig = {
     serverActions: {
       bodySizeLimit: '2mb',
     },
+    // Reduzir uso de memória durante o build
+    optimizeCss: false,
+    // Desabilitar otimizações pesadas que consomem muita memória
+    webpackBuildWorker: false,
+  },
+  // Configurações para reduzir uso de memória
+  swcMinify: true,
+  // Desabilitar source maps em produção para economizar memória
+  productionBrowserSourceMaps: false,
+  // Configurações adicionais do webpack para reduzir memória
+  webpack: (config) => {
+    // Reduzir paralelismo para economizar memória
+    config.parallelism = 1
+    return config
   },
   // Adicionar rewrites para servir favicon.ico
   async rewrites() {
