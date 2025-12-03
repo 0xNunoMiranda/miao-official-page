@@ -11,7 +11,7 @@
     "build": "NODE_OPTIONS='--max-old-space-size=1024' NEXT_TELEMETRY_DISABLED=1 next build",
     "dev": "next dev",
     "lint": "next lint",
-    "start": "next start"
+    "start": "node app.js"
   },
   "dependencies": {
     "@vercel/analytics": "1.5.0",
