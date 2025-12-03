@@ -1,0 +1,16 @@
+# Forçar Node.js (não Python)
+# Desabilitar detecção automática de Python
+Options -ExecCGI
+RemoveHandler .py .pyc .pyo
+
+# Configuração para Next.js
+RewriteEngine On
+
+# Redirecionar para Next.js (se usando Passenger/Node.js)
+# Se estiver usando cPanel Node.js Selector, o cPanel gerencia isso automaticamente
+
+# Desabilitar Python
+<FilesMatch "\.(py|pyc|pyo)$">
+    Deny from all
+</FilesMatch>
+
