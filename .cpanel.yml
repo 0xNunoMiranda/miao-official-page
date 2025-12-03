@@ -1,6 +1,8 @@
 ---
 deployment:
   tasks:
+    - export DEPLOYPATH=/home/miaotoke/repositories/miao-official-page
+    - cd $DEPLOYPATH
     - /bin/pwd
     - /bin/test -f package.json
     - /bin/rm -rf .next
