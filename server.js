@@ -7,8 +7,18 @@ const next = require('next')
 const fs = require('fs')
 const path = require('path')
 
+// No cPanel, o Passenger define automaticamente a porta via process.env.PORT
+// NÃO defina PORT manualmente - deixe o cPanel fazer isso
 const hostname = process.env.HOSTNAME || '0.0.0.0'
-const port = parseInt(process.env.PORT || '3000', 10)
+const port = parseInt(process.env.PORT || process.env.PASSENGER_PORT || '3000', 10)
+
+// Log para debug (remover em produção se necessário)
+console.log('Starting server with:', {
+  hostname,
+  port,
+  nodeEnv: process.env.NODE_ENV,
+  passengerPort: process.env.PASSENGER_PORT
+})
 
 // Função para garantir que sempre retornamos o mesmo content type
 function setStandardHeaders(res) {
