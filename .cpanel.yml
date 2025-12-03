@@ -4,19 +4,32 @@ deployment:
     # 1) Verificar se estamos no diretório correto
     - /bin/pwd
     
-    # 2) Limpar builds anteriores (opcional, mas recomendado)
-    - /bin/rm -rf .next node_modules/.cache || true
+    # 2) Limpar builds anteriores e cache (importante para builds limpos)
+    - /bin/rm -rf .next node_modules/.cache .swc || true
     
-    # 3) Instalar dependências
-    # Usa npm ci se package-lock.json existir, senão npm install
-    - /bin/npm ci || /bin/npm install
+    # 3) Instalar dependências de produção
+    # Usa npm ci se package-lock.json existir (mais rápido e confiável), senão npm install
+    - /bin/npm ci --production=false || /bin/npm install
     
-    # 4) Build de produção (Next.js)
-    - /bin/npm run build
+    # 4) Verificar se Node.js está disponível e na versão correta
+    - /bin/node --version || (echo "Node.js não encontrado" && exit 1)
     
-    # 5) Verificar se o build foi bem-sucedido
+    # 5) Build de produção do Next.js (NODE_ENV será definido automaticamente pelo npm run build)
+    - NODE_ENV=production /bin/npm run build
+    
+    # 7) Verificar se o build foi bem-sucedido
     - /bin/test -d .next || (echo "Build failed: .next directory not found" && exit 1)
+    - /bin/test -f .next/BUILD_ID || (echo "Build failed: BUILD_ID not found" && exit 1)
     
-    # 6) Garantir permissões corretas
+    # 8) Garantir permissões corretas para arquivos e diretórios
     - /bin/chmod -R 755 .next || true
     - /bin/chmod -R 755 public || true
+    - /bin/chmod 644 package.json || true
+    - /bin/chmod 755 node_modules/.bin/* || true
+    
+    # 9) Criar diretório de logs se não existir
+    - /bin/mkdir -p logs || true
+    - /bin/chmod 755 logs || true
+    
+    # 10) Verificar se o script start está configurado no package.json
+    - /bin/grep -q '"start"' package.json || (echo "Warning: start script not found in package.json" && exit 1)
