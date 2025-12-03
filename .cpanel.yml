@@ -1,0 +1,12 @@
+---
+deployment:
+  tasks:
+    # 1) Instalar dependências
+    - /bin/npm ci --production=false || /bin/npm install
+    
+    # 2) Build de produção (Next.js)
+    - /bin/npm run build
+    
+    # 3) Garantir que arquivos necessários estão presentes
+    # O cPanel automaticamente faz o deploy do diretório raiz
+    # Apenas precisamos garantir que o build foi feito
