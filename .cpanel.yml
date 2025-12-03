@@ -2,11 +2,10 @@
 deployment:
   tasks:
     - /bin/pwd
-    - /bin/test -f package.json || (echo "ERROR: package.json not found" && exit 1)
-    - /bin/rm -rf .next node_modules/.cache || true
-    - /bin/npm ci || /bin/npm install
+    - /bin/test -f package.json
+    - /bin/rm -rf .next
+    - /bin/npm install
     - /bin/npm run build
-    - /bin/test -d .next || (echo "Build failed: .next directory not found" && exit 1)
-    - /bin/chmod -R 755 .next || true
-    - /bin/chmod -R 755 public || true
-    - echo "Deploy completed successfully"
+    - /bin/test -d .next
+    - /bin/chmod -R 755 .next
+    - /bin/chmod -R 755 public
