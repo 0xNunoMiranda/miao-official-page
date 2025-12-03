@@ -1,12 +1,22 @@
 ---
 deployment:
   tasks:
-    # 1) Instalar dependências
-    - /bin/npm ci --production=false || /bin/npm install
+    # 1) Verificar se estamos no diretório correto
+    - /bin/pwd
     
-    # 2) Build de produção (Next.js)
+    # 2) Limpar builds anteriores (opcional, mas recomendado)
+    - /bin/rm -rf .next node_modules/.cache || true
+    
+    # 3) Instalar dependências
+    # Usa npm ci se package-lock.json existir, senão npm install
+    - /bin/npm ci || /bin/npm install
+    
+    # 4) Build de produção (Next.js)
     - /bin/npm run build
     
-    # 3) Garantir que arquivos necessários estão presentes
-    # O cPanel automaticamente faz o deploy do diretório raiz
-    # Apenas precisamos garantir que o build foi feito
+    # 5) Verificar se o build foi bem-sucedido
+    - /bin/test -d .next || (echo "Build failed: .next directory not found" && exit 1)
+    
+    # 6) Garantir permissões corretas
+    - /bin/chmod -R 755 .next || true
+    - /bin/chmod -R 755 public || true
