@@ -1,16 +1,16 @@
 ---
 deployment:
   tasks:
-    # 1) Pasta de destino no servidor (ajusta para o teu utilizador/pasta)
-    - export DEPLOYPATH=/home/SEU_USER/apps/miao-official-page
+    # 1) Pasta de destino no servidor (ajusta para o teu utilizador cPanel)
+    - export DEPLOYPATH=/home/miaotoke/apps/miao-official-page
 
-    # 2) Garantir que a pasta existe
+    # 2) Garantir que a pasta de deploy existe
     - /bin/mkdir -p $DEPLOYPATH
 
-    # 3) Instalar dependências (usa o package-lock.json)
+    # 3) Instalar dependências (usa package-lock.json)
     - /bin/npm ci || /bin/npm install
 
-    # 4) Build de produção (Next.js / app do AI Studio)
+    # 4) Build de produção (Next.js)
     - /bin/npm run build
 
     # 5) Copiar tudo (código + .next + public, etc.) para a pasta de deploy
@@ -19,5 +19,9 @@ deployment:
         --exclude ".cpanel.yml" \
         ./ $DEPLOYPATH
 
-    # 6) (Opcional) Reiniciar a app Node, se tiveres um script/comando para isso
-    # - /home/SEU_USER/apps/miao-official-page/restart.sh || true
+    # 6) Reiniciar a app Node.js via Passenger (cPanel)
+    - /bin/mkdir -p $DEPLOYPATH/tmp
+    - /bin/touch $DEPLOYPATH/tmp/restart.txt
+
+    # 7) Mensagem final
+    - echo "Deploy Next.js concluído com sucesso!"
