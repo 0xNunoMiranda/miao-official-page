@@ -3,9 +3,13 @@ deployment:
   tasks:
     - export DEPLOYPATH=/home/miaotoke/repositories/miao-official-page
     - cd $DEPLOYPATH
+    - /bin/pwd
+    - /bin/test -f package.json
     - /bin/rm -rf .next
     - /bin/npm install
     - export NODE_ENV=production
     - /bin/npm run build
+    - /bin/test -d .next
+    - /bin/test -f .next/BUILD_ID
     - /bin/chmod -R 755 .next
     - /bin/chmod -R 755 public
