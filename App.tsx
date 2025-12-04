@@ -39,22 +39,26 @@ const AppContent: React.FC = () => {
   const [currentView, setCurrentView] = useState<"home" | "games" | "tools">(
     "home"
   );
-  const [season, setSeason] = useState<Season>(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("season");
-      return (saved as Season) || "normal";
-    }
-    return "normal";
-  });
+  const [season, setSeason] = useState<Season>("normal");
   const [isChristmasMode, setIsChristmasMode] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    // Carrega o estado do som do localStorage apenas no cliente
     if (typeof window !== "undefined") {
-      const stored = localStorage.getItem("soundEnabled");
-      if (stored !== null) {
-        setSoundEnabled(stored === "true");
+      // Detecta viewport mobile uma vez no cliente
+      setIsMobile(window.innerWidth < 768);
+
+      // Carrega o estado do som do localStorage apenas no cliente
+      const storedSound = localStorage.getItem("soundEnabled");
+      if (storedSound !== null) {
+        setSoundEnabled(storedSound === "true");
+      }
+
+      // Carrega a estação guardada, se existir
+      const savedSeason = localStorage.getItem("season");
+      if (savedSeason) {
+        setSeason(savedSeason as Season);
       }
     }
   }, []);
@@ -149,18 +153,17 @@ const AppContent: React.FC = () => {
           })`,
           backgroundSize: "cover",
           backgroundPosition: "bottom center",
-          backgroundAttachment: "fixed",
           backgroundRepeat: "no-repeat",
         }}
       >
         <div className="fixed inset-0 bg-(--bg-primary)/85 pointer-events-none z-0" />
 
-        {isChristmasMode && (
+        {!isMobile && isChristmasMode && (
           <div className="fixed inset-0 pointer-events-none z-1">
             <SnowEffect isActive={isChristmasMode} />
           </div>
         )}
-        {season === "fall" && (
+        {!isMobile && season === "fall" && (
           <div className="fixed inset-0 pointer-events-none z-1">
             <LeafEffect isActive={season === "fall"} />
           </div>
