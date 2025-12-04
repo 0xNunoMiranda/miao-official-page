@@ -1,9 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getOrCreateUser, generateWalletToken, isAdminWallet, verifyWalletOnchain } from '@/lib/auth'
-import { Connection, PublicKey } from '@solana/web3.js'
-
-const SOLANA_RPC = process.env.SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com'
-const connection = new Connection(SOLANA_RPC, 'confirmed')
 
 /**
  * POST /api/auth/wallet

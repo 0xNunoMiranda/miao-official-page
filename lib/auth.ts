@@ -1,8 +1,10 @@
 import { NextRequest } from 'next/server'
 import { execute } from '@/lib/db'
 import crypto from 'crypto'
+import { Connection, PublicKey } from '@solana/web3.js'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'miao-secret-key-change-in-production'
+const SOLANA_RPC = process.env.SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com'
 
 export interface AuthPayload {
   wallet: string
@@ -211,6 +213,40 @@ export async function getOrCreateUser(wallet: string): Promise<any | null> {
   } catch (error) {
     console.error('Error getting/creating user:', error)
     return null
+  }
+}
+
+/**
+ * Verifica se uma wallet Solana é válida onchain
+ * @param wallet - Endereço da wallet
+ * @returns true se a wallet é válida
+ */
+export async function verifyWalletOnchain(wallet: string): Promise<boolean> {
+  try {
+    const normalizedWallet = wallet.toLowerCase().trim()
+    
+    // Validar formato básico (Solana addresses têm 32-44 caracteres)
+    if (normalizedWallet.length < 32 || normalizedWallet.length > 44) {
+      return false
+    }
+
+    // Tentar criar PublicKey (valida formato)
+    try {
+      const publicKey = new PublicKey(normalizedWallet)
+      
+      // Tentar obter balance para verificar se a wallet existe onchain
+      const connection = new Connection(SOLANA_RPC, 'confirmed')
+      await connection.getBalance(publicKey)
+      
+      return true
+    } catch (error) {
+      // Se não conseguir criar PublicKey ou obter balance, wallet inválida
+      console.warn('Wallet validation failed:', error)
+      return false
+    }
+  } catch (error) {
+    console.error('Error verifying wallet onchain:', error)
+    return false
   }
 }
 
