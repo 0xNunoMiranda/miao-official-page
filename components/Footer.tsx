@@ -1,11 +1,11 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useLanguage } from "../lib/language-context"
-import { Mail, Heart } from "lucide-react"
+import type React from "react";
+import { useLanguage } from "../lib/language-context";
+import { Mail, Heart } from "lucide-react";
 
 const Footer: React.FC = () => {
-  const { t } = useLanguage()
+  const { t } = useLanguage();
 
   return (
     <footer className="relative bg-[var(--bg-secondary)] pt-16 pb-12 px-6 md:px-12 lg:px-24 overflow-hidden">
@@ -19,14 +19,18 @@ const Footer: React.FC = () => {
             {t("footer.disclaimer")}
           </h3>
           <div className="bg-[var(--bg-primary)] rounded-2xl p-6 border-2 border-[var(--border-color)] border-b-4">
-            <p className="text-[var(--text-secondary)] font-medium leading-relaxed">{t("footer.disclaimerText")}</p>
+            <p className="text-[var(--text-secondary)] font-medium leading-relaxed">
+              {t("footer.disclaimerText")}
+            </p>
           </div>
         </div>
 
         {/* Right: Copyright & Contact */}
         <div className="flex flex-col items-start justify-between">
           <div className="text-left w-full">
-            <p className="font-bold text-[var(--text-primary)] text-lg mb-4">{t("footer.rights")}</p>
+            <p className="font-bold text-[var(--text-primary)] text-lg mb-4">
+              {t("footer.rights")}
+            </p>
             <a
               href="mailto:miaotokenonsol@gmail.com"
               className="inline-flex items-center gap-2 px-8 py-3 rounded-2xl font-bold uppercase bg-[var(--duo-green)] text-white border-2 border-b-4 border-[var(--btn-shadow)] hover:brightness-105 active:border-b-2 active:translate-y-[2px] transition-all mb-4"
@@ -34,7 +38,9 @@ const Footer: React.FC = () => {
               <Mail size={18} />
               {t("footer.sendEmail")}
             </a>
-            <p className="text-sm font-medium text-[var(--text-secondary)]">v1.0.9</p>
+            <p className="text-sm font-medium text-[var(--text-secondary)]">
+              v1.0.10
+            </p>
           </div>
         </div>
       </div>
@@ -45,7 +51,7 @@ const Footer: React.FC = () => {
         className="absolute bottom-0 right-0 w-[500px] md:w-[650px] lg:w-[800px] h-auto pointer-events-none select-none"
       />
     </footer>
-  )
-}
+  );
+};
 
-export default Footer
+export default Footer;

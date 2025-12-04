@@ -11,7 +11,7 @@ const fredoka = Fredoka({
 export const metadata: Metadata = {
   title: "MIAO - The Green Cat Token | Community-Owned Solana Memecoin",
   description:
-    "MIAO — community-owned Solana memecoin. Connect your wallet, swap tokens, explore the contract, and join our vibrant community.",
+    "MIAO — a community-owned Solana memecoin. Connect your wallet, swap tokens, explore our smart contract, and join a vibrant community building fun, utility, and culture on-chain.",
   keywords: [
     "MIAO",
     "miao token",
@@ -96,6 +96,7 @@ export default function RootLayout({
   return (
     <html lang="en" dir="ltr" suppressHydrationWarning>
       <head>
+        <meta name="robots" content="index,follow" />
         <link
           rel="icon"
           href="/icon-light-32x32.png"

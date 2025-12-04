@@ -191,6 +191,73 @@ const AppContent: React.FC = () => {
                   <a href="#games-heading">Games</a>
                 </nav>
 
+                {/* SEO-only rich content block: hidden from visual layout but readable by crawlers and screen readers */}
+                <article
+                  className="sr-only"
+                  aria-label="About MIAO detailed description"
+                >
+                  <p>
+                    MIAO is a community-owned memecoin on the Solana blockchain,
+                    created for fun, culture, and utility-first experimentation.
+                    Our mission is simple: build delightful on-chain experiences
+                    while rewarding participation, creativity, and helpfulness.
+                    The project embraces transparency and open collaboration,
+                    inviting anyone to join, contribute, and grow the ecosystem.
+                  </p>
+                  <p>
+                    Powered by Solana’s fast, low-cost infrastructure, MIAO
+                    enables instant swaps, playful dApps, and accessible tools
+                    for both newcomers and seasoned Web3 users. With
+                    community-driven governance and an open roadmap, holders can
+                    shape features, propose integrations, and help steer
+                    seasonal events such as winter holiday themes, autumn leaf
+                    effects, and limited-time collectibles. MIAO celebrates the
+                    spirit of memecoins while grounding development in real
+                    utility and friendly UX.
+                  </p>
+                  <p>
+                    Tokenomics prioritize fair access and sustainability. The
+                    supply is designed to support liquidity, community rewards,
+                    and ecosystem development without aggressive emissions.
+                    Utility flows through tools like swaps, wallet integrations,
+                    and mini-games that encourage engagement. The Cat Generator
+                    and NFTs & Collectibles introduce personalization and
+                    verifiable digital ownership, extending the MIAO identity
+                    across the broader Solana ecosystem. Community & Social
+                    channels—Telegram and Twitter—help newcomers get support,
+                    share updates, and coordinate collaborations.
+                  </p>
+                  <p>
+                    Security and user safety matter. We promote self-custody,
+                    responsible experimentation, and education around Web3 best
+                    practices. Our codebase aims for clarity and performance,
+                    with a focus on accessibility and internationalization so
+                    more people can participate. Whether you are here to swap,
+                    collect, play, or build—MIAO welcomes you. Connect your
+                    wallet, explore the contract, and join the vibrant community
+                    shaping the future of playful on-chain culture.
+                  </p>
+                  <h2>Getting Started on Solana</h2>
+                  <p>
+                    To begin, install a Solana-compatible wallet, acquire SOL
+                    for fees, and use the integrated swap tools to explore
+                    tokens. Visit our official channels for updates, and check
+                    the contract details to learn more about how the token
+                    works. Seasonal modes add a festive touch to the experience,
+                    and community proposals keep the roadmap fresh and
+                    collaborative.
+                  </p>
+                  <h3>Why MIAO?</h3>
+                  <p>
+                    MIAO blends the charm of memecoins with accessible utility:
+                    quick swaps, friendly interfaces, and fun experiences. It’s
+                    built for people who enjoy culture, creativity, and shared
+                    ownership—without compromising on speed or affordability.
+                    Join us, bring a friend, and help build something delightful
+                    together on Solana.
+                  </p>
+                </article>
+
                 <section
                   aria-labelledby="about-heading"
                   className="px-4 md:px-8 mt-10"
@@ -281,38 +348,6 @@ const AppContent: React.FC = () => {
           </main>
 
           <Footer />
-          <div className="px-4 md:px-8 mt-8 text-(--text-primary)">
-            <p>
-              Learn more about Solana at{" "}
-              <a
-                href="https://solana.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline"
-              >
-                solana.com
-              </a>{" "}
-              and follow us on{" "}
-              <a
-                href="https://x.com/miaoonsol"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline"
-              >
-                Twitter
-              </a>{" "}
-              and{" "}
-              <a
-                href="https://t.me/miaotokensol"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline"
-              >
-                Telegram
-              </a>
-              .
-            </p>
-          </div>
         </div>
 
         <WalletModal
