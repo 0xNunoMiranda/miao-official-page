@@ -116,10 +116,15 @@ const AppContent: React.FC = () => {
         }
       }
 
-      // Obter balance
+      // Obter balance (opcional, não bloqueia se falhar)
       let balance = 0;
       if (type !== "metamask") {
-        balance = await getSolBalance(address);
+        try {
+          balance = await getSolBalance(address);
+        } catch (error) {
+          // Balance não é crítico, continua sem ele
+          console.warn('Failed to get balance:', error);
+        }
       }
 
       setWalletState({
@@ -134,7 +139,12 @@ const AppContent: React.FC = () => {
       // Ainda permite conectar localmente mesmo se a API falhar
       let balance = 0;
       if (type !== "metamask") {
-        balance = await getSolBalance(address);
+        try {
+          balance = await getSolBalance(address);
+        } catch (error) {
+          // Balance não é crítico, continua sem ele
+          console.warn('Failed to get balance:', error);
+        }
       }
 
       setWalletState({

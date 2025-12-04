@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getOrCreateUser, generateWalletToken, isAdminWallet, verifyWalletOnchain } from '@/lib/auth'
+import { getOrCreateUser, generateWalletToken, isAdminWallet } from '@/lib/auth'
 
 /**
  * POST /api/auth/wallet
@@ -29,34 +29,45 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Verificar se a wallet é válida onchain (opcional, pode ser pesado)
-    // Comentado temporariamente para não bloquear em caso de problemas de rede
-    /*
-    try {
-      const isValid = await verifyWalletOnchain(normalizedWallet)
-      if (!isValid) {
-        return NextResponse.json(
-          { success: false, error: 'Invalid wallet address' },
-          { status: 400 }
-        )
-      }
-    } catch (onchainError) {
-      // Se não conseguir verificar onchain, continua (pode ser problema de rede)
-      console.warn('Could not verify wallet onchain:', onchainError)
-    }
-    */
-
+    // Validação de formato apenas (sem verificação onchain para evitar bloqueios)
     console.log('[AUTH/WALLET] Attempting to get or create user for wallet:', normalizedWallet)
 
     // Criar ou obter usuário (automaticamente cria se não existir)
-    const user = await getOrCreateUser(normalizedWallet)
-
-    console.log('[AUTH/WALLET] User result:', user ? 'User found/created' : 'User is null', user)
+    let user
+    try {
+      user = await getOrCreateUser(normalizedWallet)
+      console.log('[AUTH/WALLET] User result:', user ? 'User found/created' : 'User is null')
+      if (user) {
+        console.log('[AUTH/WALLET] User data:', {
+          wallet_address: user.wallet_address,
+          username: user.username,
+          level: user.level,
+        })
+      }
+    } catch (dbError) {
+      console.error('[AUTH/WALLET] Database error when creating user:', dbError)
+      if (dbError instanceof Error) {
+        return NextResponse.json(
+          { 
+            success: false, 
+            error: 'Database error',
+            details: dbError.message,
+            hint: 'Please check if the stored procedure sp_user_get_or_create exists in the database'
+          },
+          { status: 500 }
+        )
+      }
+      throw dbError
+    }
 
     if (!user) {
       console.error('[AUTH/WALLET] Failed to create or retrieve user for wallet:', normalizedWallet)
       return NextResponse.json(
-        { success: false, error: 'Failed to create or retrieve user. Please check server logs.' },
+        { 
+          success: false, 
+          error: 'Failed to create or retrieve user',
+          hint: 'The stored procedure may not be returning data correctly. Check server logs for details.'
+        },
         { status: 500 }
       )
     }

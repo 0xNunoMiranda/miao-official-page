@@ -196,49 +196,81 @@ export function verifyWalletOwnership(authWallet: string, routeWallet: string): 
  * @returns Dados do usuário
  */
 export async function getOrCreateUser(wallet: string): Promise<any | null> {
+  const normalizedWallet = wallet.toLowerCase().trim()
+  console.log('[AUTH] Calling sp_user_get_or_create for wallet:', normalizedWallet)
+  
   try {
-    const normalizedWallet = wallet.toLowerCase().trim()
-    console.log('[AUTH] Calling sp_user_get_or_create for wallet:', normalizedWallet)
-    
     const result = await execute('sp_user_get_or_create', [normalizedWallet])
     
-    console.log('[AUTH] Raw stored procedure result:', JSON.stringify(result, null, 2))
+    console.log('[AUTH] Raw stored procedure result type:', typeof result)
+    console.log('[AUTH] Raw stored procedure result isArray:', Array.isArray(result))
+    if (Array.isArray(result)) {
+      console.log('[AUTH] Result length:', result.length)
+      result.forEach((item, index) => {
+        console.log(`[AUTH] Result[${index}]:`, {
+          type: typeof item,
+          isArray: Array.isArray(item),
+          length: Array.isArray(item) ? item.length : 'N/A',
+          sample: Array.isArray(item) && item.length > 0 ? item[0] : item,
+        })
+      })
+    } else {
+      console.log('[AUTH] Raw stored procedure result:', result)
+    }
     
     // mysql2 retorna stored procedures como array de resultados
     // Cada SELECT na stored procedure é um elemento do array
-    // sp_user_get_or_create tem um SELECT no final, então result[0] deve conter as linhas
+    // sp_user_get_or_create tem um SELECT no final
     
-    if (result && Array.isArray(result)) {
-      // result é um array de resultados (um para cada SELECT na SP)
-      // O último SELECT (result[result.length - 1]) contém os dados do usuário
-      const userResult = result[result.length - 1]
-      
-      if (Array.isArray(userResult) && userResult.length > 0) {
-        const user = userResult[0]
-        console.log('[AUTH] User found/created successfully:', {
-          wallet_address: user.wallet_address,
-          username: user.username,
-          level: user.level,
-        })
-        return user
+    if (!result) {
+      console.warn('[AUTH] Stored procedure returned null or undefined')
+      return null
+    }
+    
+    if (Array.isArray(result)) {
+      // Tentar encontrar o resultado do SELECT
+      // Pode estar em result[0] ou no último elemento
+      for (let i = result.length - 1; i >= 0; i--) {
+        const item = result[i]
+        
+        // Se é um array de linhas
+        if (Array.isArray(item) && item.length > 0) {
+          const user = item[0]
+          if (user && user.wallet_address) {
+            console.log('[AUTH] User found/created successfully:', {
+              wallet_address: user.wallet_address,
+              username: user.username,
+              level: user.level,
+            })
+            return user
+          }
+        }
+        
+        // Se é um objeto direto
+        if (item && typeof item === 'object' && item.wallet_address) {
+          console.log('[AUTH] User found/created (direct object):', {
+            wallet_address: item.wallet_address,
+            username: item.username,
+            level: item.level,
+          })
+          return item
+        }
       }
-      
-      // Se não encontrou no último, tenta no primeiro
-      if (result.length > 0 && Array.isArray(result[0]) && result[0].length > 0) {
-        const user = result[0][0]
-        console.log('[AUTH] User found/created (fallback):', {
-          wallet_address: user.wallet_address,
-          username: user.username,
-          level: user.level,
-        })
-        return user
-      }
+    } else if (result && typeof result === 'object' && result.wallet_address) {
+      // Resultado direto como objeto
+      console.log('[AUTH] User found/created (single object):', {
+        wallet_address: result.wallet_address,
+        username: result.username,
+        level: result.level,
+      })
+      return result
     }
     
     console.warn('[AUTH] No user data found in result. Result structure:', {
+      type: typeof result,
       isArray: Array.isArray(result),
       length: Array.isArray(result) ? result.length : 'N/A',
-      firstElement: Array.isArray(result) && result.length > 0 ? result[0] : 'N/A',
+      keys: result && typeof result === 'object' ? Object.keys(result) : 'N/A',
     })
     return null
   } catch (error) {
@@ -246,6 +278,9 @@ export async function getOrCreateUser(wallet: string): Promise<any | null> {
     if (error instanceof Error) {
       console.error('[AUTH] Error message:', error.message)
       console.error('[AUTH] Error stack:', error.stack)
+      
+      // Re-throw para que o endpoint possa capturar e retornar erro apropriado
+      throw error
     }
     return null
   }
@@ -266,21 +301,18 @@ export async function verifyWalletOnchain(wallet: string): Promise<boolean> {
     }
 
     // Tentar criar PublicKey (valida formato)
+    // Não verifica onchain para evitar bloqueios de RPC
     try {
       const publicKey = new PublicKey(normalizedWallet)
-      
-      // Tentar obter balance para verificar se a wallet existe onchain
-      const connection = new Connection(SOLANA_RPC, 'confirmed')
-      await connection.getBalance(publicKey)
-      
+      // Apenas valida o formato, não verifica onchain
       return true
     } catch (error) {
-      // Se não conseguir criar PublicKey ou obter balance, wallet inválida
-      console.warn('Wallet validation failed:', error)
+      // Se não conseguir criar PublicKey, wallet inválida
+      console.warn('[AUTH] Wallet format validation failed:', error)
       return false
     }
   } catch (error) {
-    console.error('Error verifying wallet onchain:', error)
+    console.error('[AUTH] Error verifying wallet format:', error)
     return false
   }
 }

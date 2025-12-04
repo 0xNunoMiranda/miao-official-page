@@ -176,7 +176,10 @@ export async function connectWallet(walletType: WalletType, timeoutMs = 30000): 
 
 export async function getSolBalance(address: string): Promise<number> {
   try {
-    const response = await fetch("https://api.mainnet-beta.solana.com", {
+    // Usar RPC alternativo se disponível, ou fallback silencioso
+    const rpcUrl = process.env.NEXT_PUBLIC_SOLANA_RPC_URL || "https://api.mainnet-beta.solana.com"
+    
+    const response = await fetch(rpcUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -186,9 +189,18 @@ export async function getSolBalance(address: string): Promise<number> {
         params: [address],
       }),
     })
+    
+    if (!response.ok) {
+      // Se der erro (403, etc), retorna 0 silenciosamente
+      console.warn(`[WALLET] Failed to get balance from RPC (${response.status}):`, response.statusText)
+      return 0
+    }
+    
     const data = await response.json()
     return (data.result?.value || 0) / 1e9
-  } catch {
+  } catch (error) {
+    // Falha silenciosamente - balance não é crítico para a conexão
+    console.warn('[WALLET] Error getting balance:', error instanceof Error ? error.message : 'Unknown error')
     return 0
   }
 }
