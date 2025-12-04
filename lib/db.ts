@@ -32,13 +32,19 @@ export async function execute(procedureName: string, params: any[] = []) {
     try {
       const placeholders = params.map(() => '?').join(',')
       const sql = `CALL ${procedureName}(${placeholders})`
+      console.log('[DB] Executing stored procedure:', procedureName, 'with params:', params)
       const [results] = await connection.execute(sql, params)
+      console.log('[DB] Stored procedure result:', JSON.stringify(results, null, 2))
       return results
     } finally {
       connection.release()
     }
   } catch (error) {
-    console.error('Database error:', error)
+    console.error('[DB] Database error in execute:', error)
+    if (error instanceof Error) {
+      console.error('[DB] Error message:', error.message)
+      console.error('[DB] Error stack:', error.stack)
+    }
     throw error
   }
 }

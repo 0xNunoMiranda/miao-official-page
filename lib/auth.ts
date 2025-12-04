@@ -198,20 +198,55 @@ export function verifyWalletOwnership(authWallet: string, routeWallet: string): 
 export async function getOrCreateUser(wallet: string): Promise<any | null> {
   try {
     const normalizedWallet = wallet.toLowerCase().trim()
+    console.log('[AUTH] Calling sp_user_get_or_create for wallet:', normalizedWallet)
+    
     const result = await execute('sp_user_get_or_create', [normalizedWallet])
     
-    // A stored procedure retorna um array de resultados
-    // O primeiro elemento é um array com as linhas do SELECT
-    if (result && Array.isArray(result) && result.length > 0) {
-      const rows = result[0] as any[]
-      if (Array.isArray(rows) && rows.length > 0) {
-        return rows[0]
+    console.log('[AUTH] Raw stored procedure result:', JSON.stringify(result, null, 2))
+    
+    // mysql2 retorna stored procedures como array de resultados
+    // Cada SELECT na stored procedure é um elemento do array
+    // sp_user_get_or_create tem um SELECT no final, então result[0] deve conter as linhas
+    
+    if (result && Array.isArray(result)) {
+      // result é um array de resultados (um para cada SELECT na SP)
+      // O último SELECT (result[result.length - 1]) contém os dados do usuário
+      const userResult = result[result.length - 1]
+      
+      if (Array.isArray(userResult) && userResult.length > 0) {
+        const user = userResult[0]
+        console.log('[AUTH] User found/created successfully:', {
+          wallet_address: user.wallet_address,
+          username: user.username,
+          level: user.level,
+        })
+        return user
+      }
+      
+      // Se não encontrou no último, tenta no primeiro
+      if (result.length > 0 && Array.isArray(result[0]) && result[0].length > 0) {
+        const user = result[0][0]
+        console.log('[AUTH] User found/created (fallback):', {
+          wallet_address: user.wallet_address,
+          username: user.username,
+          level: user.level,
+        })
+        return user
       }
     }
     
+    console.warn('[AUTH] No user data found in result. Result structure:', {
+      isArray: Array.isArray(result),
+      length: Array.isArray(result) ? result.length : 'N/A',
+      firstElement: Array.isArray(result) && result.length > 0 ? result[0] : 'N/A',
+    })
     return null
   } catch (error) {
-    console.error('Error getting/creating user:', error)
+    console.error('[AUTH] Error getting/creating user:', error)
+    if (error instanceof Error) {
+      console.error('[AUTH] Error message:', error.message)
+      console.error('[AUTH] Error stack:', error.stack)
+    }
     return null
   }
 }

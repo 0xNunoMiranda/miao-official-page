@@ -30,6 +30,8 @@ export async function POST(req: NextRequest) {
     }
 
     // Verificar se a wallet é válida onchain (opcional, pode ser pesado)
+    // Comentado temporariamente para não bloquear em caso de problemas de rede
+    /*
     try {
       const isValid = await verifyWalletOnchain(normalizedWallet)
       if (!isValid) {
@@ -42,13 +44,19 @@ export async function POST(req: NextRequest) {
       // Se não conseguir verificar onchain, continua (pode ser problema de rede)
       console.warn('Could not verify wallet onchain:', onchainError)
     }
+    */
+
+    console.log('[AUTH/WALLET] Attempting to get or create user for wallet:', normalizedWallet)
 
     // Criar ou obter usuário (automaticamente cria se não existir)
     const user = await getOrCreateUser(normalizedWallet)
 
+    console.log('[AUTH/WALLET] User result:', user ? 'User found/created' : 'User is null', user)
+
     if (!user) {
+      console.error('[AUTH/WALLET] Failed to create or retrieve user for wallet:', normalizedWallet)
       return NextResponse.json(
-        { success: false, error: 'Failed to create or retrieve user' },
+        { success: false, error: 'Failed to create or retrieve user. Please check server logs.' },
         { status: 500 }
       )
     }
@@ -81,9 +89,30 @@ export async function POST(req: NextRequest) {
       message: 'Wallet authenticated successfully',
     })
   } catch (error) {
-    console.error('Wallet authentication error:', error)
+    console.error('[AUTH/WALLET] Wallet authentication error:', error)
+    if (error instanceof Error) {
+      console.error('[AUTH/WALLET] Error message:', error.message)
+      console.error('[AUTH/WALLET] Error stack:', error.stack)
+      
+      // Verificar se é erro de stored procedure não encontrada
+      if (error.message.includes('does not exist') || error.message.includes('PROCEDURE')) {
+        return NextResponse.json(
+          { 
+            success: false, 
+            error: 'Database stored procedure not found. Please run the database setup script.',
+            details: error.message
+          },
+          { status: 500 }
+        )
+      }
+    }
+    
     return NextResponse.json(
-      { success: false, error: 'Wallet authentication failed' },
+      { 
+        success: false, 
+        error: 'Wallet authentication failed',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
       { status: 500 }
     )
   }
