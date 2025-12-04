@@ -1,0 +1,238 @@
+import { NextRequest } from 'next/server'
+import { execute } from '@/lib/db'
+import crypto from 'crypto'
+
+const JWT_SECRET = process.env.JWT_SECRET || 'miao-secret-key-change-in-production'
+
+export interface AuthPayload {
+  wallet: string
+  timestamp: number
+  isAdmin?: boolean
+}
+
+/**
+ * Verifica se o token JWT da wallet é válido
+ * @param request - NextRequest com Authorization header
+ * @returns Payload decodificado ou null se inválido
+ */
+export function verifyWalletAuth(request: NextRequest): AuthPayload | null {
+  try {
+    const authHeader = request.headers.get('authorization')
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return null
+    }
+
+    const token = authHeader.substring(7)
+    
+    // Decodificar JWT manualmente (Base64)
+    const parts = token.split('.')
+    if (parts.length !== 3) {
+      return null
+    }
+
+    const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString())
+
+    // Verificar se o token não expirou (24 horas)
+    const now = Date.now()
+    const tokenAge = now - payload.timestamp
+    const MAX_AGE = 24 * 60 * 60 * 1000 // 24 horas
+
+    if (tokenAge > MAX_AGE) {
+      return null
+    }
+
+    return payload as AuthPayload
+  } catch (error) {
+    console.error('Token verification failed:', error)
+    return null
+  }
+}
+
+/**
+ * Verifica se a wallet autenticada é admin (consulta BD)
+ * @param wallet - Endereço da wallet
+ * @returns true se for admin
+ */
+export async function isAdminWallet(wallet: string): Promise<boolean> {
+  try {
+    const result = await execute('sp_admin_check_wallet', [wallet.toLowerCase()])
+    return result && Array.isArray(result) && result.length > 0
+  } catch (error) {
+    console.error('Error checking admin wallet:', error)
+    return false
+  }
+}
+
+/**
+ * Verifica credenciais de admin (consulta BD com hash)
+ * @param username - Username do admin
+ * @param password - Password do admin (será hashado)
+ * @returns Admin data se credenciais válidas, null caso contrário
+ */
+export async function verifyAdminCredentials(username: string, password: string): Promise<any | null> {
+  try {
+    // Hash da password com SHA256 (mesmo algoritmo da BD)
+    const passwordHash = crypto.createHash('sha256').update(password).digest('hex')
+    
+    const result = await execute('sp_admin_verify_credentials', [username, passwordHash])
+    
+    if (result && Array.isArray(result) && result.length > 0) {
+      return result[0]
+    }
+    
+    return null
+  } catch (error) {
+    console.error('Error verifying admin credentials:', error)
+    return null
+  }
+}
+
+/**
+ * Middleware completo para autenticação de admin
+ * Requer: wallet autenticada + wallet na lista de admins + credenciais válidas
+ */
+export async function requireAdminAuth(request: NextRequest): Promise<{
+  authorized: boolean
+  wallet?: string
+  admin?: any
+  error?: string
+}> {
+  // 1. Verificar JWT da wallet
+  const auth = verifyWalletAuth(request)
+  if (!auth) {
+    return { authorized: false, error: 'Wallet authentication required' }
+  }
+
+  // 2. Verificar se wallet é admin
+  const isAdmin = await isAdminWallet(auth.wallet)
+  if (!isAdmin) {
+    return { authorized: false, error: 'Admin wallet required' }
+  }
+
+  // 3. Verificar credenciais admin do header (x-admin-username e x-admin-password)
+  const adminUsername = request.headers.get('x-admin-username')
+  const adminPassword = request.headers.get('x-admin-password')
+
+  if (!adminUsername || !adminPassword) {
+    return { authorized: false, error: 'Admin credentials required' }
+  }
+
+  const adminData = await verifyAdminCredentials(adminUsername, adminPassword)
+  if (!adminData) {
+    return { authorized: false, error: 'Invalid admin credentials' }
+  }
+
+  // Atualizar último login
+  if (adminData.admin_id) {
+    await execute('sp_admin_update_last_login', [adminData.admin_id])
+  }
+
+  return { authorized: true, wallet: auth.wallet, admin: adminData }
+}
+
+/**
+ * Middleware para autenticação de cliente (apenas wallet)
+ * Verifica token e garante que o usuário existe na BD
+ * Opcionalmente verifica se a wallet do header corresponde ao token
+ */
+export async function requireWalletAuth(
+  request: NextRequest,
+  options?: { verifyWalletMatch?: string }
+): Promise<{
+  authorized: boolean
+  wallet?: string
+  user?: any
+  error?: string
+  walletMismatch?: boolean
+}> {
+  const auth = verifyWalletAuth(request)
+  
+  if (!auth) {
+    return { authorized: false, error: 'Wallet authentication required' }
+  }
+
+  // Se foi fornecida uma wallet para verificar, comparar
+  if (options?.verifyWalletMatch) {
+    const providedWallet = options.verifyWalletMatch.toLowerCase().trim()
+    const tokenWallet = auth.wallet.toLowerCase().trim()
+    
+    if (providedWallet !== tokenWallet) {
+      return { 
+        authorized: false, 
+        error: 'Wallet mismatch: token wallet does not match provided wallet',
+        walletMismatch: true
+      }
+    }
+  }
+
+  // Verificar se o usuário existe na BD
+  try {
+    const user = await getOrCreateUser(auth.wallet)
+    
+    if (!user) {
+      return { authorized: false, error: 'User not found in database' }
+    }
+
+    return { authorized: true, wallet: auth.wallet, user }
+  } catch (error) {
+    console.error('Error checking user:', error)
+    return { authorized: false, error: 'Database error' }
+  }
+}
+
+/**
+ * Verifica se a wallet autenticada corresponde ao parâmetro da rota
+ * Previne que um usuário acesse dados de outro
+ */
+export function verifyWalletOwnership(authWallet: string, routeWallet: string): boolean {
+  return authWallet.toLowerCase() === routeWallet.toLowerCase()
+}
+
+/**
+ * Cria ou obtém usuário automaticamente na autenticação
+ * @param wallet - Endereço da wallet
+ * @returns Dados do usuário
+ */
+export async function getOrCreateUser(wallet: string): Promise<any | null> {
+  try {
+    const normalizedWallet = wallet.toLowerCase().trim()
+    const result = await execute('sp_user_get_or_create', [normalizedWallet])
+    
+    // A stored procedure retorna um array de resultados
+    // O primeiro elemento é um array com as linhas do SELECT
+    if (result && Array.isArray(result) && result.length > 0) {
+      const rows = result[0] as any[]
+      if (Array.isArray(rows) && rows.length > 0) {
+        return rows[0]
+      }
+    }
+    
+    return null
+  } catch (error) {
+    console.error('Error getting/creating user:', error)
+    return null
+  }
+}
+
+/**
+ * Gera um token JWT simples para a wallet
+ * @param wallet - Endereço da wallet
+ * @param isAdmin - Se a wallet é admin
+ * @returns JWT-like token
+ */
+export function generateWalletToken(wallet: string, isAdmin: boolean = false): string {
+  const payload = {
+    wallet: wallet.toLowerCase(),
+    timestamp: Date.now(),
+    isAdmin,
+  }
+
+  const header = { alg: 'HS256', typ: 'JWT' }
+  const encodedHeader = Buffer.from(JSON.stringify(header)).toString('base64url')
+  const encodedPayload = Buffer.from(JSON.stringify(payload)).toString('base64url')
+  
+  // Assinatura simplificada (em produção usar crypto.createHmac)
+  const signature = Buffer.from(`${encodedHeader}.${encodedPayload}.${JWT_SECRET}`).toString('base64url')
+  
+  return `${encodedHeader}.${encodedPayload}.${signature}`
+}

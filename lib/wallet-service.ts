@@ -19,10 +19,16 @@ declare global {
     phantom?: {
       solana?: {
         isPhantom?: boolean
-        connect: () => Promise<{ publicKey: { toString: () => string } }>
+        connect: (options?: { onlyIfTrusted?: boolean }) => Promise<{ publicKey: { toString: () => string } }>
         disconnect: () => Promise<void>
         connection: unknown
       }
+    }
+    solana?: {
+      isPhantom?: boolean
+      connect: (options?: { onlyIfTrusted?: boolean }) => Promise<{ publicKey: { toString: () => string } }>
+      disconnect: () => Promise<void>
+      isConnected?: boolean
     }
     solflare?: {
       isSolflare?: boolean
@@ -63,7 +69,8 @@ export function isWalletInstalled(walletType: WalletType): boolean {
   if (typeof window === "undefined") return false
   switch (walletType) {
     case "phantom":
-      return !!window.phantom?.solana?.isPhantom
+      // Phantom pode estar em window.solana ou window.phantom.solana
+      return !!(window.solana?.isPhantom || window.phantom?.solana?.isPhantom)
     case "solflare":
       return !!window.solflare?.isSolflare
     case "backpack":
@@ -101,7 +108,17 @@ export async function connectWallet(walletType: WalletType, timeoutMs = 30000): 
     const connectionPromise = (async () => {
       switch (walletType) {
         case "phantom": {
-          const resp = await window.phantom!.solana!.connect()
+          // Phantom pode estar em window.solana ou window.phantom.solana
+          const phantomProvider = window.solana?.isPhantom 
+            ? window.solana 
+            : window.phantom?.solana
+          
+          if (!phantomProvider) {
+            throw new Error("Phantom wallet not found")
+          }
+
+          // Forçar popup mesmo em localhost usando onlyIfTrusted: false
+          const resp = await phantomProvider.connect({ onlyIfTrusted: false })
           address = resp.publicKey.toString()
           break
         }
@@ -179,9 +196,16 @@ export async function getSolBalance(address: string): Promise<number> {
 export async function disconnectWallet(walletType: WalletType): Promise<void> {
   try {
     switch (walletType) {
-      case "phantom":
-        await window.phantom?.solana?.disconnect()
+      case "phantom": {
+        // Phantom pode estar em window.solana ou window.phantom.solana
+        const phantomProvider = window.solana?.isPhantom 
+          ? window.solana 
+          : window.phantom?.solana
+        if (phantomProvider) {
+          await phantomProvider.disconnect()
+        }
         break
+      }
       case "solflare":
         await window.solflare?.disconnect()
         break

@@ -10,14 +10,64 @@ View your app in AI Studio: https://ai.studio/apps/temp/1
 
 ## Run Locally
 
-**Prerequisites:**  Node.js
+**Prerequisites:**  
+- Node.js (>=18.0.0)
+- MySQL/MariaDB database
+- npm (>=9.0.0)
 
+### Setup Steps:
 
-1. Install dependencies:
-   `npm install`
-2. Set the `OPENAI_API_KEY` in `.env.local` to your OpenAI API key (required for image generation)
-3. Run the app:
-   `npm run dev`
+1. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+
+2. **Configure environment variables:**
+   
+   Create a `.env.local` file in the root directory with the following variables:
+   ```env
+   # Database Configuration
+   DATABASE_HOST=localhost
+   DATABASE_PORT=3306
+   DATABASE_USER=your_username
+   DATABASE_PASSWORD=your_password
+   DATABASE_NAME=miao_tools
+
+   # JWT Secret (change in production!)
+   JWT_SECRET=your-super-secret-jwt-key-change-in-production
+
+   # Solana RPC URL (optional, defaults to mainnet)
+   SOLANA_RPC_URL=https://api.mainnet-beta.solana.com
+
+   # OpenAI API Key (for image generation)
+   OPENAI_API_KEY=your_openai_api_key_here
+
+   # Port (optional, default: 3000)
+   PORT=3000
+
+   # Node Environment
+   NODE_ENV=development
+   ```
+
+3. **Setup Database:**
+   
+   Execute the SQL scripts in the `database/` folder:
+   - `complete-setup.sql` - Complete database setup (tables + stored procedures)
+   - Or `mariadb-procedures.sql` - Only stored procedures (if tables already exist)
+
+4. **Run the development server:**
+   ```bash
+   npm run dev
+   ```
+   
+   This will start the Next.js development server on `http://localhost:3000`
+
+5. **Or run as production server (custom HTTP server):**
+   ```bash
+   npm run start
+   ```
+   
+   This uses the custom `app.js` server (useful for production-like testing)
 
 ## Deploy to Vercel
 

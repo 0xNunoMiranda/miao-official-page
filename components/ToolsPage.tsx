@@ -39,6 +39,13 @@ const ToolsPage: React.FC<ToolsPageProps> = ({ onBack, walletState }) => {
   const [generatedImage, setGeneratedImage] = useState<string | null>(null)
   const [isGenerating, setIsGenerating] = useState(false)
 
+  // Admin Login Handler
+  const handleAdminLogin = async () => {
+    if (!walletState.isConnected) {
+      return
+    }
+  }
+
   // --- Auth Gate (Comic Style) ---
   if (!walletState.isConnected) {
     return (

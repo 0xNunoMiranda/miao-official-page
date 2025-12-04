@@ -89,24 +89,73 @@ const AppContent: React.FC = () => {
   });
 
   const handleConnect = async (type: WalletType, address: string) => {
-    let balance = 0;
-    if (type !== "metamask") {
-      balance = await getSolBalance(address);
-    }
+    try {
+      // Autenticar wallet na API (cria usuário se não existir)
+      const response = await fetch('/api/auth/wallet', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ wallet: address }),
+      });
 
-    setWalletState({
-      isConnected: true,
-      address: address,
-      balance: balance,
-      type: type,
-    });
-    setIsWalletModalOpen(false);
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        console.error('Wallet authentication failed:', data.error);
+        // Ainda permite conectar localmente, mas sem autenticação
+      } else {
+        // Salvar token de autenticação
+        if (data.token) {
+          localStorage.setItem('miao_wallet_token', data.token);
+          localStorage.setItem('miao_wallet_auth', JSON.stringify({
+            isAuthenticated: true,
+            wallet: data.wallet,
+            isAdmin: data.isAdmin,
+          }));
+        }
+      }
+
+      // Obter balance
+      let balance = 0;
+      if (type !== "metamask") {
+        balance = await getSolBalance(address);
+      }
+
+      setWalletState({
+        isConnected: true,
+        address: address,
+        balance: balance,
+        type: type,
+      });
+      setIsWalletModalOpen(false);
+    } catch (error) {
+      console.error('Error connecting wallet:', error);
+      // Ainda permite conectar localmente mesmo se a API falhar
+      let balance = 0;
+      if (type !== "metamask") {
+        balance = await getSolBalance(address);
+      }
+
+      setWalletState({
+        isConnected: true,
+        address: address,
+        balance: balance,
+        type: type,
+      });
+      setIsWalletModalOpen(false);
+    }
   };
 
   const handleDisconnect = async () => {
     if (walletState.type) {
       await disconnectWallet(walletState.type);
     }
+    
+    // Limpar autenticação
+    localStorage.removeItem('miao_wallet_token');
+    localStorage.removeItem('miao_wallet_auth');
+    
     setWalletState({
       isConnected: false,
       address: null,
