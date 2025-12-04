@@ -1,17 +1,29 @@
-import type React from "react"
-import type { Metadata } from "next"
-import { Fredoka } from "next/font/google"
-import "./globals.css"
+import type React from "react";
+import type { Metadata } from "next";
+import { Fredoka } from "next/font/google";
+import "./globals.css";
 
 const fredoka = Fredoka({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
-})
+});
 
 export const metadata: Metadata = {
-  title: "MIAO - The Green Cat Token | Community Owned Memecoin",
-  description: "Join the MIAO community! Connect your wallet, swap tokens, and explore our contract. First came the dogs, then the frogs, but the streets were never safe from the shadows. 100% community owned memecoin on Solana.",
-  keywords: ["MIAO", "miao token", "memecoin", "solana", "community", "contract", "connect", "swap", "cryptocurrency", "blockchain"],
+  title: "MIAO - The Green Cat Token | Community-Owned Solana Memecoin",
+  description:
+    "MIAO — community-owned Solana memecoin. Connect your wallet, swap tokens, explore the contract, and join our vibrant community.",
+  keywords: [
+    "MIAO",
+    "miao token",
+    "memecoin",
+    "solana",
+    "community",
+    "contract",
+    "connect",
+    "swap",
+    "cryptocurrency",
+    "blockchain",
+  ],
   authors: [{ name: "MIAO Community" }],
   creator: "MIAO Community",
   publisher: "MIAO Community",
@@ -21,8 +33,9 @@ export const metadata: Metadata = {
     canonical: "/",
   },
   openGraph: {
-    title: "MIAO - The Green Cat Token | Community Owned Memecoin",
-    description: "Join the MIAO community! Connect your wallet, swap tokens, and explore our contract. First came the dogs, then the frogs, but the streets were never safe from the shadows.",
+    title: "MIAO - The Green Cat Token | Community-Owned Solana Memecoin",
+    description:
+      "MIAO — community-owned Solana memecoin. Connect your wallet, swap tokens, explore the contract, and join our vibrant community.",
     url: "https://miaotoken.vip",
     siteName: "MIAO Token",
     images: [
@@ -38,8 +51,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "MIAO - The Green Cat Token | Community Owned Memecoin",
-    description: "Join the MIAO community! Connect your wallet, swap tokens, and explore our contract. First came the dogs, then the frogs, but the streets were never safe from the shadows.",
+    title: "MIAO - The Green Cat Token | Community-Owned Solana Memecoin",
+    description:
+      "MIAO — community-owned Solana memecoin. Connect your wallet, swap tokens, explore the contract, and join our vibrant community.",
     images: ["/logo.png"],
     creator: "@miaoonsol",
   },
@@ -72,17 +86,22 @@ export const metadata: Metadata = {
     apple: "/apple-icon.png",
     shortcut: "/icon-light-32x32.png",
   },
-}
+};
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode
+  children: React.ReactNode;
 }>) {
   return (
     <html lang="en" dir="ltr" suppressHydrationWarning>
       <head>
-        <link rel="icon" href="/icon-light-32x32.png" sizes="32x32" type="image/png" />
+        <link
+          rel="icon"
+          href="/icon-light-32x32.png"
+          sizes="32x32"
+          type="image/png"
+        />
         <link rel="icon" href="/icon.svg" type="image/svg+xml" />
         <link rel="apple-touch-icon" href="/apple-icon.png" />
         <script
@@ -91,27 +110,31 @@ export default function RootLayout({
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "Organization",
-              "name": "MIAO Token",
-              "alternateName": "MIAO - The Green Cat Token",
-              "url": "https://miaotoken.vip",
-              "logo": "https://miaotoken.vip/logo.png",
-              "description": "MIAO is a community-owned memecoin on Solana. Join the community, connect your wallet, and swap tokens.",
-              "sameAs": [
+              name: "MIAO Token",
+              alternateName: "MIAO - The Green Cat Token",
+              url: "https://miaotoken.vip",
+              logo: "https://miaotoken.vip/logo.png",
+              description:
+                "MIAO is a community-owned memecoin on Solana. Join the community, connect your wallet, and swap tokens.",
+              sameAs: [
                 "https://t.me/miaotokensol",
                 "https://x.com/miaoonsol",
                 "https://www.instagram.com/miaotoken/",
-                "https://www.tiktok.com/@miaoonsol"
+                "https://www.tiktok.com/@miaoonsol",
               ],
-              "foundingDate": "2024",
-              "founder": {
+              foundingDate: "2024",
+              founder: {
                 "@type": "Organization",
-                "name": "MIAO Community"
-              }
+                name: "MIAO Community",
+              },
             }),
           }}
         />
       </head>
-      <body className={`${fredoka.className} antialiased`} suppressHydrationWarning>
+      <body
+        className={`${fredoka.className} antialiased`}
+        suppressHydrationWarning
+      >
         {children}
         <script
           dangerouslySetInnerHTML={{
@@ -130,5 +153,5 @@ export default function RootLayout({
         <script src="https://js.puter.com/v2/" async></script>
       </body>
     </html>
-  )
+  );
 }

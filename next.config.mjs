@@ -1,5 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Enable Turbopack explicitly to avoid Next 16 warning
+  turbopack: {},
   typescript: {
     ignoreBuildErrors: true,
   },

@@ -1,6 +1,6 @@
 {
   "name": "miao-the-green-cat",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "private": true,
   "type": "module",
   "engines": {
@@ -8,7 +8,7 @@
     "npm": ">=9.0.0"
   },
   "scripts": {
-    "build": "cross-env NODE_OPTIONS=--max-old-space-size=1024 NEXT_TELEMETRY_DISABLED=1 next build --webpack",
+    "build": "cross-env NODE_OPTIONS=--max-old-space-size=1024 NEXT_TELEMETRY_DISABLED=1 next build",
     "dev": "next dev",
     "lint": "next lint",
     "start": "node app.js"
