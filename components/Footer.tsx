@@ -39,7 +39,7 @@ const Footer: React.FC = () => {
               {t("footer.sendEmail")}
             </a>
             <p className="text-sm font-medium text-[var(--text-secondary)]">
-              v1.0.10
+              v1.0.11
             </p>
           </div>
         </div>

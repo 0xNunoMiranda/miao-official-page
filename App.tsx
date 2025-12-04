@@ -2,7 +2,7 @@
 
 import type React from "react";
 import { useState, useEffect } from "react";
-import { X } from "lucide-react";
+import dynamic from "next/dynamic";
 import { LanguageProvider, useLanguage } from "@/lib/language-context";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
@@ -14,9 +14,15 @@ import CatGenerator from "@/components/CatGenerator";
 import Footer from "@/components/Footer";
 import GamesPage from "@/components/GamesPage";
 import ToolsPage from "@/components/ToolsPage";
-import WalletModal from "@/components/WalletModal";
-import SwapModal from "@/components/SwapModal";
-import SwapChartModal from "@/components/SwapChartModal";
+const WalletModal = dynamic(() => import("@/components/WalletModal"), {
+  ssr: false,
+});
+const SwapModal = dynamic(() => import("@/components/SwapModal"), {
+  ssr: false,
+});
+const SwapChartModal = dynamic(() => import("@/components/SwapChartModal"), {
+  ssr: false,
+});
 import { redirectToWhitepaper } from "@/components/WhitepaperModal";
 import SnowEffect from "@/components/SnowEffect";
 import LeafEffect from "@/components/LeafEffect";
@@ -255,6 +261,33 @@ const AppContent: React.FC = () => {
                     ownership—without compromising on speed or affordability.
                     Join us, bring a friend, and help build something delightful
                     together on Solana.
+                  </p>
+                  <p>
+                    Learn more at{" "}
+                    <a
+                      href="https://solana.com/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      solana.com
+                    </a>{" "}
+                    and follow updates on{" "}
+                    <a
+                      href="https://x.com/miaoonsol"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Twitter
+                    </a>{" "}
+                    and{" "}
+                    <a
+                      href="https://t.me/miaotokensol"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Telegram
+                    </a>
+                    .
                   </p>
                 </article>
 

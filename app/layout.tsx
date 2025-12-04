@@ -11,7 +11,7 @@ const fredoka = Fredoka({
 export const metadata: Metadata = {
   title: "MIAO - The Green Cat Token | Community-Owned Solana Memecoin",
   description:
-    "MIAO — a community-owned Solana memecoin. Connect your wallet, swap tokens, explore our smart contract, and join a vibrant community building fun, utility, and culture on-chain.",
+    "MIAO — community-owned Solana memecoin. Connect your wallet, swap tokens, explore our contract, and join a vibrant community building on-chain utility.",
   keywords: [
     "MIAO",
     "miao token",
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "MIAO - The Green Cat Token | Community-Owned Solana Memecoin",
     description:
-      "MIAO — community-owned Solana memecoin. Connect your wallet, swap tokens, explore the contract, and join our vibrant community.",
+      "MIAO — community-owned Solana memecoin. Connect your wallet, swap tokens, explore our contract, and join a vibrant community building on-chain utility.",
     url: "https://miaotoken.vip",
     siteName: "MIAO Token",
     images: [
@@ -53,7 +53,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "MIAO - The Green Cat Token | Community-Owned Solana Memecoin",
     description:
-      "MIAO — community-owned Solana memecoin. Connect your wallet, swap tokens, explore the contract, and join our vibrant community.",
+      "MIAO — community-owned Solana memecoin. Connect your wallet, swap tokens, explore our contract, and join a vibrant community building on-chain utility.",
     images: ["/logo.png"],
     creator: "@miaoonsol",
   },
@@ -97,6 +97,41 @@ export default function RootLayout({
     <html lang="en" dir="ltr" suppressHydrationWarning>
       <head>
         <meta name="robots" content="index,follow" />
+        <meta name="color-scheme" content="light dark" />
+        <link
+          rel="preconnect"
+          href="https://gateway.pinit.io"
+          crossOrigin="anonymous"
+        />
+        <link rel="dns-prefetch" href="https://gateway.pinit.io" />
+        <link
+          rel="preconnect"
+          href="https://arweave.net"
+          crossOrigin="anonymous"
+        />
+        <link rel="dns-prefetch" href="https://arweave.net" />
+        <link
+          rel="preconnect"
+          href="https://cryptologos.cc"
+          crossOrigin="anonymous"
+        />
+        <link rel="dns-prefetch" href="https://cryptologos.cc" />
+        <link
+          rel="preconnect"
+          href="https://js.puter.com"
+          crossOrigin="anonymous"
+        />
+        <link rel="dns-prefetch" href="https://js.puter.com" />
+        <meta
+          name="theme-color"
+          media="(prefers-color-scheme: light)"
+          content="#ffffff"
+        />
+        <meta
+          name="theme-color"
+          media="(prefers-color-scheme: dark)"
+          content="#0b0f1a"
+        />
         <link
           rel="icon"
           href="/icon-light-32x32.png"
@@ -128,6 +163,32 @@ export default function RootLayout({
                 "@type": "Organization",
                 name: "MIAO Community",
               },
+            }),
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebPage",
+              name: "MIAO - The Green Cat Token | Community-Owned Solana Memecoin",
+              description:
+                "MIAO — community-owned Solana memecoin. Connect your wallet, swap tokens, explore our contract, and join a vibrant community building on-chain utility.",
+              keywords: [
+                "MIAO",
+                "Solana",
+                "memecoin",
+                "token",
+                "community",
+                "swap",
+                "wallet",
+                "NFTs",
+                "games",
+                "tools",
+              ],
+              about: [{ "@type": "Thing", name: "Solana memecoin" }],
+              url: "https://miaotoken.vip/",
             }),
           }}
         />

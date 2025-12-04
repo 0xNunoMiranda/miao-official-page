@@ -1,7 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Enable Turbopack explicitly to avoid Next 16 warning
-  turbopack: {},
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -26,36 +24,6 @@ const nextConfig = {
     ],
   },
   reactStrictMode: true,
-  // Garantir que não há problemas com a estrutura
-  experimental: {
-    serverActions: {
-      bodySizeLimit: '2mb',
-    },
-    // Reduzir uso de memória durante o build
-    optimizeCss: false,
-    // Desabilitar otimizações pesadas que consomem muita memória
-    webpackBuildWorker: false,
-  },
-  // Desabilitar source maps em produção para economizar memória
-  productionBrowserSourceMaps: false,
-  // Configurações adicionais do webpack para reduzir memória
-  webpack: (config, { isServer }) => {
-    // Reduzir paralelismo para economizar memória
-    config.parallelism = 1
-    
-    // Desabilitar otimizações pesadas que usam WebAssembly
-    if (!isServer) {
-      config.optimization = {
-        ...config.optimization,
-        minimize: false, // Desabilitar minificação para economizar memória
-      }
-    }
-    
-    // Reduzir cache para economizar memória
-    config.cache = false
-    
-    return config
-  },
   // Adicionar rewrites para servir favicon.ico
   async rewrites() {
     return [
@@ -65,7 +33,7 @@ const nextConfig = {
       },
     ]
   },
-  // Redirects para canonicalização de URL
+  // Redirects para canonicaliza��o de URL
   async redirects() {
     return [
       {
@@ -81,12 +49,16 @@ const nextConfig = {
       },
     ]
   },
-  // Headers para segurança e SEO
+  // Headers para seguran�a e SEO
   async headers() {
     return [
       {
         source: '/:path*',
         headers: [
+          {
+            key: 'X-Robots-Tag',
+            value: 'index, follow',
+          },
           {
             key: 'X-Content-Type-Options',
             value: 'nosniff',
@@ -98,6 +70,34 @@ const nextConfig = {
           {
             key: 'X-XSS-Protection',
             value: '1; mode=block',
+          },
+        ],
+      },
+      // Long-term caching for static assets
+      {
+        source: '/assets/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        source: '/images/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        source: '/_next/static/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
           },
         ],
       },
