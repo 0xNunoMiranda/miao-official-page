@@ -176,8 +176,8 @@ export async function connectWallet(walletType: WalletType, timeoutMs = 30000): 
 
 export async function getSolBalance(address: string): Promise<number> {
   try {
-    // Usar RPC alternativo se disponível, ou fallback silencioso
-    const rpcUrl = process.env.NEXT_PUBLIC_SOLANA_RPC_URL || "https://api.mainnet-beta.solana.com"
+    // Usar RPC alternativo se disponível, ou mainnet estável
+    const rpcUrl = process.env.NEXT_PUBLIC_SOLANA_RPC_URL || "https://api.mainnet.solana.com"
     
     const response = await fetch(rpcUrl, {
       method: "POST",

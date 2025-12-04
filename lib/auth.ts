@@ -4,7 +4,7 @@ import crypto from 'crypto'
 import { Connection, PublicKey } from '@solana/web3.js'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'miao-secret-key-change-in-production'
-const SOLANA_RPC = process.env.SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com'
+const SOLANA_RPC = process.env.SOLANA_RPC_URL || 'https://api.mainnet.solana.com'
 
 export interface AuthPayload {
   wallet: string

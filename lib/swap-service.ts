@@ -207,7 +207,7 @@ const confirmTransaction = async (signature: string): Promise<boolean> => {
 
   for (let i = 0; i < maxRetries; i++) {
     try {
-      const response = await fetch("https://api.mainnet-beta.solana.com", {
+      const response = await fetch("https://api.mainnet.solana.com", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

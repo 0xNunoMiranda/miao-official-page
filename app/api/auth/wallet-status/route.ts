@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { verifyWalletAuth } from '@/lib/auth'
 import { Connection, PublicKey } from '@solana/web3.js'
 
-const SOLANA_RPC = process.env.SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com'
+const SOLANA_RPC = process.env.SOLANA_RPC_URL || 'https://api.mainnet.solana.com'
 const connection = new Connection(SOLANA_RPC, 'confirmed')
 
 /**

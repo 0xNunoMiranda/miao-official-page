@@ -23,7 +23,7 @@ DATABASE_NAME=miao_tools
 JWT_SECRET=chave-secreta-jwt-mude-em-producao
 
 # Solana (opcional)
-SOLANA_RPC_URL=https://api.mainnet-beta.solana.com
+SOLANA_RPC_URL=https://api.mainnet.solana.com
 
 # OpenAI (para geração de imagens)
 OPENAI_API_KEY=sua_chave_openai

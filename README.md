@@ -37,7 +37,7 @@ View your app in AI Studio: https://ai.studio/apps/temp/1
    JWT_SECRET=your-super-secret-jwt-key-change-in-production
 
    # Solana RPC URL (optional, defaults to mainnet)
-   SOLANA_RPC_URL=https://api.mainnet-beta.solana.com
+   SOLANA_RPC_URL=https://api.mainnet.solana.com
 
    # OpenAI API Key (for image generation)
    OPENAI_API_KEY=your_openai_api_key_here
