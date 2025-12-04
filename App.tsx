@@ -270,7 +270,7 @@ const AppContent: React.FC = () => {
                     <a
                       href="https://solana.com/"
                       target="_blank"
-                      rel="noopener noreferrer"
+                      rel="noopener nofollow"
                     >
                       solana.com
                     </a>{" "}
@@ -278,7 +278,7 @@ const AppContent: React.FC = () => {
                     <a
                       href="https://x.com/miaoonsol"
                       target="_blank"
-                      rel="noopener noreferrer"
+                      rel="noopener nofollow"
                     >
                       Twitter
                     </a>{" "}
@@ -286,7 +286,7 @@ const AppContent: React.FC = () => {
                     <a
                       href="https://t.me/miaotokensol"
                       target="_blank"
-                      rel="noopener noreferrer"
+                      rel="noopener nofollow"
                     >
                       Telegram
                     </a>

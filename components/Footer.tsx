@@ -8,8 +8,8 @@ const Footer: React.FC = () => {
   const { t } = useLanguage();
 
   return (
-    <footer className="relative bg-[var(--bg-secondary)] pt-16 pb-12 px-6 md:px-12 lg:px-24 overflow-hidden">
-      <div className="max-w-[1400px] mx-auto grid md:grid-cols-2 gap-12 relative z-10">
+    <footer className="relative bg-[var(--bg-secondary)] pt-12 pb-10 px-4 sm:px-6 md:px-12 lg:px-24 overflow-hidden">
+      <div className="max-w-[1400px] mx-auto grid md:grid-cols-2 gap-10 sm:gap-12 relative z-10">
         {/* Left: Disclaimer */}
         <div>
           <h3 className="text-2xl font-black text-[var(--text-primary)] mb-6 flex items-center gap-2">
@@ -27,19 +27,25 @@ const Footer: React.FC = () => {
 
         {/* Right: Copyright & Contact */}
         <div className="flex flex-col items-start justify-between">
-          <div className="text-left w-full">
+          <div className="text-left w-full max-[500px]:space-y-2">
             <p className="font-bold text-[var(--text-primary)] text-lg mb-4">
               {t("footer.rights")}
             </p>
             <a
-              href="mailto:miaotokenonsol@gmail.com"
-              className="inline-flex items-center gap-2 px-8 py-3 rounded-2xl font-bold uppercase bg-[var(--duo-green)] text-white border-2 border-b-4 border-[var(--btn-shadow)] hover:brightness-105 active:border-b-2 active:translate-y-[2px] transition-all mb-4"
+              href="mailto:geral@miaotoken.vip"
+              className="inline-flex items-center gap-2 px-8 py-3 rounded-2xl font-bold uppercase bg-[var(--duo-green)] text-white border-2 border-b-4 border-[var(--btn-shadow)] hover:brightness-105 active:border-b-2 active:translate-y-[2px] transition-all mb-3"
             >
               <Mail size={18} />
               {t("footer.sendEmail")}
             </a>
-            <p className="text-sm font-medium text-[var(--text-secondary)]">
-              v1.0.11
+            <p className="text-xs text-(--text-secondary) mb-1 break-all max-[500px]:max-w-full">
+              Contact:{" "}
+              <a href="mailto:geral@miaotoken.vip" className="underline">
+                geral@miaotoken.vip
+              </a>
+            </p>
+            <p className="text-sm font-medium text-(--text-secondary)">
+              v1.0.12
             </p>
           </div>
         </div>

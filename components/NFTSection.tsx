@@ -429,7 +429,7 @@ const NFTSection: React.FC<NFTSectionProps> = ({
       <div className="relative z-10 max-w-5xl mx-auto px-4 md:px-8 w-full">
         {/* Gradient border frame (green to purple), tech look with clipped corners */}
         <div
-          className="relative p-[3px]"
+          className="relative p-0.5 max-[500px]:p-[1.5px]"
           style={{
             background:
               "linear-gradient(135deg, var(--brand) 0%, #6b21a8 100%)",
@@ -438,7 +438,7 @@ const NFTSection: React.FC<NFTSectionProps> = ({
           }}
         >
           <div
-            className="relative p-5 md:p-6 overflow-hidden shadow-lg backdrop-blur-sm"
+            className="relative p-4 sm:p-5 md:p-6 overflow-hidden shadow-lg backdrop-blur-sm"
             style={{
               background: "var(--bg-secondary)",
               clipPath:
@@ -460,9 +460,9 @@ const NFTSection: React.FC<NFTSectionProps> = ({
             {/* SnowCap decoration */}
             <SnowCap className="h-6 opacity-90" visible={isChristmasMode} />
 
-            <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-5 lg:gap-6">
+            <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
               {/* Column 1: Mint Info */}
-              <div className="flex flex-col justify-center">
+              <div className="flex flex-col justify-center max-[500px]:items-stretch">
                 <h3
                   className="text-xl md:text-2xl lg:text-3xl font-black mb-2"
                   style={{ color: "var(--text-primary)" }}
@@ -476,11 +476,11 @@ const NFTSection: React.FC<NFTSectionProps> = ({
                   {t("nft.description")}
                 </p>
 
-                <div className="flex flex-col sm:flex-row gap-2.5">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <a
                     href="https://launchmynft.io/sol/20841"
                     target="_blank"
-                    rel="noopener noreferrer"
+                    rel="noopener nofollow"
                     className="flex-1 text-sm font-bold py-2.5 px-5 text-center uppercase tracking-wide rounded-xl bg-(--brand) text-white border-[3px] border-(--btn-shadow) shadow hover:shadow-lg hover:-translate-y-0.5 active:translate-x-1 active:translate-y-1 transition-all"
                   >
                     {t("nft.mintV1")}
@@ -488,7 +488,7 @@ const NFTSection: React.FC<NFTSectionProps> = ({
                   <a
                     href="https://launchmynft.io/sol/20841"
                     target="_blank"
-                    rel="noopener noreferrer"
+                    rel="noopener nofollow"
                     className="flex-1 text-sm font-bold py-2.5 px-5 text-center uppercase tracking-wide rounded-xl bg-(--bg-tertiary) text-(--text-primary) border-[3px] border-(--btn-shadow) shadow hover:shadow-lg hover:-translate-y-0.5 active:translate-x-1 active:translate-y-1 transition-all"
                   >
                     {t("nft.mintV2")}

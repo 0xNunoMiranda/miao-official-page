@@ -442,7 +442,7 @@ const Header: React.FC<HeaderProps> = ({
               {/* Version */}
               <div className="px-4 py-2 border-t-2 border-[var(--border-color)]">
                 <p className="text-xs font-medium text-[var(--text-secondary)] text-center">
-                  v1.0.9
+                  v1.0.12
                 </p>
               </div>
 
@@ -451,7 +451,7 @@ const Header: React.FC<HeaderProps> = ({
                 <a
                   href="https://t.me/miaotokensol"
                   target="_blank"
-                  rel="noopener noreferrer"
+                  rel="noopener nofollow"
                   className="w-10 h-10 rounded-lg flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-2 border-[var(--border-color)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-all"
                 >
                   <Send size={18} />
@@ -459,7 +459,7 @@ const Header: React.FC<HeaderProps> = ({
                 <a
                   href="https://x.com/miaoonsol"
                   target="_blank"
-                  rel="noopener noreferrer"
+                  rel="noopener nofollow"
                   className="w-10 h-10 rounded-lg flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-2 border-[var(--border-color)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-all"
                 >
                   <Twitter size={18} />
@@ -467,7 +467,7 @@ const Header: React.FC<HeaderProps> = ({
                 <a
                   href="https://www.instagram.com/miaotoken/"
                   target="_blank"
-                  rel="noopener noreferrer"
+                  rel="noopener nofollow"
                   className="w-10 h-10 rounded-lg flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-2 border-[var(--border-color)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-all"
                 >
                   <Instagram size={18} />
@@ -475,7 +475,7 @@ const Header: React.FC<HeaderProps> = ({
                 <a
                   href="https://www.tiktok.com/@miaoonsol"
                   target="_blank"
-                  rel="noopener noreferrer"
+                  rel="noopener nofollow"
                   className="w-10 h-10 rounded-lg flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-2 border-[var(--border-color)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-all"
                 >
                   <TikTokIcon size={18} />

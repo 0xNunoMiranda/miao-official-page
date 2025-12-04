@@ -407,7 +407,7 @@ const Tokenomics: React.FC<TokenomicsProps> = ({
           </div>
 
           {/* How to Buy Card */}
-          <div className="bg-[var(--bg-secondary)]/95 backdrop-blur-sm rounded-3xl p-4 md:p-6 border-2 border-[var(--border-color)] border-b-4 relative overflow-visible w-full max-w-full">
+          <div className="bg-[var(--bg-secondary)]/95 backdrop-blur-sm rounded-3xl p-3 sm:p-4 md:p-6 border-2 border-(--border-color) border-b-4 relative overflow-visible w-full max-w-full">
             {isChristmasMode && (
               <div className="absolute -inset-4 rounded-3xl pointer-events-none z-[20]">
                 <SnowEffect isActive={isChristmasMode} borderRadius="1.5rem" />
@@ -435,11 +435,11 @@ const Tokenomics: React.FC<TokenomicsProps> = ({
                 }}
               />
             </div>
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-[var(--text-primary)] mb-4 md:mb-6 relative z-[30] pr-20 sm:pr-0">
+            <h2 className="text-lg sm:text-2xl md:text-3xl font-black text-[var(--text-primary)] mb-3 sm:mb-4 md:mb-6 relative z-30 pr-16 sm:pr-0">
               How to Buy
             </h2>
 
-            <div className="grid grid-cols-2 gap-2 sm:gap-3 relative z-[30] auto-rows-fr">
+            <div className="grid grid-cols-2 gap-2 sm:gap-3 relative z-[30] auto-rows-fr max-[500px]:grid-cols-1">
               {howToBuySteps.map((step, i) => {
                 const IconComponent = step.icon;
                 const numberImage = `/assets/numbers/${i + 1}.png`;
