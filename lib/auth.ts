@@ -202,42 +202,37 @@ export async function getOrCreateUser(wallet: string): Promise<any | null> {
   try {
     const result = await execute('sp_user_get_or_create', [normalizedWallet])
     
-    console.log('[AUTH] Raw stored procedure result type:', typeof result)
-    console.log('[AUTH] Raw stored procedure result isArray:', Array.isArray(result))
-    if (Array.isArray(result)) {
-      console.log('[AUTH] Result length:', result.length)
-      result.forEach((item, index) => {
-        console.log(`[AUTH] Result[${index}]:`, {
-          type: typeof item,
-          isArray: Array.isArray(item),
-          length: Array.isArray(item) ? item.length : 'N/A',
-          sample: Array.isArray(item) && item.length > 0 ? item[0] : item,
-        })
-      })
-    } else {
-      console.log('[AUTH] Raw stored procedure result:', result)
-    }
-    
     // mysql2 retorna stored procedures como array de resultados
     // Cada SELECT na stored procedure é um elemento do array
-    // sp_user_get_or_create tem um SELECT no final
+    // sp_user_get_or_create tem um SELECT no final, então deve estar em result[0]
+    
+    console.log('[AUTH] Raw result:', {
+      type: typeof result,
+      isArray: Array.isArray(result),
+      length: Array.isArray(result) ? result.length : 'N/A',
+    })
     
     if (!result) {
       console.warn('[AUTH] Stored procedure returned null or undefined')
       return null
     }
     
-    if (Array.isArray(result)) {
-      // Tentar encontrar o resultado do SELECT
-      // Pode estar em result[0] ou no último elemento
-      for (let i = result.length - 1; i >= 0; i--) {
-        const item = result[i]
+    // mysql2 retorna: [[rows], [fields]] para cada SELECT
+    // Para stored procedures: [resultSet1, resultSet2, ...]
+    // Cada resultSet é [rows, fields]
+    
+    if (Array.isArray(result) && result.length > 0) {
+      // O primeiro elemento contém [rows, fields]
+      const firstResult = result[0]
+      
+      if (Array.isArray(firstResult) && firstResult.length > 0) {
+        // firstResult[0] são as linhas
+        const rows = firstResult[0]
         
-        // Se é um array de linhas
-        if (Array.isArray(item) && item.length > 0) {
-          const user = item[0]
+        if (Array.isArray(rows) && rows.length > 0) {
+          const user = rows[0]
           if (user && user.wallet_address) {
-            console.log('[AUTH] User found/created successfully:', {
+            console.log('[AUTH] ✅ User found/created:', {
               wallet_address: user.wallet_address,
               username: user.username,
               level: user.level,
@@ -245,44 +240,32 @@ export async function getOrCreateUser(wallet: string): Promise<any | null> {
             return user
           }
         }
-        
-        // Se é um objeto direto
-        if (item && typeof item === 'object' && item.wallet_address) {
-          console.log('[AUTH] User found/created (direct object):', {
-            wallet_address: item.wallet_address,
-            username: item.username,
-            level: item.level,
+      }
+      
+      // Tentar formato alternativo: result[0] pode ser diretamente as linhas
+      if (Array.isArray(firstResult) && firstResult.length > 0) {
+        const user = firstResult[0]
+        if (user && typeof user === 'object' && user.wallet_address) {
+          console.log('[AUTH] ✅ User found/created (alt format):', {
+            wallet_address: user.wallet_address,
+            username: user.username,
+            level: user.level,
           })
-          return item
+          return user
         }
       }
-    } else if (result && typeof result === 'object' && result.wallet_address) {
-      // Resultado direto como objeto
-      console.log('[AUTH] User found/created (single object):', {
-        wallet_address: result.wallet_address,
-        username: result.username,
-        level: result.level,
-      })
-      return result
     }
     
-    console.warn('[AUTH] No user data found in result. Result structure:', {
-      type: typeof result,
-      isArray: Array.isArray(result),
-      length: Array.isArray(result) ? result.length : 'N/A',
-      keys: result && typeof result === 'object' ? Object.keys(result) : 'N/A',
-    })
+    // Log detalhado para debug
+    console.error('[AUTH] ❌ No user data found. Full result structure:', JSON.stringify(result, null, 2))
     return null
   } catch (error) {
-    console.error('[AUTH] Error getting/creating user:', error)
+    console.error('[AUTH] ❌ Error getting/creating user:', error)
     if (error instanceof Error) {
       console.error('[AUTH] Error message:', error.message)
       console.error('[AUTH] Error stack:', error.stack)
-      
-      // Re-throw para que o endpoint possa capturar e retornar erro apropriado
-      throw error
     }
-    return null
+    throw error
   }
 }
 
