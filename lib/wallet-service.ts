@@ -108,18 +108,24 @@ export async function connectWallet(walletType: WalletType, timeoutMs = 30000): 
     const connectionPromise = (async () => {
       switch (walletType) {
         case "phantom": {
-          // Phantom pode estar em window.solana ou window.phantom.solana
-          const phantomProvider = window.solana?.isPhantom 
-            ? window.solana 
-            : window.phantom?.solana
+          // Prioritize window.phantom.solana as it is specific to Phantom
+          const phantomProvider = window.phantom?.solana || (window.solana?.isPhantom ? window.solana : null)
           
           if (!phantomProvider) {
             throw new Error("Phantom wallet not found")
           }
 
-          // Forçar popup mesmo em localhost usando onlyIfTrusted: false
-          const resp = await phantomProvider.connect({ onlyIfTrusted: false })
-          address = resp.publicKey.toString()
+          try {
+            // Forçar popup mesmo em localhost usando onlyIfTrusted: false
+            const resp = await phantomProvider.connect({ onlyIfTrusted: false })
+            address = resp.publicKey.toString()
+          } catch (err: any) {
+            console.error("Phantom connection error:", err)
+            if (err.code === 4001) {
+              throw new Error("User rejected the request")
+            }
+            throw new Error(err.message || "Failed to connect to Phantom")
+          }
           break
         }
         case "solflare": {
@@ -210,9 +216,7 @@ export async function disconnectWallet(walletType: WalletType): Promise<void> {
     switch (walletType) {
       case "phantom": {
         // Phantom pode estar em window.solana ou window.phantom.solana
-        const phantomProvider = window.solana?.isPhantom 
-          ? window.solana 
-          : window.phantom?.solana
+        const phantomProvider = window.phantom?.solana || (window.solana?.isPhantom ? window.solana : null)
         if (phantomProvider) {
           await phantomProvider.disconnect()
         }

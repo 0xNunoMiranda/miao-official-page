@@ -136,9 +136,7 @@ export function useWalletAuth(
     }
 
     // Verificar mudanças na wallet do Phantom (pode estar em window.solana ou window.phantom.solana)
-    const phantomProvider = (window as any).solana?.isPhantom 
-      ? (window as any).solana 
-      : (window as any).phantom?.solana
+    const phantomProvider = (window as any).phantom?.solana || ((window as any).solana?.isPhantom ? (window as any).solana : null)
     
     if (phantomProvider) {
       phantomProvider.on('disconnect', handleWalletChange)

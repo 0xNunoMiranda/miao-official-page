@@ -91,6 +91,7 @@ const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, onConnect })
         setConnecting(null)
       }
     } catch (err: unknown) {
+      console.error("Wallet connection error:", err)
       const error = err as Error
       setError(error.message || t("wallet.error"))
       setConnecting(null)

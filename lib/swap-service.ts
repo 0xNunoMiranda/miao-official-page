@@ -186,6 +186,8 @@ export const executeSwap = async (
 // Get Solana provider from window
 const getSolanaProvider = () => {
   if (typeof window === "undefined") return null
+  // Prioritize window.phantom.solana
+  if (window.phantom?.solana?.isPhantom) return window.phantom.solana
   if (window.solana?.isPhantom) return window.solana
   if (window.solflare?.isSolflare) return window.solflare
   if (window.backpack?.isBackpack) return window.backpack
