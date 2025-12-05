@@ -442,7 +442,7 @@ const Header: React.FC<HeaderProps> = ({
               {/* Version */}
               <div className="px-4 py-2 border-t-2 border-[var(--border-color)]">
                 <p className="text-xs font-medium text-[var(--text-secondary)] text-center">
-                  v1.0.12
+                  v1.1.0
                 </p>
               </div>
 

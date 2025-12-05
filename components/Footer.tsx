@@ -45,7 +45,7 @@ const Footer: React.FC = () => {
               </a>
             </p>
             <p className="text-sm font-medium text-(--text-secondary)">
-              v1.0.12
+              v1.1.0
             </p>
           </div>
         </div>
