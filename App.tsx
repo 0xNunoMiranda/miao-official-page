@@ -99,7 +99,13 @@ const AppContent: React.FC = () => {
         body: JSON.stringify({ wallet: address }),
       });
 
-      const data = await response.json();
+      let data;
+      try {
+        data = await response.json();
+      } catch (e) {
+        console.error('Failed to parse auth response:', e);
+        data = { success: false, error: 'Invalid server response' };
+      }
 
       if (!response.ok || !data.success) {
         console.error('Wallet authentication failed:', data.error);
