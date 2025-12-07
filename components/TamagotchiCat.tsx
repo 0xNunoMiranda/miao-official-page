@@ -257,53 +257,26 @@ export default function TamagotchiCat({ isChatMode = false, emotion }: Tamagotch
     </button>
   )
 
-  // Se estiver em modo chat, renderizar estilo visual novel
+  // Se estiver em modo chat, renderizar estilo Messenger (caixa compacta)
   if (isChatMode) {
     const emotionIndex = currentEmotion >= 0 && currentEmotion < catEmotions.length ? currentEmotion : 0
     const currentImageSrc = catEmotions[emotionIndex]?.src || "/images/header-cat.png"
     
     return (
-      <div className="w-full h-full relative overflow-hidden">
-        {/* Desktop/Tablet: Gato grande, pivot no centro alinhado ao bottom */}
-        <div className="hidden md:block w-full h-full relative overflow-visible">
-          <img
-            src={currentImageSrc}
-            alt={`Miao ${catEmotions[emotionIndex]?.name || 'cat'}`}
-            className="absolute bottom-0 w-auto object-contain transition-all duration-500 ease-in-out"
-            key={emotionIndex}
-            style={{ 
-              left: 'clamp(180px, 35%, 42%)',
-              transformOrigin: 'center bottom',
-              filter: 'drop-shadow(0 10px 30px rgba(0,0,0,0.3))',
-              animation: 'fadeIn 0.3s ease-in-out, cat-vertical-float-chat 3s ease-in-out infinite',
-              height: 'min(85vh, 700px)',
-              maxHeight: '700px',
-              maxWidth: 'min(85%, 600px)',
-              width: 'auto',
-            }}
-            draggable={false}
-          />
-        </div>
-        
-        {/* Mobile: Gato menor, pivot no centro alinhado ao bottom */}
-        <div className="block md:hidden w-full h-full relative overflow-hidden">
-          <img
-            src={currentImageSrc}
-            alt={`Miao ${catEmotions[emotionIndex]?.name || 'cat'}`}
-            className="absolute bottom-0 left-1/2 w-auto object-contain transition-all duration-500 ease-in-out"
-            key={emotionIndex}
-            style={{ 
-              transformOrigin: 'center bottom',
-              filter: 'drop-shadow(0 8px 25px rgba(0,0,0,0.4))',
-              animation: 'fadeIn 0.3s ease-in-out, cat-vertical-float-chat 3s ease-in-out infinite',
-              height: 'min(50vh, 400px)',
-              maxHeight: '400px',
-              maxWidth: 'min(75%, 350px)',
-              width: 'auto',
-            }}
-            draggable={false}
-          />
-        </div>
+      <div className="w-full h-full relative flex items-center justify-center overflow-hidden">
+        <img
+          src={currentImageSrc}
+          alt={`Miao ${catEmotions[emotionIndex]?.name || 'cat'}`}
+          className="w-full h-full object-contain transition-all duration-500 ease-in-out"
+          key={emotionIndex}
+          style={{ 
+            filter: 'drop-shadow(0 8px 20px rgba(0,0,0,0.25))',
+            animation: 'fadeIn 0.3s ease-in-out, cat-vertical-float 3s ease-in-out infinite',
+            maxHeight: '100%',
+            maxWidth: '100%',
+          }}
+          draggable={false}
+        />
       </div>
     )
   }

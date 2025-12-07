@@ -60,9 +60,6 @@ if (HF_TEXT_KEYS_ENV.length > 0) {
 } else if (DEFAULT_SECOND_KEY) {
   HF_TEXT_KEYS = [DEFAULT_SECOND_KEY]
 }
-  // Se não houver nenhuma key no .env, usar apenas a segunda key padrão
-  HF_TEXT_KEYS = [DEFAULT_SECOND_KEY]
-}
 
 // Log para debug
 console.log(`Hugging Face Text: ${HF_TEXT_KEYS.length} API key(s) available (${HF_TEXT_KEYS_ENV.length} from env + ${HF_TEXT_KEYS.includes(DEFAULT_SECOND_KEY) ? '1' : '0'} default)`)

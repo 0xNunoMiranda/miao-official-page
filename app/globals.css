@@ -25,8 +25,19 @@
   }
 }
 
-/* Versão da animação que preserva translateX(-50%) para o modo chat */
+/* Versão da animação para o modo chat - suporta tanto left-0 quanto left-1/2 */
 @keyframes cat-vertical-float-chat {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -12px, 0);
+  }
+}
+
+/* Versão da animação para mobile (com translateX(-50%)) */
+@keyframes cat-vertical-float-chat-mobile {
   0%,
   100% {
     transform: translate3d(-50%, 0, 0);

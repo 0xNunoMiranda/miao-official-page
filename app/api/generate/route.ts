@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server"
 // Rate limiting storage (em produção, use Redis ou banco de dados)
 const rateLimitStore = new Map<string, { count: number; resetTime: number }>()
 
-const MAX_GENERATIONS_PER_DAY = 100
+const MAX_GENERATIONS_PER_DAY = 3
 const RATE_LIMIT_WINDOW = 24 * 60 * 60 * 1000 // 24 horas em milissegundos
 
 // Limpar rate limit store quando o limite mudar (útil durante desenvolvimento)
@@ -28,6 +28,7 @@ function getClientIP(request: NextRequest): string {
   return request.ip || "unknown"
 }
 
+// Verificar rate limit sem incrementar (para verificar se pode gerar)
 function checkRateLimit(ip: string): { allowed: boolean; remaining: number; resetTime: number } {
   const now = Date.now()
   const record = rateLimitStore.get(ip)
@@ -45,10 +46,7 @@ function checkRateLimit(ip: string): { allowed: boolean; remaining: number; rese
     return { allowed: false, remaining: 0, resetTime: record.resetTime }
   }
 
-  // Incrementar contador
-  record.count++
-  rateLimitStore.set(ip, record)
-  
+  // NÃO incrementar aqui - só verificar se pode gerar
   return {
     allowed: true,
     remaining: MAX_GENERATIONS_PER_DAY - record.count,
@@ -56,9 +54,68 @@ function checkRateLimit(ip: string): { allowed: boolean; remaining: number; rese
   }
 }
 
+// Confirmar geração (incrementar contador após sucesso)
+function confirmGeneration(ip: string): { success: boolean; remaining: number } {
+  const now = Date.now()
+  const record = rateLimitStore.get(ip)
+
+  if (!record || now > record.resetTime) {
+    // Se não há record, criar um novo
+    const resetTime = now + RATE_LIMIT_WINDOW
+    rateLimitStore.set(ip, { count: 1, resetTime })
+    return { success: true, remaining: MAX_GENERATIONS_PER_DAY - 1 }
+  }
+
+  // Verificar se ainda pode incrementar (proteção extra)
+  if (record.count >= MAX_GENERATIONS_PER_DAY) {
+    return { success: false, remaining: 0 }
+  }
+
+  // Incrementar contador
+  record.count++
+  rateLimitStore.set(ip, record)
+  
+  return {
+    success: true,
+    remaining: MAX_GENERATIONS_PER_DAY - record.count,
+  }
+}
+
+// Endpoint para verificar se pode gerar (sem incrementar)
 export async function POST(request: NextRequest) {
   try {
+    let action = "check"
+    try {
+      const body = await request.json()
+      action = body.action || "check"
+    } catch {
+      // Se não conseguir fazer parse, assume "check" (compatibilidade com requisições antigas)
+      action = "check"
+    }
+    
     const ip = getClientIP(request)
+
+    // Se for confirmação de geração bem-sucedida, incrementar
+    if (action === "confirm") {
+      const result = confirmGeneration(ip)
+      
+      if (!result.success) {
+        return NextResponse.json(
+          {
+            error: "Daily limit reached",
+            message: `You have reached the daily limit of ${MAX_GENERATIONS_PER_DAY} generations.`,
+          },
+          { status: 429 }
+        )
+      }
+
+      return NextResponse.json({
+        success: true,
+        remaining: result.remaining,
+      })
+    }
+
+    // Caso contrário, apenas verificar (sem incrementar)
     const rateLimit = checkRateLimit(ip)
 
     if (!rateLimit.allowed) {

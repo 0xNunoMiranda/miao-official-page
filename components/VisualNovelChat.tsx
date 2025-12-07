@@ -99,21 +99,24 @@ export default function VisualNovelChat({ isOpen, onClose, videoRef }: VisualNov
     error: speechError,
   } = useSpeechRecognition(language)
 
-  // Speech synthesis hook
-  const { speak, cancel: cancelSpeech, isSpeaking } = useSpeechSynthesis(language)
+  // Speech synthesis hook - passa a emoção atual para ajustar a voz
+  const { speak, cancel: cancelSpeech, isSpeaking } = useSpeechSynthesis(language, currentEmotion)
 
   // Update input when transcript changes (voice input)
   useEffect(() => {
-    // Always update input when transcript changes, even if empty
+    // Always update input when transcript changes in voice mode
     // This ensures real-time transcription display
-    console.log("Transcript changed, updating input:", {
-      transcript,
-      transcriptLength: transcript.length,
-      isListening,
-      inputMode,
-    });
-    setInput(transcript || "");
-  }, [transcript, isListening, inputMode])
+    if (inputMode === "voice") {
+      console.log("Transcript changed, updating input:", {
+        transcript,
+        transcriptLength: transcript.length,
+        isListening,
+        inputMode,
+      });
+      // Atualizar sempre que o transcript mudar, mesmo que esteja vazio (para limpar quando necessário)
+      setInput(transcript || "");
+    }
+  }, [transcript, inputMode])
 
   // Stop listening when TTS is speaking to prevent transcribing the cat's voice
   useEffect(() => {
@@ -134,11 +137,11 @@ export default function VisualNovelChat({ isOpen, onClose, videoRef }: VisualNov
         }
         cancelSpeech()
         setTimeout(() => {
-          speak(lastMessage.content)
+          speak(lastMessage.content, currentEmotion)
         }, 500)
       }
     }
-  }, [messages, inputMode, loading, speak, cancelSpeech, isListening, stopListening])
+  }, [messages, inputMode, loading, speak, cancelSpeech, isListening, stopListening, currentEmotion])
 
   // Auto-scroll para a última mensagem
   useEffect(() => {
@@ -205,15 +208,23 @@ export default function VisualNovelChat({ isOpen, onClose, videoRef }: VisualNov
     console.log("Starting voice input...");
     resetTranscript();
     setInput(""); // Clear input field
-    startListening();
+    // Pequeno delay para garantir que o reset foi processado
+    setTimeout(() => {
+      startListening();
+    }, 100);
   }
 
   const handleStopVoice = () => {
     stopListening()
-    // Send the transcript if there's text
-    if (transcript.trim()) {
-      handleSend()
-    }
+    // Pequeno delay para garantir que o transcript final foi processado
+    setTimeout(() => {
+      // O transcript já deve estar atualizado no input via useEffect
+      // Mas garantimos que está sincronizado
+      if (transcript.trim() && !input.trim()) {
+        setInput(transcript.trim());
+      }
+      // Não enviar automaticamente - deixar o usuário decidir quando enviar
+    }, 300);
   }
 
   const handleCancelVoice = () => {
@@ -432,7 +443,7 @@ export default function VisualNovelChat({ isOpen, onClose, videoRef }: VisualNov
         }
         cancelSpeech()
         setTimeout(() => {
-          speak(assistantMessage.content)
+          speak(assistantMessage.content, detectedEmotion)
         }, 500)
       }
     } catch (error: any) {
@@ -470,7 +481,7 @@ export default function VisualNovelChat({ isOpen, onClose, videoRef }: VisualNov
           }
           cancelSpeech()
           setTimeout(() => {
-            speak(tiredMessage.content)
+            speak(tiredMessage.content, "sleepy")
           }, 500)
         }
         return
@@ -579,29 +590,40 @@ export default function VisualNovelChat({ isOpen, onClose, videoRef }: VisualNov
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col lg:flex-row bg-transparent">
-      {/* Gato estilo Visual Novel - z-index alto para ficar acima do chat */}
-      <div className="absolute inset-0 z-30 pointer-events-none overflow-visible">
-        {/* Desktop: Gato à esquerda, com espaço suficiente para não cortar */}
-        <div className="hidden lg:block absolute inset-0 left-0 w-[60%] xl:w-[58%] 2xl:w-[55%] h-full overflow-visible">
-          <TamagotchiCat isChatMode={true} emotion={currentEmotion} />
+    <div className="fixed inset-0 z-50 flex flex-col bg-[var(--bg-primary)]">
+      {/* Mobile: Gato em caixa no topo */}
+      <div className="md:hidden flex flex-col w-full border-b-2 border-[var(--border-color)] bg-[var(--bg-secondary)] max-h-[200px] flex-shrink-0">
+        <div className="flex-shrink-0 p-2 border-b border-[var(--border-color)] bg-[var(--bg-tertiary)]">
+          <h3 className="text-xs font-bold text-[var(--text-primary)]">Miao</h3>
         </div>
-        
-        {/* Tablet: Gato à esquerda, com espaço suficiente */}
-        <div className="hidden md:block lg:hidden absolute inset-0 left-0 w-[65%] h-full overflow-visible">
-          <TamagotchiCat isChatMode={true} emotion={currentEmotion} />
-        </div>
-        
-        {/* Mobile: Gato centralizado no fundo, visível mas não interferindo */}
-        <div className="block md:hidden absolute inset-0 w-full h-full overflow-hidden">
+        <div className="flex-1 flex items-center justify-center p-2 overflow-hidden">
           <TamagotchiCat isChatMode={true} emotion={currentEmotion} />
         </div>
       </div>
-      
-      {/* Chat Area - Contorna o gato, não sobrepõe - z-index baixo para ficar atrás do gato */}
-      {/* Desktop: começa bem à direita para contornar completamente o gato */}
-      {/* Mobile: largura total */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-4 md:p-4 lg:p-6 space-y-3 sm:space-y-4 pt-14 sm:pt-20 md:pt-24 lg:pt-6 pb-20 sm:pb-32 md:pb-32 lg:pb-6 h-screen relative z-10 pointer-events-auto lg:ml-[65%] xl:ml-[62%] 2xl:ml-[58%]">
+
+      {/* Layout estilo Messenger: Gato à esquerda em caixa, Chat à direita */}
+      <div className="flex flex-row h-full w-full flex-1 min-h-0">
+        {/* Caixa do Gato - Estilo Messenger à esquerda (desktop/tablet) */}
+        <div className="hidden md:flex flex-col w-[280px] lg:w-[320px] xl:w-[360px] border-r-2 border-[var(--border-color)] bg-[var(--bg-secondary)] flex-shrink-0">
+          {/* Header da caixa do gato */}
+          <div className="flex-shrink-0 p-4 border-b-2 border-[var(--border-color)] bg-[var(--bg-tertiary)]">
+            <h3 className="text-sm font-bold text-[var(--text-primary)]">
+              {language === "pt" ? "Miao" : "Miao"}
+            </h3>
+          </div>
+          
+          {/* Área do gato - centralizado verticalmente */}
+          <div className="flex-1 flex items-center justify-center p-4 overflow-hidden relative min-h-0">
+            <div className="w-full h-full max-h-[500px] flex items-center justify-center">
+              <TamagotchiCat isChatMode={true} emotion={currentEmotion} />
+            </div>
+          </div>
+        </div>
+        
+        {/* Chat Area - Ocupa o resto do espaço */}
+        <div className="flex-1 flex flex-col min-w-0 h-full">
+          {/* Área de mensagens */}
+          <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-4 md:p-4 lg:p-6 space-y-3 sm:space-y-4 pt-14 sm:pt-20 md:pt-6 pb-20 sm:pb-32 md:pb-24 lg:pb-6 relative">
         {messages.map((message) => (
           <div
             key={message.id}
@@ -640,102 +662,100 @@ export default function VisualNovelChat({ isOpen, onClose, videoRef }: VisualNov
           </div>
         )}
 
-        <div ref={messagesEndRef} />
-      </div>
-
-      {/* Gradientes de contraste - fora do scroll */}
-      {/* Gradiente sutil no topo para melhor contraste (apenas mobile/tablet) */}
-      <div className="md:hidden fixed top-0 left-0 right-0 h-20 bg-gradient-to-b from-[var(--bg-primary)]/70 to-transparent pointer-events-none z-40" />
-      
-      {/* Footer - Input area fixed at bottom - sempre largura total */}
-      <div className="fixed bottom-0 left-0 right-0 p-2 sm:p-4 bg-[var(--bg-secondary)]/85 backdrop-blur-md border-t-2 border-[var(--border-color)]/50 z-50 shadow-[0_-4px_20px_rgba(0,0,0,0.15)]">
-        <div className="w-full max-w-full">
-          {/* Mode toggle - ocultar em mobile muito pequeno */}
-          {sttSupported && (
-            <div className="flex flex-col gap-2 mb-2">
-              <div className="flex items-center gap-2">
+            <div ref={messagesEndRef} />
+          </div>
+          
+          {/* Footer - Input area fixed at bottom */}
+          <div className="flex-shrink-0 p-2 sm:p-4 bg-[var(--bg-secondary)]/95 backdrop-blur-md border-t-2 border-[var(--border-color)] shadow-[0_-4px_20px_rgba(0,0,0,0.15)]">
+            <div className="w-full max-w-full">
+              {/* Mode toggle - ocultar em mobile muito pequeno */}
+              {sttSupported && (
+                <div className="flex flex-col gap-2 mb-2">
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setInputMode(inputMode === "text" ? "voice" : "text")}
+                      className="text-xs px-2 sm:px-3 py-1 rounded-lg bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-secondary)] hover:bg-[var(--bg-primary)] transition-all flex items-center gap-1"
+                    >
+                      {inputMode === "text" ? (
+                        <>
+                          <Mic size={12} className="sm:w-3.5 sm:h-3.5" />
+                          <span className="hidden sm:inline">{language === "pt" ? "Modo Voz" : "Voice Mode"}</span>
+                        </>
+                      ) : (
+                        <>
+                          <Keyboard size={12} className="sm:w-3.5 sm:h-3.5" />
+                          <span className="hidden sm:inline">{language === "pt" ? "Modo Texto" : "Text Mode"}</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                  {/* Mostrar erro de microfone se houver */}
+                  {speechError && (
+                    <div className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-2 py-1">
+                      {speechError}
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              <div className="flex gap-2">
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={input}
+                  onChange={(e) => {
+                    // Allow manual editing even in voice mode (user can correct transcription)
+                    setInput(e.target.value);
+                  }}
+                  onKeyPress={handleKeyPress}
+                  placeholder={
+                    inputMode === "voice"
+                      ? language === "pt" 
+                        ? (isListening ? "A falar..." : "Clique no microfone para falar...")
+                        : (isListening ? "Speaking..." : "Click microphone to speak...")
+                      : language === "pt" ? "Escreve uma mensagem..." : "Type a message..."
+                  }
+                  disabled={loading}
+                  readOnly={inputMode === "voice" && isListening}
+                  className="flex-1 bg-[var(--bg-tertiary)] border-2 border-[var(--border-color)] rounded-xl sm:rounded-2xl px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-none focus:border-[var(--brand)] disabled:opacity-50"
+                />
+                
+                {sttSupported && inputMode === "voice" && !isListening && (
+                  <button
+                    onClick={handleStartVoice}
+                    disabled={loading || isSpeaking}
+                    className="bg-[var(--brand)] text-white px-3 sm:px-4 py-2 sm:py-3 rounded-xl sm:rounded-2xl font-bold hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center"
+                    title={
+                      isSpeaking 
+                        ? (language === "pt" ? "Aguarda o gato terminar de falar" : "Wait for cat to finish speaking")
+                        : (language === "pt" ? "Iniciar gravação de voz" : "Start voice recording")
+                    }
+                  >
+                    <Mic size={18} className="sm:w-5 sm:h-5" />
+                  </button>
+                )}
+                
                 <button
-                  onClick={() => setInputMode(inputMode === "text" ? "voice" : "text")}
-                  className="text-xs px-2 sm:px-3 py-1 rounded-lg bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-secondary)] hover:bg-[var(--bg-primary)] transition-all flex items-center gap-1"
+                  onClick={handleSend}
+                  disabled={loading || !input.trim()}
+                  className="bg-[var(--brand)] text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl sm:rounded-2xl font-bold hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center"
                 >
-                  {inputMode === "text" ? (
-                    <>
-                      <Mic size={12} className="sm:w-3.5 sm:h-3.5" />
-                      <span className="hidden sm:inline">{language === "pt" ? "Modo Voz" : "Voice Mode"}</span>
-                    </>
+                  {loading ? (
+                    <Loader2 className="animate-spin" size={18} className="sm:w-5 sm:h-5" />
                   ) : (
-                    <>
-                      <Keyboard size={12} className="sm:w-3.5 sm:h-3.5" />
-                      <span className="hidden sm:inline">{language === "pt" ? "Modo Texto" : "Text Mode"}</span>
-                    </>
+                    <Send size={18} className="sm:w-5 sm:h-5" />
                   )}
                 </button>
               </div>
-              {/* Mostrar erro de microfone se houver */}
-              {speechError && (
-                <div className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-2 py-1">
-                  {speechError}
-                </div>
-              )}
             </div>
-          )}
-          
-          <div className="flex gap-2">
-            <input
-              ref={inputRef}
-              type="text"
-              value={input}
-              onChange={(e) => {
-                // Allow manual editing even in voice mode (user can correct transcription)
-                setInput(e.target.value);
-              }}
-              onKeyPress={handleKeyPress}
-              placeholder={
-                inputMode === "voice"
-                  ? language === "pt" 
-                    ? (isListening ? "A falar..." : "Clique no microfone para falar...")
-                    : (isListening ? "Speaking..." : "Click microphone to speak...")
-                  : language === "pt" ? "Escreve uma mensagem..." : "Type a message..."
-              }
-              disabled={loading}
-              readOnly={inputMode === "voice" && isListening}
-              className="flex-1 bg-[var(--bg-tertiary)] border-2 border-[var(--border-color)] rounded-xl sm:rounded-2xl px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-none focus:border-[var(--brand)] disabled:opacity-50"
-            />
-            
-            {sttSupported && inputMode === "voice" && !isListening && (
-              <button
-                onClick={handleStartVoice}
-                disabled={loading || isSpeaking}
-                className="bg-[var(--brand)] text-white px-3 sm:px-4 py-2 sm:py-3 rounded-xl sm:rounded-2xl font-bold hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center"
-                title={
-                  isSpeaking 
-                    ? (language === "pt" ? "Aguarda o gato terminar de falar" : "Wait for cat to finish speaking")
-                    : (language === "pt" ? "Iniciar gravação de voz" : "Start voice recording")
-                }
-              >
-                <Mic size={18} className="sm:w-5 sm:h-5" />
-              </button>
-            )}
-            
-            <button
-              onClick={handleSend}
-              disabled={loading || !input.trim()}
-              className="bg-[var(--brand)] text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl sm:rounded-2xl font-bold hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center"
-            >
-              {loading ? (
-                <Loader2 className="animate-spin" size={18} className="sm:w-5 sm:h-5" />
-              ) : (
-                <Send size={18} className="sm:w-5 sm:h-5" />
-              )}
-            </button>
           </div>
         </div>
       </div>
 
-      {/* Close button - floating top right, sempre na área do chat */}
+      {/* Close button - floating top right */}
       <button
         onClick={onClose}
-        className="fixed top-2 right-2 sm:top-4 sm:right-4 lg:top-4 z-[55] w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-lg sm:rounded-xl bg-black/60 backdrop-blur-sm border-2 border-white/30 hover:bg-red-500/70 hover:border-red-500 transition-all shadow-lg"
+        className="fixed top-2 right-2 sm:top-4 sm:right-4 z-[55] w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-lg sm:rounded-xl bg-black/60 backdrop-blur-sm border-2 border-white/30 hover:bg-red-500/70 hover:border-red-500 transition-all shadow-lg"
       >
         <X size={16} className="sm:w-5 sm:h-5 text-white" />
       </button>

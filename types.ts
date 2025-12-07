@@ -13,6 +13,8 @@ export interface Step {
 export interface GeneratedCat {
   id: string
   imageUrl: string
+  videoUrl?: string // Optional video URL for video generations
+  type?: "image" | "video" // Type of generated content
 }
 
 export type ImageSize = "1K" | "2K" | "4K"
@@ -39,10 +41,6 @@ export interface WalletState {
 
 // Add Puter to window type
 declare global {
-  interface AIStudio {
-    hasSelectedApiKey: () => Promise<boolean>
-    openSelectKey: () => Promise<void>
-  }
 
   interface PhantomProvider {
     isPhantom?: boolean
@@ -72,7 +70,31 @@ declare global {
   interface Window {
     puter?: {
       ai: {
-        txt2img: (prompt: string, options?: { model?: string; quality?: string }) => Promise<HTMLImageElement>
+        // Image generation
+        txt2img: (prompt: string, testMode?: boolean) => Promise<HTMLImageElement>
+        // Video generation
+        txt2vid: (
+          prompt: string,
+          testModeOrOptions?: boolean | {
+            model?: "sora-2" | "sora-2-pro"
+            seconds?: 4 | 8 | 12
+            duration?: 4 | 8 | 12
+            size?: "720x1280" | "1280x720" | "1024x1792" | "1792x1024"
+            resolution?: "720x1280" | "1280x720" | "1024x1792" | "1792x1024"
+            input_reference?: File | Blob
+          }
+        ) => Promise<HTMLVideoElement>
+        // Text to speech
+        txt2speech?: (text: string, options?: { voice?: string; speed?: number }) => Promise<HTMLAudioElement>
+        // Chat
+        chat?: (prompt: string, options?: { model?: string; stream?: boolean }) => Promise<string | AsyncIterable<{ text?: string }>>
+      }
+      auth: {
+        // User authentication
+        signIn: () => Promise<void>
+        signOut: () => Promise<void>
+        isSignedIn: () => boolean
+        getUser: () => Promise<{ username?: string; email?: string; [key: string]: any }>
       }
     }
     solana?: PhantomProvider

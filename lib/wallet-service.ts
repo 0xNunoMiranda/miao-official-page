@@ -121,10 +121,11 @@ export async function connectWallet(walletType: WalletType, timeoutMs = 30000): 
             address = resp.publicKey.toString()
           } catch (err: any) {
             console.error("Phantom connection error:", err)
-            if (err.code === 4001) {
+            if (err?.code === 4001) {
               throw new Error("User rejected the request")
             }
-            throw new Error(err.message || "Failed to connect to Phantom")
+            const message = err instanceof Error ? err.message : (typeof err === 'object' && err?.message ? String(err.message) : String(err))
+            throw new Error(message || "Failed to connect to Phantom")
           }
           break
         }

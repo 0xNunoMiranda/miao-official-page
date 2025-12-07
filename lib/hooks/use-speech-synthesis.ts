@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 
 interface UseSpeechSynthesisReturn {
-  speak: (text: string) => void;
+  speak: (text: string, emotion?: string) => void;
   cancel: () => void;
   isSpeaking: boolean;
   isSupported: boolean;
@@ -10,7 +10,7 @@ interface UseSpeechSynthesisReturn {
   setVoice: (voice: SpeechSynthesisVoice) => void;
 }
 
-export function useSpeechSynthesis(language: string = "pt"): UseSpeechSynthesisReturn {
+export function useSpeechSynthesis(language: string = "pt", defaultEmotion: string = "excited"): UseSpeechSynthesisReturn {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [selectedVoice, setSelectedVoice] = useState<SpeechSynthesisVoice | null>(null);
@@ -48,22 +48,35 @@ export function useSpeechSynthesis(language: string = "pt"): UseSpeechSynthesisR
         (voice) => voice.lang.startsWith(langPrefix) || voice.lang === targetLang
       );
       
-      // Tentar encontrar voz masculina
+      // Priorizar vozes de menino/criança (geralmente têm nomes específicos ou são "child", "young", "teen")
+      const boyVoiceKeywords = ["child", "young", "teen", "boy", "kid", "criança", "jovem", "niño", "garçon", "junge"];
+      
+      // Tentar encontrar voz de menino primeiro
       let matchingVoice = languageVoices.find(
         (voice) => {
           const voiceName = voice.name.toLowerCase();
-          return maleKeywords.some(keyword => voiceName.includes(keyword));
+          return boyVoiceKeywords.some(keyword => voiceName.includes(keyword));
         }
       );
       
-      // Se não encontrar voz masculina explícita, tentar vozes com nomes que soam masculinos
+      // Se não encontrar voz de menino, tentar vozes naturais/premium
       if (!matchingVoice) {
-        // Alguns navegadores usam nomes específicos para vozes masculinas
-        const maleVoiceNames = ["david", "daniel", "james", "thomas", "joão", "carlos", "luis", "pierre", "hans", "ahmed"];
+        const naturalVoiceKeywords = ["enhanced", "premium", "natural", "neural", "wavenet", "studio"];
         matchingVoice = languageVoices.find(
           (voice) => {
             const voiceName = voice.name.toLowerCase();
-            return maleVoiceNames.some(name => voiceName.includes(name));
+            return naturalVoiceKeywords.some(keyword => voiceName.includes(keyword));
+          }
+        );
+      }
+      
+      // Se não encontrar, tentar vozes masculinas jovens
+      if (!matchingVoice) {
+        const youngMaleNames = ["david", "daniel", "james", "thomas", "joão", "carlos", "luis"];
+        matchingVoice = languageVoices.find(
+          (voice) => {
+            const voiceName = voice.name.toLowerCase();
+            return youngMaleNames.some(name => voiceName.includes(name));
           }
         );
       }
@@ -117,7 +130,7 @@ export function useSpeechSynthesis(language: string = "pt"): UseSpeechSynthesisR
     return cleaned;
   };
 
-  const speak = useCallback((text: string) => {
+  const speak = useCallback((text: string, emotion: string = defaultEmotion) => {
     if (!isSupported || !text.trim()) return;
 
     // Cancel any ongoing speech
@@ -146,12 +159,22 @@ export function useSpeechSynthesis(language: string = "pt"): UseSpeechSynthesisR
       ar: "ar-SA",
     };
     
-    // Voz masculina natural:
-    // Pitch mais baixo (0.8-1.0) para voz mais grave/masculina
-    // Rate normal (1.0) para som mais natural
-    utterance.rate = 1.0; // Velocidade normal, mais natural
-    utterance.pitch = 0.9; // Pitch mais baixo = voz mais grave/masculina
-    utterance.volume = 1;
+    // Ajustar parâmetros de voz conforme a emoção (voz de menino com emoções)
+    const emotionSettings: Record<string, { rate: number; pitch: number; volume: number }> = {
+      excited: { rate: 1.15, pitch: 1.15, volume: 1.0 }, // Rápido e agudo - empolgado
+      happy: { rate: 1.1, pitch: 1.1, volume: 1.0 }, // Alegre e animado
+      laugh: { rate: 1.2, pitch: 1.2, volume: 1.0 }, // Muito rápido e agudo - riso
+      surprise: { rate: 1.15, pitch: 1.2, volume: 1.0 }, // Rápido e muito agudo - surpresa
+      sad: { rate: 0.9, pitch: 0.85, volume: 0.9 }, // Lento e grave - triste
+      mad: { rate: 1.0, pitch: 0.9, volume: 1.0 }, // Normal mas grave - bravo
+      sleepy: { rate: 0.85, pitch: 0.9, volume: 0.85 }, // Muito lento e suave - sonolento
+    };
+    
+    const settings = emotionSettings[emotion.toLowerCase()] || emotionSettings["excited"];
+    
+    utterance.rate = settings.rate; // Velocidade ajustada pela emoção
+    utterance.pitch = settings.pitch; // Pitch ajustado pela emoção (mais agudo = menino)
+    utterance.volume = settings.volume; // Volume ajustado pela emoção
     utterance.lang = langMap[language] || language;
 
     utterance.onstart = () => setIsSpeaking(true);
@@ -160,7 +183,7 @@ export function useSpeechSynthesis(language: string = "pt"): UseSpeechSynthesisR
 
     utteranceRef.current = utterance;
     window.speechSynthesis.speak(utterance);
-  }, [isSupported, selectedVoice, language]);
+  }, [isSupported, selectedVoice, language, defaultEmotion]);
 
   const cancel = useCallback(() => {
     if (!isSupported) return;

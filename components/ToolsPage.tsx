@@ -92,7 +92,8 @@ const ToolsPage: React.FC<ToolsPageProps> = ({ onBack, walletState }) => {
         const basePrompt =
           "comic style vector art, cute green cat mascot named Miao, white background, expressive, high quality"
         const fullPrompt = `${basePrompt}, ${prompt}`
-        const img = await window.puter.ai.txt2img(fullPrompt)
+        // Usar Puter.js conforme documentação: txt2img(prompt, testMode?)
+        const img = await window.puter.ai.txt2img(fullPrompt, false) // false = não usar testMode
         setGeneratedImage(img.src)
         // Reward points for generation
         setPoints((p) => p + 50)
