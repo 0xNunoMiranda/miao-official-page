@@ -50,6 +50,7 @@ export const translations: Record<Language, Record<string, string>> = {
     "hero.games": "Jogos MIAO",
     "hero.playEarn": "Jogar & Ganhar",
     "hero.play": "JOGAR",
+    "hero.talkToMe": "Fala Comigo",
 
     // Tokenomics
     "tokenomics.title": "Tokenomics",
@@ -346,6 +347,7 @@ export const translations: Record<Language, Record<string, string>> = {
     "hero.games": "MIAO Games",
     "hero.playEarn": "Play & Earn",
     "hero.play": "PLAY",
+    "hero.talkToMe": "Talk to Me",
 
     // Tokenomics
     "tokenomics.title": "Tokenomics",
@@ -642,6 +644,7 @@ export const translations: Record<Language, Record<string, string>> = {
     "hero.games": "Juegos MIAO",
     "hero.playEarn": "Jugar & Ganar",
     "hero.play": "JUGAR",
+    "hero.talkToMe": "Habla Conmigo",
 
     // Tokenomics
     "tokenomics.title": "Tokenomics",
@@ -938,6 +941,7 @@ export const translations: Record<Language, Record<string, string>> = {
     "hero.games": "Jeux MIAO",
     "hero.playEarn": "Jouer & Gagner",
     "hero.play": "JOUER",
+    "hero.talkToMe": "Parle-Moi",
 
     // Tokenomics
     "tokenomics.title": "Tokenomics",
@@ -1531,6 +1535,7 @@ export const translations: Record<Language, Record<string, string>> = {
     "hero.games": "MIAO 游戏",
     "hero.playEarn": "边玩边赚",
     "hero.play": "开玩",
+    "hero.talkToMe": "和我说话",
 
     // Tokenomics
     "tokenomics.title": "代币经济",
@@ -1826,6 +1831,7 @@ export const translations: Record<Language, Record<string, string>> = {
     "hero.games": "ألعاب MIAO",
     "hero.playEarn": "العب واربح",
     "hero.play": "العب",
+    "hero.talkToMe": "تحدث معي",
 
     // Tokenomics
     "tokenomics.title": "اقتصاد الرمز",

@@ -12,6 +12,7 @@ import {
   Instagram,
 } from "lucide-react";
 import TamagotchiCat from "./TamagotchiCat";
+import VisualNovelChat from "./VisualNovelChat";
 import { useVideoSound } from "@/lib/use-video-sound";
 import { useLanguage } from "../lib/language-context";
 
@@ -26,6 +27,8 @@ interface HeroProps {
   onToolsClick?: () => void;
   onGamesClick?: () => void;
   onWhitepaperClick?: () => void;
+  isChatOpen?: boolean;
+  onChatOpenChange?: (open: boolean) => void;
 }
 
 const TikTokIcon = ({ size = 20 }: { size?: number }) => (
@@ -79,8 +82,10 @@ const Hero: React.FC<HeroProps> = ({
   onToolsClick,
   onGamesClick,
   onWhitepaperClick,
+  isChatOpen: externalIsChatOpen,
+  onChatOpenChange,
 }) => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const videoRef = useRef<HTMLVideoElement>(null);
   const videoRefFall = useRef<HTMLVideoElement>(null);
   const videoRefWinter = useRef<HTMLVideoElement>(null);
@@ -100,6 +105,44 @@ const Hero: React.FC<HeroProps> = ({
     fall: false,
     winter: false,
   });
+  // Usar estado externo se fornecido, senão usar estado interno
+  // Garantir que o estado inicial seja sempre false para evitar problemas de hidratação
+  const [internalIsChatOpen, setInternalIsChatOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+  
+  // Aguardar montagem do componente no cliente para evitar problemas de hidratação
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+  
+  // Durante SSR, sempre usar false para garantir consistência
+  const isChatOpen = isMounted 
+    ? (externalIsChatOpen !== undefined ? externalIsChatOpen : internalIsChatOpen)
+    : false;
+    
+  const setIsChatOpen = (open: boolean) => {
+    if (onChatOpenChange) {
+      onChatOpenChange(open);
+    } else {
+      setInternalIsChatOpen(open);
+    }
+  };
+  
+  // Calcular className de forma estática para evitar problemas de hidratação
+  // Durante SSR (isMounted = false), sempre usar o layout padrão
+  // Após hidratação, usar o estado real
+  const gridClassName = !isMounted 
+    ? 'grid lg:grid-cols-2 gap-2 sm:gap-4 md:gap-6 lg:gap-8 items-center justify-items-center lg:justify-items-stretch'
+    : (isChatOpen 
+      ? 'grid lg:grid-cols-1 gap-2 sm:gap-4 md:gap-6 lg:gap-8 items-center justify-items-center lg:justify-items-stretch'
+      : 'grid lg:grid-cols-2 gap-2 sm:gap-4 md:gap-6 lg:gap-8 items-center justify-items-center lg:justify-items-stretch');
+    
+  const contentRightClassName = !isMounted
+    ? 'order-1 lg:order-2 space-y-8 md:space-y-10 text-center lg:text-center w-full max-w-full px-2 sm:px-0'
+    : (isChatOpen
+      ? 'order-1 lg:order-2 space-y-8 md:space-y-10 text-center lg:text-center w-full max-w-full px-2 sm:px-0 hidden'
+      : 'order-1 lg:order-2 space-y-8 md:space-y-10 text-center lg:text-center w-full max-w-full px-2 sm:px-0');
+  
   const [videoReady, setVideoReady] = useState({
     normal: false,
     fall: false,
@@ -490,17 +533,29 @@ const Hero: React.FC<HeroProps> = ({
       </video>
 
       <div className="max-w-[1400px] mx-auto px-2 sm:px-4 md:px-8 lg:px-12 xl:px-24 w-full relative z-20">
-        <div className="grid lg:grid-cols-2 gap-2 sm:gap-4 md:gap-6 lg:gap-8 items-center justify-items-center lg:justify-items-stretch">
-          {/* Cat Image - Left */}
+        <div className={gridClassName} suppressHydrationWarning>
+          {/* Cat Image - Left - Mantém visível quando chat está aberto */}
           <div
-            className="order-2 lg:order-1 flex justify-center lg:justify-start lg:items-start w-full max-w-full min-w-0"
+            className="order-2 lg:order-1 flex flex-col items-center lg:items-start w-full max-w-full min-w-0 gap-4"
             style={{ overflow: "visible", padding: "0 4px" }}
           >
-            <TamagotchiCat />
+            {(!isMounted || !isChatOpen) && (
+              <>
+                <TamagotchiCat />
+                {/* Botão "Fala Comigo" */}
+                <button
+                  onClick={() => setIsChatOpen(true)}
+                  className="bg-[var(--brand)] text-white px-8 py-4 rounded-2xl font-black text-lg uppercase tracking-wide border-b-4 border-[var(--brand-dark)] hover:brightness-110 active:border-b-0 active:translate-y-[4px] transition-all shadow-lg"
+                  suppressHydrationWarning
+                >
+                  {t("hero.talkToMe") || (language === "pt" ? "Fala Comigo" : "Talk to Me")}
+                </button>
+              </>
+            )}
           </div>
 
-          {/* Content - Right */}
-          <div className="order-1 lg:order-2 space-y-8 md:space-y-10 text-center lg:text-center w-full max-w-full px-2 sm:px-0">
+          {/* Content - Right - Ocultar quando chat está aberto */}
+          <div className={contentRightClassName} suppressHydrationWarning>
             {/* Logo */}
             <div className="flex flex-col items-center gap-4">
               <h1 className="sr-only">
@@ -805,6 +860,15 @@ const Hero: React.FC<HeroProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Visual Novel Chat */}
+      {(isMounted && isChatOpen) && (
+        <VisualNovelChat
+          isOpen={isChatOpen}
+          onClose={() => setIsChatOpen(false)}
+          videoRef={season === "normal" ? videoRef : season === "fall" ? videoRefFall : videoRefWinter}
+        />
+      )}
     </section>
   );
 };

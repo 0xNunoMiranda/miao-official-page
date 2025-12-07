@@ -14,6 +14,11 @@ const catEmotions = [
   { name: "mad", src: "/images/cat-mad.png" },
 ]
 
+// Debug: verificar se as imagens existem
+if (typeof window !== 'undefined') {
+  console.log('Cat emotions:', catEmotions.map(e => e.src))
+}
+
 interface Stats {
   hunger: number
   energy: number
@@ -21,7 +26,12 @@ interface Stats {
   intelligence: number
 }
 
-export default function TamagotchiCat() {
+interface TamagotchiCatProps {
+  isChatMode?: boolean
+  emotion?: string
+}
+
+export default function TamagotchiCat({ isChatMode = false, emotion }: TamagotchiCatProps) {
   const { t } = useLanguage()
   const [currentEmotion, setCurrentEmotion] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
@@ -80,8 +90,71 @@ export default function TamagotchiCat() {
     return false
   }, [loadedImages])
 
+  // Atualizar emoção quando receber nova do chat
   useEffect(() => {
-    if (isPaused) return
+    if (isChatMode && emotion) {
+      // Mapear emoção do chat para índice da emoção do gato
+      // A função detectEmotion retorna: "excited", "happy", "laugh", "surprise", "sleepy", "sad", "mad"
+      const mapEmotionToIndex = (emotionName: string): number => {
+        const emotionLower = emotionName.toLowerCase().trim()
+        
+        // Mapeamento direto dos nomes de emoções retornados por detectEmotion
+        const emotionMap: Record<string, number> = {
+          'excited': 0,
+          'happy': 1,
+          'laugh': 2,
+          'surprise': 3,
+          'sleepy': 4,
+          'sad': 5,
+          'mad': 6,
+        }
+        
+        // Verificar mapeamento direto primeiro
+        if (emotionMap[emotionLower] !== undefined) {
+          return emotionMap[emotionLower]
+        }
+        
+        // Fallback: verificar se contém palavras-chave (para compatibilidade)
+        if (emotionLower.includes('happy') || emotionLower.includes('alegre') || emotionLower.includes('feliz') || emotionLower.includes('joy')) {
+          return 1 // happy
+        }
+        if (emotionLower.includes('laugh') || emotionLower.includes('riso') || emotionLower.includes('haha') || emotionLower.includes('funny')) {
+          return 2 // laugh
+        }
+        if (emotionLower.includes('surprise') || emotionLower.includes('surpreso') || emotionLower.includes('wow') || emotionLower.includes('incrível')) {
+          return 3 // surprise
+        }
+        if (emotionLower.includes('sleepy') || emotionLower.includes('sono') || emotionLower.includes('cansado') || emotionLower.includes('tired')) {
+          return 4 // sleepy
+        }
+        if (emotionLower.includes('sad') || emotionLower.includes('triste') || emotionLower.includes('sorry') || emotionLower.includes('desculpa')) {
+          return 5 // sad
+        }
+        if (emotionLower.includes('mad') || emotionLower.includes('bravo') || emotionLower.includes('angry') || emotionLower.includes('raiva')) {
+          return 6 // mad
+        }
+        if (emotionLower.includes('excited') || emotionLower.includes('empolgado') || emotionLower.includes('emocionado')) {
+          return 0 // excited
+        }
+        
+        // Default: excited
+        return 0
+      }
+      
+      const emotionIndex = mapEmotionToIndex(emotion)
+      console.log("Mapping emotion:", emotion, "to index:", emotionIndex, "image:", catEmotions[emotionIndex]?.src)
+      // Sempre atualizar, mesmo que a imagem não esteja carregada ainda
+      setCurrentEmotion(emotionIndex)
+      setIsPaused(true)
+      // Voltar a animar após 3 segundos
+      const timeoutId = setTimeout(() => setIsPaused(false), 3000)
+      return () => clearTimeout(timeoutId)
+    }
+  }, [isChatMode, emotion])
+
+  useEffect(() => {
+    // Não animar automaticamente em modo chat
+    if (isChatMode || isPaused) return
 
     const interval = setInterval(() => {
       const nextIndex = (currentEmotion + 1) % catEmotions.length
@@ -93,7 +166,7 @@ export default function TamagotchiCat() {
     }, 5000)
 
     return () => clearInterval(interval)
-  }, [currentEmotion, isPaused, changeEmotion, loadedImages])
+  }, [currentEmotion, isPaused, isChatMode, changeEmotion, loadedImages])
 
   const handleFeed = () => {
     setIsPaused(true)
@@ -184,6 +257,57 @@ export default function TamagotchiCat() {
     </button>
   )
 
+  // Se estiver em modo chat, renderizar estilo visual novel
+  if (isChatMode) {
+    const emotionIndex = currentEmotion >= 0 && currentEmotion < catEmotions.length ? currentEmotion : 0
+    const currentImageSrc = catEmotions[emotionIndex]?.src || "/images/header-cat.png"
+    
+    return (
+      <div className="w-full h-full relative overflow-hidden">
+        {/* Desktop/Tablet: Gato grande, pivot no centro alinhado ao bottom */}
+        <div className="hidden md:block w-full h-full relative overflow-visible">
+          <img
+            src={currentImageSrc}
+            alt={`Miao ${catEmotions[emotionIndex]?.name || 'cat'}`}
+            className="absolute bottom-0 w-auto object-contain transition-all duration-500 ease-in-out"
+            key={emotionIndex}
+            style={{ 
+              left: 'clamp(180px, 35%, 42%)',
+              transformOrigin: 'center bottom',
+              filter: 'drop-shadow(0 10px 30px rgba(0,0,0,0.3))',
+              animation: 'fadeIn 0.3s ease-in-out, cat-vertical-float-chat 3s ease-in-out infinite',
+              height: 'min(85vh, 700px)',
+              maxHeight: '700px',
+              maxWidth: 'min(85%, 600px)',
+              width: 'auto',
+            }}
+            draggable={false}
+          />
+        </div>
+        
+        {/* Mobile: Gato menor, pivot no centro alinhado ao bottom */}
+        <div className="block md:hidden w-full h-full relative overflow-hidden">
+          <img
+            src={currentImageSrc}
+            alt={`Miao ${catEmotions[emotionIndex]?.name || 'cat'}`}
+            className="absolute bottom-0 left-1/2 w-auto object-contain transition-all duration-500 ease-in-out"
+            key={emotionIndex}
+            style={{ 
+              transformOrigin: 'center bottom',
+              filter: 'drop-shadow(0 8px 25px rgba(0,0,0,0.4))',
+              animation: 'fadeIn 0.3s ease-in-out, cat-vertical-float-chat 3s ease-in-out infinite',
+              height: 'min(50vh, 400px)',
+              maxHeight: '400px',
+              maxWidth: 'min(75%, 350px)',
+              width: 'auto',
+            }}
+            draggable={false}
+          />
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div
       className={`flex flex-row items-center justify-center lg:justify-start gap-1 sm:gap-2 md:gap-3 transition-all duration-700 ease-out relative mx-auto lg:mx-0 w-full max-w-full ${
@@ -237,7 +361,10 @@ export default function TamagotchiCat() {
           src={catEmotions[currentEmotion].src || "/placeholder.svg"}
           alt={`Miao ${catEmotions[currentEmotion].name}`}
           className="relative w-full max-w-[200px] sm:max-w-[280px] md:max-w-[350px] lg:max-w-[450px] xl:max-w-[550px] h-auto object-contain mx-auto"
-          style={{ maxHeight: 'calc(100vh - 200px)' }}
+          style={{ 
+            maxHeight: 'calc(100vh - 200px)',
+            animation: 'cat-vertical-float 3s ease-in-out infinite',
+          }}
           draggable={false}
         />
       </div>

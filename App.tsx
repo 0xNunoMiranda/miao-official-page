@@ -43,9 +43,11 @@ const AppContent: React.FC = () => {
   const [isChristmasMode, setIsChristmasMode] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
+      setIsMounted(true);
       // Detecta viewport mobile uma vez no cliente
       setIsMobile(window.innerWidth < 768);
 
@@ -81,6 +83,7 @@ const AppContent: React.FC = () => {
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
   const [isSwapModalOpen, setIsSwapModalOpen] = useState(false);
   const [isSwapChartModalOpen, setIsSwapChartModalOpen] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
   const [walletState, setWalletState] = useState<WalletState>({
     isConnected: false,
     address: null,
@@ -108,8 +111,17 @@ const AppContent: React.FC = () => {
       }
 
       if (!response.ok || !data.success) {
-        console.error('Wallet authentication failed:', data.error);
-        // Ainda permite conectar localmente, mas sem autenticação
+        // Silently handle database/auth errors - don't log to console
+        // Still allow local connection without authentication
+        // Database errors are non-critical - wallet works locally without auth
+        // Only log unexpected errors (not database/auth related)
+        if (data.error && 
+            !data.error.toLowerCase().includes('database error') &&
+            !data.error.toLowerCase().includes('authentication failed') &&
+            !data.error.toLowerCase().includes('wallet authentication')) {
+          // Only log unexpected errors for debugging
+          console.warn('Wallet authentication issue (non-critical):', data.error);
+        }
       } else {
         // Salvar token de autenticação
         if (data.token) {
@@ -205,9 +217,14 @@ const AppContent: React.FC = () => {
         onWhitepaperClick={() => redirectToWhitepaper(language)}
         season={season}
         onSeasonChange={handleSeasonChange}
+        isChatOpen={isChatOpen}
       />
       <div
-        className="min-h-screen text-(--text-primary) transition-colors duration-500 relative"
+        className={
+          !isMounted || !isChatOpen
+            ? "min-h-screen text-(--text-primary) transition-colors duration-500 relative"
+            : "min-h-screen text-(--text-primary) transition-colors duration-500 relative overflow-hidden h-screen"
+        }
         style={{
           backgroundImage: `url(${
             season === "winter"
@@ -220,8 +237,9 @@ const AppContent: React.FC = () => {
           backgroundPosition: "bottom center",
           backgroundRepeat: "no-repeat",
         }}
+        suppressHydrationWarning
       >
-        <div className="fixed inset-0 bg-(--bg-primary)/85 pointer-events-none z-0" />
+        <div className={`fixed inset-0 pointer-events-none z-0 transition-opacity duration-300 ${isChatOpen ? 'bg-transparent' : 'bg-(--bg-primary)/85'}`} />
 
         {!isMobile && isChristmasMode && (
           <div className="fixed inset-0 pointer-events-none z-1">
@@ -250,6 +268,8 @@ const AppContent: React.FC = () => {
                   onToolsClick={() => setCurrentView("tools")}
                   onGamesClick={() => setCurrentView("games")}
                   onWhitepaperClick={() => redirectToWhitepaper(language)}
+                  isChatOpen={isChatOpen}
+                  onChatOpenChange={setIsChatOpen}
                 />
                 {/* SEO-only heading and nav: accessible to crawlers, visually hidden */}
                 <h1 className="sr-only">

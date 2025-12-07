@@ -39,7 +39,21 @@ View your app in AI Studio: https://ai.studio/apps/temp/1
    # Solana RPC URL (optional, defaults to mainnet)
    SOLANA_RPC_URL=https://api.mainnet.solana.com
 
-   # OpenAI API Key (for image generation)
+   # Hugging Face API Keys (for text and image generation)
+   # Sistema de rotação: cada key adicional = +1000 requests/dia
+   # Texto: Usa apenas Hugging Face (modelos gpt2, distilgpt2 funcionam sem token)
+   HUGGINGFACE_API_KEY=hf_your_first_key_here
+   HUGGINGFACE_API_KEY_2=hf_your_second_key_here
+   # Adicione mais keys conforme necessário:
+   # HUGGINGFACE_API_KEY_3=hf_your_third_key_here
+
+   # Stable Horde API Keys (for IMAGE generation ONLY - optional)
+   # NOTA: Não usado para texto - apenas para imagens
+   STABLE_HORDE_API_KEY=lqICemPDKR3ocs7teOaq1g
+   # Adicione mais keys conforme necessário:
+   # STABLE_HORDE_API_KEY_2=your_second_key_here
+
+   # OpenAI API Key (for image generation - optional)
    OPENAI_API_KEY=your_openai_api_key_here
 
    # Port (optional, default: 3000)
@@ -74,7 +88,10 @@ View your app in AI Studio: https://ai.studio/apps/temp/1
 1. Push your code to GitHub
 2. Import your repository in Vercel
 3. **Important:** Add the following environment variables in Vercel project settings:
-   - `OPENAI_API_KEY` - Your OpenAI API key (required for `/api/generate-image` endpoint)
+   - `HUGGINGFACE_API_KEY` - Your Hugging Face API key (for text and image generation)
+   - `HUGGINGFACE_API_KEY_2` - Optional second key (increases capacity to 2000 requests/day)
+   - `STABLE_HORDE_API_KEY` - Optional Stable Horde API key (for image generation fallback)
+   - `OPENAI_API_KEY` - Optional OpenAI API key (alternative for image generation)
 4. Deploy!
 
 **Note:** If you get a 404 error after deployment, make sure:

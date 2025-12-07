@@ -1,53 +1,56 @@
-import { experimental_generateImage } from "ai"
+// API Route para gerar imagens usando Stable Horde API (COMPLETAMENTE GRATUITO, SEM CADASTRO)
+import { generateImageFromText } from "@/lib/stablehorde-image-generator"
+
+// Configurar timeout de 30 minutos para esta rota
+export const maxDuration = 1800 // 30 minutos em segundos
+
+// Blocked content patterns
+const BLOCKED_CONTENT_PATTERNS = [
+  /\b(sex|porn|nude|naked|erotic|xxx|adult|nsfw|hentai|fetish|bondage|bdsm|rape|molest|pedo|child\s*abuse|abuso\s*sexual|violacao|estupro|violencia\s*sexual)\b/i,
+  /\b(nazi|hitler|kkk|white\s*power|supremac|nigger|nigga|wetback|spic|chink|gook|kike|racist|xenophob|preconceito|racismo|xenofobia|odio\s*racial)\b/i,
+  /\b(kill|murder|torture|genocide|terrorist|bomb|weapon|gun|knife|blood|gore|violence|matar|assassin|tortura)\b/i,
+]
+
+function isContentBlocked(text: string): boolean {
+  return BLOCKED_CONTENT_PATTERNS.some(pattern => pattern.test(text))
+}
 
 export async function POST(request: Request) {
   try {
-    // Verificar se a API key está configurada
-    if (!process.env.OPENAI_API_KEY) {
+    const { prompt, width, height, model, language } = await request.json()
+    const userInput = prompt?.trim() || ""
+    
+    // Check for blocked content
+    if (userInput && isContentBlocked(userInput)) {
       return Response.json(
-        { error: "OpenAI API key is not configured" },
-        { status: 503 },
+        { error: "Content blocked: inappropriate content detected" },
+        { status: 400 },
       )
     }
 
-    const { prompt } = await request.json()
-
-    if (!prompt) {
-      return Response.json({ error: "Prompt is required" }, { status: 400 })
-    }
-
-    const fullPrompt = `Generate an image of a green cartoon cat character. The cat must have these EXACT characteristics:
-- Bright green colored body (like a mint/emerald green)
-- Big round black eyes with white highlights/reflections
-- Cute cartoon/comic style appearance
-- Sharp white teeth showing in a happy smile
-- Pink tongue visible
-- Black whiskers on both sides of face
-- Playful and friendly expression
-- Simple clean cartoon art style
-
-The user wants this green cat character: ${prompt}
-
-Keep the cat's core design and green color consistent. Make it fun and vibrant.`
-
-    const { image } = await experimental_generateImage({
-      model: "openai/dall-e-3",
-      prompt: fullPrompt,
-      size: "1024x1024",
+    // Gerar imagem usando Stable Horde (completamente gratuito, sem cadastro)
+    // Limite: 576x576 e 50 steps para evitar necessidade de kudos
+    const requestedWidth = width || 576
+    const requestedHeight = height || 576
+    const imageUrl = await generateImageFromText(userInput, {
+      width: Math.min(requestedWidth, 576), // Limitar a 576x576
+      height: Math.min(requestedHeight, 576),
+      model: model || undefined,
+      language: language || "en", // Passar a linguagem para o gerador
     })
 
-    // Return base64 image
     return Response.json({
       success: true,
-      imageUrl: `data:image/png;base64,${image.base64}`,
+      imageUrl: imageUrl,
+      serverGenerated: true,
     })
-  } catch (error) {
+  } catch (error: any) {
     console.error("Image generation error:", error)
-    return Response.json(
-      {
-        error: error instanceof Error ? error.message : "Failed to generate image",
-      },
-      { status: 500 },
-    )
+    
+    return Response.json({
+      success: false,
+      error: error?.message || "Failed to generate image",
+      serverGenerated: false,
+    }, { status: 500 })
   }
 }

@@ -16,7 +16,7 @@ interface CatGeneratorProps {
 }
 
 const CAT_REFERENCE_IMAGE = "/images/cat.png"
-const MAX_GENERATIONS_PER_DAY = 3
+const MAX_GENERATIONS_PER_DAY = 100
 const STORAGE_KEY = "miao_generator_daily_count"
 const IMAGES_STORAGE_KEY = "miao_generator_images"
 const IMAGE_EXPIRATION_HOURS = 24
@@ -177,41 +177,24 @@ const clearAllImages = (): void => {
   }
 }
 
-// Declaração de tipo para Puter
-declare global {
-  interface Window {
-    puter?: {
-      ai?: {
-        txt2img: (
-          prompt: string,
-          options?: { model?: string; quality?: string }
-        ) => Promise<HTMLImageElement>
-      }
-      auth?: {
-        isSignedIn: () => boolean
-        signIn: () => Promise<void>
-      }
-    }
-  }
-}
+// Removido: Declaração de tipo para Puter (não é mais necessário)
 
 const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false, season = "normal" }) => {
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
   const [cats, setCats] = useState<GeneratedCat[]>([])
   const [loading, setLoading] = useState(false)
   const [prompt, setPrompt] = useState("")
   const [error, setError] = useState<string | null>(null)
-  const [model, setModel] = useState("gpt-image-1")
-  const [quality, setQuality] = useState("medium")
-  const [puterReady, setPuterReady] = useState(false)
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [isAuthenticating, setIsAuthenticating] = useState(false)
   const [dailyCount, setDailyCount] = useState(0)
   const [showLimitModal, setShowLimitModal] = useState(false)
+  const [mounted, setMounted] = useState(false)
+  const [model, setModel] = useState("stable_diffusion_xl") // SDXL como padrão
+  const [queueProgress, setQueueProgress] = useState<{ queuePosition: number; progress: number } | null>(null)
   const latestCatRef = useRef<HTMLDivElement | null>(null)
 
   // Carrega a contagem diária do servidor e imagens salvas ao montar o componente
   useEffect(() => {
+    setMounted(true)
     // Buscar rate limit do servidor (por IP)
     fetch("/api/generate")
       .then((res) => res.json())
@@ -246,90 +229,12 @@ const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false, se
     return () => clearInterval(cleanupInterval)
   }, [])
 
-  // Verifica se Puter.js está carregado e se o usuário está autenticado
-  useEffect(() => {
-    const checkPuter = () => {
-      if (window.puter && window.puter.ai && window.puter.auth) {
-        setPuterReady(true)
-        // Verifica se o usuário já está autenticado - AUTENTICAÇÃO OBRIGATÓRIA
-        if (window.puter.auth.isSignedIn()) {
-          setIsAuthenticated(true)
-        } else {
-          // Garante que o estado está sincronizado se não estiver autenticado
-          setIsAuthenticated(false)
-        }
-      } else {
-        setTimeout(checkPuter, 100)
-      }
-    }
-    checkPuter()
-    
-    // Verifica periodicamente o estado de autenticação
-    const authCheckInterval = setInterval(() => {
-      if (window.puter?.auth) {
-        const signedIn = window.puter.auth.isSignedIn()
-        if (signedIn !== isAuthenticated) {
-          setIsAuthenticated(signedIn)
-        }
-      }
-    }, 1000)
-    
-    return () => clearInterval(authCheckInterval)
-  }, [isAuthenticated])
-
-  // Função para autenticar o usuário
-  const handleSignIn = async () => {
-    if (!window.puter?.auth) {
-      setError(t("generator.puterNotLoaded"))
-      return
-    }
-
-    setIsAuthenticating(true)
-    setError(null)
-
-    try {
-      await window.puter.auth.signIn()
-      // Verifica novamente após o login
-      if (window.puter.auth.isSignedIn()) {
-        setIsAuthenticated(true)
-      }
-    } catch (err) {
-      console.error("Authentication error:", err)
-      setError(err instanceof Error ? err.message : t("generator.authFailed"))
-    } finally {
-      setIsAuthenticating(false)
-    }
-  }
+  // Removido: Verificação do Puter.js (não é mais necessário)
 
   const handleGenerate = async () => {
     if (!prompt.trim()) {
       alert(t("generator.pleaseEnterPrompt"))
       return
-    }
-
-    // Verifica se Puter está carregado
-    if (!puterReady) {
-      setError(t("generator.puterNotLoaded"))
-      return
-    }
-
-    // Verifica se Puter.auth está disponível
-    if (!window.puter?.auth) {
-      setError(t("generator.puterNotLoaded"))
-      return
-    }
-
-    // AUTENTICAÇÃO OBRIGATÓRIA: Verifica se o usuário está autenticado no Puter
-    if (!window.puter.auth.isSignedIn()) {
-      setError(t("generator.pleaseAuthenticate") || "Por favor, autentique-se primeiro")
-      // Atualiza o estado de autenticação
-      setIsAuthenticated(false)
-      return
-    }
-
-    // Atualiza o estado de autenticação se estiver autenticado
-    if (!isAuthenticated) {
-      setIsAuthenticated(true)
     }
 
     setLoading(true)
@@ -364,20 +269,142 @@ const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false, se
       // Atualizar contador local baseado na resposta do servidor
       setDailyCount(MAX_GENERATIONS_PER_DAY - rateLimitData.remaining)
 
-      // Constrói o prompt final garantindo que tudo que o usuário digitar seja sobre o gato
       const userInput = prompt.trim()
-      // Usa "está" ou "tem" dependendo do contexto, mas sempre referindo-se ao gato
-      const finalPrompt = `${baseCharacteristics}, ${userInput}. Estilo cartoon animado, personagem mascote expressivo, fundo branco ou transparente, alta qualidade, detalhes nítidos, cores vibrantes`
+      
+      // Resetar progresso
+      setQueueProgress(null)
+      
+      // Gerar imagem
+      await handleGenerateImage(userInput)
+    } catch (error: any) {
+      console.error("Generation error:", error)
+      
+      // Melhor tratamento de erros para capturar diferentes tipos
+      let errorMessage = t("generator.generationFailed")
+      
+      if (error instanceof Error) {
+        errorMessage = error.message || errorMessage
+      } else if (typeof error === "string") {
+        errorMessage = error
+      } else if (error && typeof error === "object") {
+        // Tenta extrair mensagem de objetos de erro
+        const errorObj = error as any
+        errorMessage = errorObj.message || errorObj.error || errorObj.toString() || errorMessage
+      }
+      
+      setError(errorMessage)
+    } finally {
+      setLoading(false)
+      setQueueProgress(null) // Resetar progresso ao finalizar
+    }
+  }
 
-      if (!window.puter?.ai?.txt2img) {
-        throw new Error(t("generator.puterNotAvailable"))
+  const handleGenerateImage = async (userInput: string) => {
+    // Usar API com streaming para receber atualizações de progresso
+    const response = await fetch("/api/generate-image-stream", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ 
+          prompt: userInput,
+          width: 576, // Limite gratuito do Stable Horde
+          height: 576,
+          model: model,
+          language: language, // Passar a linguagem do website
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || "Failed to start image generation")
       }
 
-      const img = await window.puter.ai.txt2img(finalPrompt, { model, quality })
+      // Ler stream de eventos
+      const reader = response.body?.getReader()
+      const decoder = new TextDecoder()
+      let buffer = ""
+
+      if (!reader) {
+        throw new Error("No response stream available")
+      }
+
+      let imageUrl: string | null = null
+
+      while (true) {
+        const { done, value } = await reader.read()
+        
+        if (done) break
+
+        buffer += decoder.decode(value, { stream: true })
+        const lines = buffer.split("\n\n")
+        buffer = lines.pop() || ""
+
+        for (const line of lines) {
+          if (line.startsWith("data: ")) {
+            try {
+              const data = JSON.parse(line.slice(6))
+              
+              if (data.type === "progress") {
+                // Atualizar progresso da fila
+                setQueueProgress({
+                  queuePosition: data.queuePosition || 0,
+                  progress: data.progress || 0,
+                })
+              } else if (data.type === "complete") {
+                imageUrl = data.imageUrl
+              } else if (data.type === "error") {
+                throw new Error(data.error || "Image generation failed")
+              }
+            } catch (parseError) {
+              console.warn("Failed to parse SSE data:", parseError)
+            }
+          }
+        }
+      }
+
+      if (!imageUrl) {
+        throw new Error("No image URL received from server")
+      }
+
+      // Validar URL da imagem
+      if (!imageUrl || typeof imageUrl !== "string" || (!imageUrl.startsWith("data:") && !imageUrl.startsWith("http"))) {
+        throw new Error("Invalid image URL format from server")
+      }
+      
+      // Criar elemento de imagem para compatibilidade com sendImageToTelegram
+      let imageElement: HTMLImageElement = new Image()
+      imageElement.src = imageUrl
+    
+      await new Promise<void>((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          reject(new Error("Image loading timeout (10s)"))
+        }, 10000) // 10 segundos de timeout
+        
+        imageElement.onload = () => {
+          clearTimeout(timeout)
+          resolve()
+        }
+        
+        imageElement.onerror = (error) => {
+          clearTimeout(timeout)
+          console.error("Image load error:", error)
+          reject(new Error("Failed to load generated image. The image data may be corrupted."))
+        }
+      })
+
+      // Validar que temos uma URL de imagem válida
+      if (!imageUrl || typeof imageUrl !== "string") {
+        throw new Error("Invalid image URL generated")
+      }
+      
+      if (!imageElement) {
+        throw new Error("Image element not created")
+      }
 
       const newCat: GeneratedCat = {
         id: Date.now().toString(),
-        imageUrl: img.src,
+        imageUrl: imageUrl,
       }
       setCats((prev) => [newCat, ...prev])
       
@@ -385,8 +412,7 @@ const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false, se
       saveImage(newCat)
 
       // Enviar imagem para o Telegram automaticamente (em background, não bloqueia a UI)
-      // Converte a imagem para data URL válida antes de enviar
-      sendImageToTelegram(img, userInput).catch((err) => {
+      sendImageToTelegram(imageUrl, userInput).catch((err) => {
         // Silenciosamente falha se não conseguir enviar (não afeta a experiência do usuário)
         console.warn("Failed to send image to Telegram:", err)
       })
@@ -397,13 +423,8 @@ const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false, se
           latestCatRef.current.scrollIntoView({ behavior: "smooth", block: "center" })
         }
       }, 300)
-    } catch (err) {
-      console.error("Generation error:", err)
-      setError(err instanceof Error ? err.message : t("generator.generationFailed"))
-    } finally {
-      setLoading(false)
-    }
   }
+
 
   const downloadImage = async (cat: GeneratedCat) => {
     try {
@@ -432,72 +453,52 @@ const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false, se
     }
   }
 
-  // Função para converter imagem para data URL válida
-  const convertImageToDataURL = (imageElement: HTMLImageElement): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      // Se já é uma data URL válida de imagem, retorna diretamente
-      if (imageElement.src.startsWith("data:image/")) {
-        resolve(imageElement.src)
-        return
+  // Função para converter URL de imagem para data URL (via servidor para evitar CORS)
+  const convertImageUrlToDataURL = async (imageUrl: string): Promise<string> => {
+    // Se já é uma data URL, retorna diretamente
+    if (imageUrl.startsWith("data:image/")) {
+      return imageUrl
+    }
+
+    // Para URLs externas, fazemos o fetch através do servidor para evitar CORS
+    try {
+      const response = await fetch("/api/convert-image", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ imageUrl }),
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to convert image")
       }
 
-      // Se a imagem já está carregada, converte diretamente
-      if (imageElement.complete && imageElement.naturalWidth > 0) {
-        try {
-          const canvas = document.createElement("canvas")
-          canvas.width = imageElement.naturalWidth
-          canvas.height = imageElement.naturalHeight
-          const ctx = canvas.getContext("2d")
-          if (!ctx) {
-            reject(new Error("Could not get canvas context"))
-            return
-          }
-          ctx.drawImage(imageElement, 0, 0)
-          const dataURL = canvas.toDataURL("image/png")
-          resolve(dataURL)
-        } catch (error) {
-          reject(error)
-        }
-        return
+      const data = await response.json()
+      return data.dataURL
+    } catch (error) {
+      console.error("Error converting image:", error)
+      // Fallback: tenta fazer fetch direto (pode falhar por CORS)
+      try {
+        const response = await fetch(imageUrl)
+        const blob = await response.blob()
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader()
+          reader.onloadend = () => resolve(reader.result as string)
+          reader.onerror = reject
+          reader.readAsDataURL(blob)
+        })
+      } catch (fallbackError) {
+        throw new Error("Failed to convert image URL to data URL")
       }
-
-      // Se a imagem ainda não está carregada, espera carregar
-      const onLoad = () => {
-        try {
-          const canvas = document.createElement("canvas")
-          canvas.width = imageElement.naturalWidth
-          canvas.height = imageElement.naturalHeight
-          const ctx = canvas.getContext("2d")
-          if (!ctx) {
-            reject(new Error("Could not get canvas context"))
-            return
-          }
-          ctx.drawImage(imageElement, 0, 0)
-          const dataURL = canvas.toDataURL("image/png")
-          resolve(dataURL)
-        } catch (error) {
-          reject(error)
-        }
-        imageElement.removeEventListener("load", onLoad)
-        imageElement.removeEventListener("error", onError)
-      }
-
-      const onError = () => {
-        imageElement.removeEventListener("load", onLoad)
-        imageElement.removeEventListener("error", onError)
-        reject(new Error("Failed to load image"))
-      }
-
-      imageElement.addEventListener("load", onLoad, { once: true })
-      imageElement.addEventListener("error", onError, { once: true })
-    })
+    }
   }
 
   // Função para enviar imagem para o Telegram
-  const sendImageToTelegram = async (imageElement: HTMLImageElement, prompt: string) => {
+  const sendImageToTelegram = async (imageUrl: string, prompt: string) => {
     try {
-      // Converte a imagem para data URL válida
-      const dataURL = await convertImageToDataURL(imageElement)
+      // Converte a URL da imagem para data URL (via servidor se necessário)
+      const dataURL = await convertImageUrlToDataURL(imageUrl)
 
       const response = await fetch("/api/send-telegram", {
         method: "POST",
@@ -652,23 +653,9 @@ const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false, se
             </div>
           )}
 
-          {puterReady && !isAuthenticated && (
-            <div className="mb-6 p-4 bg-yellow-100 dark:bg-yellow-900/30 border-2 border-yellow-300 dark:border-yellow-700 rounded-2xl">
-              <p className="text-yellow-600 dark:text-yellow-400 font-bold text-sm mb-3">
-                {t("generator.authRequired")}
-              </p>
-              <button
-                onClick={handleSignIn}
-                disabled={isAuthenticating}
-                className="bg-[var(--duo-blue)] text-white px-6 py-3 rounded-xl font-bold uppercase tracking-wide border-b-4 border-[var(--blue-button-border)] active:border-b-0 active:translate-y-1 hover:brightness-110 transition-all disabled:opacity-70 disabled:cursor-wait"
-              >
-                {isAuthenticating ? t("generator.authenticating") : t("generator.authenticate")}
-              </button>
-            </div>
-          )}
 
           {/* Indicador de gerações restantes */}
-          {isAuthenticated && (
+          {mounted ? (
             <div className="mb-6 p-4 bg-[var(--bg-tertiary)] border-2 border-[var(--border-color)] rounded-2xl">
               <div className="flex items-center justify-between">
                 <div>
@@ -700,6 +687,27 @@ const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false, se
                 </p>
               )}
             </div>
+          ) : (
+            <div className="mb-6 p-4 bg-[var(--bg-tertiary)] border-2 border-[var(--border-color)] rounded-2xl">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-black text-sm uppercase text-[var(--text-secondary)] tracking-wide mb-1">
+                    {t("generator.generationsToday")}
+                  </p>
+                  <p className="text-[var(--text-primary)] font-bold">
+                    0 / {MAX_GENERATIONS_PER_DAY} {t("generator.used")}
+                  </p>
+                </div>
+                <div className="flex gap-1">
+                  {Array.from({ length: MAX_GENERATIONS_PER_DAY }).map((_, index) => (
+                    <div
+                      key={index}
+                      className="w-8 h-8 rounded-lg border-2 flex items-center justify-center bg-[var(--bg-secondary)] border-[var(--border-color)]"
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
           )}
 
           <div className="mb-6 relative z-10">
@@ -719,66 +727,76 @@ const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false, se
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 relative z-10">
-            <div>
-              <label className="block font-black text-sm uppercase text-[var(--text-secondary)] mb-3 tracking-widest">
-                {t("generator.model")}
-              </label>
-              <select
-                value={model}
-                onChange={(e) => setModel(e.target.value)}
-                className="w-full bg-[var(--bg-tertiary)] border-2 border-[var(--border-color)] rounded-2xl p-4 font-bold text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand)] focus:ring-4 focus:ring-[var(--brand)]/20 transition-all"
-              >
-                <option value="gpt-image-1">GPT Image-1</option>
-                <option value="dall-e-3">DALL·E 3</option>
-                <option value="stabilityai/stable-diffusion-3-medium">Stable Diffusion 3</option>
-              </select>
-            </div>
-            <div>
-              <label className="block font-black text-sm uppercase text-[var(--text-secondary)] mb-3 tracking-widest">
-                {t("generator.quality")}
-              </label>
-              <select
-                value={quality}
-                onChange={(e) => setQuality(e.target.value)}
-                className="w-full bg-[var(--bg-tertiary)] border-2 border-[var(--border-color)] rounded-2xl p-4 font-bold text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand)] focus:ring-4 focus:ring-[var(--brand)]/20 transition-all"
-              >
-                <option value="low">{t("generator.quality.low")}</option>
-                <option value="medium">{t("generator.quality.medium")}</option>
-                <option value="high">{t("generator.quality.high")}</option>
-              </select>
-            </div>
+          {/* Seletor de Modelo */}
+          <div className="mb-6 relative z-10">
+            <label className="block font-black text-sm uppercase text-[var(--text-secondary)] mb-3 tracking-widest">
+              {mounted ? (t("generator.model") || "Modelo") : "Modelo"}
+            </label>
+            <select
+              value={model}
+              onChange={(e) => setModel(e.target.value)}
+              disabled={!mounted}
+              className="w-full bg-[var(--bg-tertiary)] border-2 border-[var(--border-color)] rounded-2xl p-4 font-bold text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand)] focus:ring-4 focus:ring-[var(--brand)]/20 transition-all disabled:opacity-50"
+            >
+              <optgroup label="Stable Diffusion (Recomendado)">
+                <option value="stable_diffusion_xl">SDXL (Recomendado)</option>
+                <option value="stable_diffusion">Stable Diffusion 1.5</option>
+                <option value="stable_diffusion_2.1">Stable Diffusion 2.1</option>
+              </optgroup>
+              <optgroup label="Modelos Especializados">
+                <option value="Deliberate">Deliberate</option>
+                <option value="DreamShaper">DreamShaper</option>
+                <option value="Realistic_Vision">Realistic Vision</option>
+                <option value="Anything-Diffusion">Anything Diffusion</option>
+              </optgroup>
+            </select>
+            <p className="mt-2 text-sm text-[var(--text-secondary)]">
+              {!mounted
+                ? "Carregando..."
+                : loading 
+                ? "Gerando imagem... Pode estar na fila, aguarde."
+                : "Stable Horde: Completamente gratuito, sem cadastro. Pode ter fila."}
+            </p>
           </div>
 
           <button
             onClick={handleGenerate}
-            disabled={loading || !puterReady || (puterReady && !isAuthenticated) || dailyCount >= MAX_GENERATIONS_PER_DAY}
+            disabled={loading || (mounted && dailyCount >= MAX_GENERATIONS_PER_DAY)}
             className={`
               w-full bg-[var(--brand)] text-white px-6 py-5 rounded-2xl font-black text-2xl 
-              flex items-center justify-center gap-3 uppercase tracking-wide
+              flex flex-col items-center justify-center gap-2 uppercase tracking-wide
               border-b-[6px] border-[var(--brand-dark)] active:border-b-0 active:translate-y-[6px]
-              hover:brightness-110 transition-all relative z-10
-              ${loading || !puterReady || (puterReady && !isAuthenticated) || dailyCount >= MAX_GENERATIONS_PER_DAY ? "opacity-70 cursor-not-allowed" : ""}
+              hover:brightness-110 transition-all relative z-10 overflow-hidden
+              ${loading || (mounted && dailyCount >= MAX_GENERATIONS_PER_DAY) ? "opacity-70 cursor-not-allowed" : ""}
             `}
           >
-            {loading ? (
-              <RefreshCw className="animate-spin" size={28} />
-            ) : (
-              <Sparkles size={28} className="text-yellow-300 fill-current" />
+            <div className="flex items-center gap-3">
+              {loading ? (
+                <RefreshCw className="animate-spin" size={28} />
+              ) : (
+                <Sparkles size={28} className="text-yellow-300 fill-current" />
+              )}
+                  <span>
+                    {!mounted
+                      ? "Gerar"
+                      : loading
+                      ? t("generator.generating")
+                      : dailyCount >= MAX_GENERATIONS_PER_DAY
+                      ? t("generator.dailyLimitReached")
+                      : t("generator.generate")}
+                  </span>
+            </div>
+            
+            {/* Barra de progresso - aparece apenas no início do loading */}
+            {loading && !queueProgress && (
+              <div className="w-full h-2 bg-black/20 rounded-full overflow-hidden">
+                <div className="h-full bg-yellow-300 animate-pulse" style={{ width: "100%" }} />
+              </div>
             )}
-            {loading
-              ? t("generator.generating")
-              : !puterReady
-              ? t("generator.loading")
-              : !isAuthenticated
-              ? t("generator.authenticateFirst")
-              : dailyCount >= MAX_GENERATIONS_PER_DAY
-              ? t("generator.dailyLimitReached")
-              : t("generator.generate")}
           </button>
         </div>
 
-        {cats.length > 0 && (
+        {mounted && cats.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-16">
             {cats.map((cat, index) => (
               <div

@@ -41,6 +41,7 @@ interface HeaderProps {
   onWhitepaperClick?: () => void;
   season: Season;
   onSeasonChange: (season: Season) => void;
+  isChatOpen?: boolean;
 }
 
 const Header: React.FC<HeaderProps> = ({
@@ -55,11 +56,18 @@ const Header: React.FC<HeaderProps> = ({
   onWhitepaperClick,
   season,
   onSeasonChange,
+  isChatOpen = false,
 }) => {
   const { t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [isDark, setIsDark] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Aguardar montagem do componente no cliente para evitar problemas de hidratação
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   useEffect(() => {
     const currentTheme = document.documentElement.getAttribute("data-theme");
@@ -94,6 +102,11 @@ const Header: React.FC<HeaderProps> = ({
     { name: t("nav.miaoAi"), href: "#generator" },
     { name: t("nav.nfts"), href: "#nfts" },
   ];
+
+  // Ocultar navbar quando chat está aberto (após hidratação)
+  if (isMounted && isChatOpen) {
+    return null;
+  }
 
   return (
     <>
