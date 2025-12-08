@@ -15,69 +15,81 @@ export async function POST(request: NextRequest) {
     }
 
     const requestBody = await request.json()
-    const { imageUrl, prompt } = requestBody
+    const { imageUrl, videoUrl, prompt, type } = requestBody
 
-    if (!imageUrl) {
+    const isVideo = type === "video"
+    const mediaUrl = isVideo ? videoUrl : imageUrl
+
+    if (!mediaUrl) {
       return NextResponse.json(
-        { error: "Image URL is required" },
+        { error: isVideo ? "Video URL is required" : "Image URL is required" },
         { status: 400 }
       )
     }
 
     // Log para debug
-    const urlPreview = imageUrl.substring(0, 100)
-    console.log("Received image URL type:", urlPreview + "...")
-    console.log("Is data URL:", imageUrl.startsWith("data:image"))
+    const urlPreview = mediaUrl.substring(0, 100)
+    console.log(`Received ${isVideo ? "video" : "image"} URL type:`, urlPreview + "...")
+    console.log("Is data URL:", mediaUrl.startsWith(`data:${isVideo ? "video" : "image"}`))
 
-    // Validar que é uma data URL de imagem
-    if (!imageUrl.startsWith("data:image")) {
-      console.error("Invalid image format received:", urlPreview)
+    // Validar que é uma data URL de imagem ou vídeo
+    const expectedPrefix = isVideo ? "data:video" : "data:image"
+    if (!mediaUrl.startsWith(expectedPrefix)) {
+      console.error(`Invalid ${isVideo ? "video" : "image"} format received:`, urlPreview)
       return NextResponse.json(
         { 
-          error: "Invalid image format. Expected data:image URL.",
-          receivedType: imageUrl.substring(0, 30)
+          error: `Invalid ${isVideo ? "video" : "image"} format. Expected ${expectedPrefix} URL.`,
+          receivedType: mediaUrl.substring(0, 30)
         },
         { status: 400 }
       )
     }
 
     // Extrair o base64 da data URL
-    // Formato esperado: data:image/png;base64,iVBORw0KGgo...
-    const base64Match = imageUrl.match(/^data:image\/(\w+);base64,(.+)$/)
-    if (!base64Match || !base64Match[2]) {
+    // Formato esperado: data:image/png;base64,... ou data:video/mp4;base64,...
+    const base64Match = mediaUrl.match(/^data:(image|video)\/(\w+);base64,(.+)$/)
+    if (!base64Match || !base64Match[3]) {
       console.error("Failed to extract base64 from data URL. Format:", urlPreview)
       return NextResponse.json(
-        { error: "Invalid image format. Could not extract base64 data." },
+        { error: `Invalid ${isVideo ? "video" : "image"} format. Could not extract base64 data.` },
         { status: 400 }
       )
     }
     
-    const imageFormat = base64Match[1] // png, jpeg, webp, etc.
-    const imageBase64 = base64Match[2]
+    const mediaFormat = base64Match[2] // png, jpeg, webp, mp4, webm, etc.
+    const mediaBase64 = base64Match[3]
     
     // Validar que temos dados
-    if (!imageBase64 || imageBase64.length === 0) {
+    if (!mediaBase64 || mediaBase64.length === 0) {
       return NextResponse.json(
-        { error: "Empty image data" },
+        { error: `Empty ${isVideo ? "video" : "image"} data` },
         { status: 400 }
       )
     }
 
-    // Construir a mensagem para o Telegram (em inglês)
-    const caption = prompt
-      ? `🎨 New image generated in Miao Army Generator!\n\n📝 Prompt: ${prompt}`
-      : "🎨 New image generated in Miao Army Generator!"
+    // Construir a mensagem para o Telegram (sempre em inglês)
+    const generatorLink = "https://miaotoken.vip/#generator"
+    const caption = isVideo
+      ? (prompt
+          ? `🎬 New video generated in Miao Army Generator!\n\n📝 User Prompt: ${prompt}\n\n✨ Create your own unique Miao variants for FREE!\n🔗 ${generatorLink}`
+          : `🎬 New video generated in Miao Army Generator!\n\n✨ Create your own unique Miao variants for FREE!\n🔗 ${generatorLink}`)
+      : (prompt
+          ? `🎨 New image generated in Miao Army Generator!\n\n📝 User Prompt: ${prompt}\n\n✨ Create your own unique Miao variants for FREE!\n🔗 ${generatorLink}`
+          : `🎨 New image generated in Miao Army Generator!\n\n✨ Create your own unique Miao variants for FREE!\n🔗 ${generatorLink}`)
 
     // Converter base64 para Buffer
-    const imageBuffer = Buffer.from(imageBase64, "base64")
+    const mediaBuffer = Buffer.from(mediaBase64, "base64")
 
-    // Normalizar o formato da imagem (jpeg -> jpg para o filename)
-    const normalizedFormat = imageFormat === "jpeg" ? "jpg" : imageFormat
-    const mimeType = imageFormat === "jpeg" ? "image/jpeg" : `image/${imageFormat}`
+    // Normalizar o formato (jpeg -> jpg para o filename)
+    const normalizedFormat = mediaFormat === "jpeg" ? "jpg" : mediaFormat
+    const mimeType = isVideo 
+      ? `video/${mediaFormat}`
+      : (mediaFormat === "jpeg" ? "image/jpeg" : `image/${mediaFormat}`)
 
-    // Enviar para o Telegram usando sendPhoto
-    // O Telegram aceita multipart/form-data
-    const telegramUrl = `https://api.telegram.org/bot${botToken}/sendPhoto`
+    // Enviar para o Telegram usando sendPhoto ou sendVideo
+    const telegramUrl = isVideo
+      ? `https://api.telegram.org/bot${botToken}/sendVideo`
+      : `https://api.telegram.org/bot${botToken}/sendPhoto`
     
     // Criar boundary único
     const boundary = `----formdata-next-${Date.now()}`
@@ -90,11 +102,13 @@ export async function POST(request: NextRequest) {
     parts.push(Buffer.from(`Content-Disposition: form-data; name="chat_id"\r\n\r\n`))
     parts.push(Buffer.from(`${chatId}\r\n`))
     
-    // photo
+    // photo ou video
+    const fieldName = isVideo ? "video" : "photo"
+    const filename = isVideo ? `miao-generated.${normalizedFormat}` : `miao-generated.${normalizedFormat}`
     parts.push(Buffer.from(`--${boundary}\r\n`))
-    parts.push(Buffer.from(`Content-Disposition: form-data; name="photo"; filename="miao-generated.${normalizedFormat}"\r\n`))
+    parts.push(Buffer.from(`Content-Disposition: form-data; name="${fieldName}"; filename="${filename}"\r\n`))
     parts.push(Buffer.from(`Content-Type: ${mimeType}\r\n\r\n`))
-    parts.push(imageBuffer)
+    parts.push(mediaBuffer)
     parts.push(Buffer.from(`\r\n`))
     
     // caption
@@ -123,22 +137,22 @@ export async function POST(request: NextRequest) {
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}))
       console.error("Telegram API error:", errorData)
-      throw new Error(errorData.description || "Failed to send image to Telegram")
+      throw new Error(errorData.description || `Failed to send ${isVideo ? "video" : "image"} to Telegram`)
     }
 
     const result = await response.json()
     
     if (!result.ok) {
       console.error("Telegram API returned error:", result)
-      throw new Error(result.description || "Failed to send image to Telegram")
+      throw new Error(result.description || `Failed to send ${isVideo ? "video" : "image"} to Telegram`)
     }
 
     return NextResponse.json({ success: true, messageId: result.result?.message_id })
   } catch (error) {
-    console.error("Error sending image to Telegram:", error)
+    console.error("Error sending to Telegram:", error)
     return NextResponse.json(
       {
-        error: error instanceof Error ? error.message : "Failed to send image to Telegram",
+        error: error instanceof Error ? error.message : "Failed to send to Telegram",
       },
       { status: 500 }
     )

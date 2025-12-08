@@ -40,14 +40,20 @@ export async function generateVideoWithPuter(
   try {
     let videoElement: HTMLVideoElement
     
-    // Se testMode é true, passar como segundo parâmetro booleano
-    // Se testMode é false mas há outras opções, passar como objeto
+    // Conforme documentação: txt2vid(prompt, testMode?) ou txt2vid(prompt, options?)
+    // Se testMode é true e não há outras opções, passar como boolean
+    // Se há opções, passar como objeto (com ou sem testMode dentro)
     if (testMode && Object.keys(videoOptions).length === 0) {
+      // Apenas testMode, passar como boolean
       videoElement = await window.puter.ai.txt2vid(prompt, true)
     } else if (Object.keys(videoOptions).length > 0) {
-      videoElement = await window.puter.ai.txt2vid(prompt, videoOptions)
+      // Há opções, passar como objeto
+      videoElement = await window.puter.ai.txt2vid(prompt, {
+        ...videoOptions,
+        ...(testMode ? { testMode: true } : {})
+      })
     } else {
-      // Sem opções e sem testMode, usar padrão
+      // Sem opções e sem testMode, usar padrão (false = não usar testMode)
       videoElement = await window.puter.ai.txt2vid(prompt, false)
     }
     
