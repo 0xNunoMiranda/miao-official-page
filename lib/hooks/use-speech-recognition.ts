@@ -14,9 +14,17 @@ interface SpeechRecognitionInstance extends EventTarget {
   continuous: boolean;
   interimResults: boolean;
   lang: string;
+  maxAlternatives?: number;
   onresult: ((event: SpeechRecognitionEvent) => void) | null;
   onerror: ((event: SpeechRecognitionErrorEvent) => void) | null;
   onend: (() => void) | null;
+  onstart: (() => void) | null;
+  onaudiostart: (() => void) | null;
+  onaudioend: (() => void) | null;
+  onsoundstart: (() => void) | null;
+  onsoundend: (() => void) | null;
+  onspeechstart: (() => void) | null;
+  onspeechend: (() => void) | null;
   start: () => void;
   stop: () => void;
   abort: () => void;
@@ -57,33 +65,91 @@ export function useSpeechRecognition(language: string = "pt"): UseSpeechRecognit
     recognition.continuous = true;
     recognition.interimResults = true;
     recognition.lang = "pt-BR"; // Default, will be updated by language effect
+    recognition.maxAlternatives = 1; // Usar apenas a melhor alternativa para melhor precisão
 
     recognition.onresult = (event) => {
       let currentInterim = "";
+      let finalText = "";
 
+      // Processar todos os resultados
       for (let i = 0; i < event.results.length; i++) {
         const result = event.results[i];
+        const transcript = result[0]?.transcript || "";
+        
         if (result.isFinal) {
-          finalTranscriptRef.current += result[0].transcript + " ";
+          // Resultado final - adicionar ao transcript final
+          finalText += transcript + " ";
         } else {
-          currentInterim += result[0].transcript;
+          // Resultado intermediário - mostrar em tempo real
+          currentInterim += transcript;
         }
       }
 
-      setTranscript(finalTranscriptRef.current + currentInterim);
+      // Atualizar o transcript final acumulado
+      if (finalText) {
+        finalTranscriptRef.current += finalText;
+      }
+
+      // Combinar transcript final com resultado intermediário atual
+      const combinedTranscript = (finalTranscriptRef.current + currentInterim).trim();
+      setTranscript(combinedTranscript);
     };
 
     recognition.onerror = (event) => {
-      // Only set error if it's not a common non-critical error
-      if (event.error !== "no-speech" && event.error !== "aborted") {
-        setError(event.error);
+      console.log("[SpeechRecognition] Error:", event.error);
+      
+      // Tratamento específico para diferentes tipos de erro
+      switch (event.error) {
+        case "no-speech":
+          // Não há fala detectada - não é um erro crítico
+          console.log("[SpeechRecognition] No speech detected");
+          break;
+        case "aborted":
+          // Reconhecimento foi abortado manualmente - não é um erro
+          console.log("[SpeechRecognition] Recognition aborted");
+          break;
+        case "audio-capture":
+          // Não foi possível capturar áudio
+          setError("Microfone não encontrado ou sem permissão");
+          setIsListening(false);
+          break;
+        case "network":
+          // Erro de rede
+          setError("Erro de conexão. Verifique sua internet.");
+          setIsListening(false);
+          break;
+        case "not-allowed":
+          // Permissão negada
+          setError("Permissão de microfone negada");
+          setIsListening(false);
+          break;
+        case "service-not-allowed":
+          // Serviço não permitido
+          setError("Serviço de reconhecimento não disponível");
+          setIsListening(false);
+          break;
+        default:
+          // Outros erros
+          if (event.error !== "no-speech" && event.error !== "aborted") {
+            setError(event.error);
+            setIsListening(false);
+          }
       }
-      setIsListening(false);
     };
 
     recognition.onend = () => {
-      console.log("Speech recognition ended");
+      console.log("[SpeechRecognition] Recognition ended");
       setIsListening(false);
+    };
+
+    recognition.onstart = () => {
+      console.log("[SpeechRecognition] Recognition started");
+      setError(null);
+    };
+
+    recognition.onspeechend = () => {
+      console.log("[SpeechRecognition] Speech ended");
+      // Não parar automaticamente - deixar o usuário controlar
     };
 
     recognitionRef.current = recognition;
@@ -154,3 +220,4 @@ interface WindowWithSpeechRecognition extends Window {
   SpeechRecognition: SpeechRecognitionConstructor;
   webkitSpeechRecognition: SpeechRecognitionConstructor;
 }
+

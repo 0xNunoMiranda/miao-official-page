@@ -132,6 +132,18 @@ export default function VisualNovelChat({ isOpen, onClose, videoRef }: VisualNov
   // O usuário deve clicar no microfone para iniciar/parar manualmente
   // Removido o useEffect que reiniciava automaticamente para evitar loops
 
+  // Sincronizar transcript com input em tempo real enquanto está ouvindo
+  useEffect(() => {
+    if (isListening && transcript) {
+      // Atualizar o input com o transcript em tempo real
+      setInput(transcript);
+      // Também atualizar o ref para garantir sincronização
+      if (inputRef.current) {
+        inputRef.current.value = transcript;
+      }
+    }
+  }, [transcript, isListening]);
+
   // Auto-speak assistant messages - APENAS UMA VEZ por mensagem
   // IMPORTANTE: Não falar se o usuário está ouvindo (tentando falar)
   // IMPORTANTE: Não falar quando apenas muda o modo, apenas quando nova mensagem é adicionada
@@ -274,11 +286,21 @@ export default function VisualNovelChat({ isOpen, onClose, videoRef }: VisualNov
     console.log("[VisualNovelChat] 🛑 Stopping voice input");
     stopListening();
     
-    // Ensure final transcript is captured
-    if (transcript.trim()) {
-      setInput(transcript.trim());
-      console.log("[VisualNovelChat] ✅ Transcript captured:", transcript.trim());
-    }
+    // Aguardar um pouco para garantir que o transcript final foi processado
+    setTimeout(() => {
+      // Capturar o transcript final e limpar espaços extras
+      const finalTranscript = transcript.trim();
+      if (finalTranscript) {
+        setInput(finalTranscript);
+        // Também atualizar o ref
+        if (inputRef.current) {
+          inputRef.current.value = finalTranscript;
+        }
+        console.log("[VisualNovelChat] ✅ Final transcript captured:", finalTranscript);
+      } else {
+        console.log("[VisualNovelChat] ⚠️ No transcript to capture");
+      }
+    }, 300); // Pequeno delay para garantir processamento final
   }
 
   const handleCancelVoice = () => {
