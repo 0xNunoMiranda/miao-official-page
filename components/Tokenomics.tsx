@@ -311,7 +311,7 @@ const Tokenomics: React.FC<TokenomicsProps> = ({
 
   return (
     <section id="overview" className="py-20 overflow-x-hidden">
-      <div className="max-w-6xl mx-auto px-4 md:px-8 w-full">
+      <div className="max-w-6xl mx-auto w-full">
         {/* Tokenomics + How to Buy Grid */}
         <div className="grid lg:grid-cols-2 gap-6 mb-8 justify-items-center lg:justify-items-stretch">
           {/* Tokenomics Card */}

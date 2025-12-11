@@ -1,6 +1,7 @@
 "use client"
 
-import { Mic, MicOff, X } from "lucide-react"
+// Force HMR update - removed MicOff import
+import { Mic, X } from "lucide-react"
 import { useLanguage } from "../lib/language-context"
 
 interface VoiceIndicatorProps {
@@ -32,16 +33,37 @@ export function VoiceIndicator({
         </div>
       </div>
 
-      <div className="text-center space-y-2 max-w-md">
+      <div className="text-center space-y-2 max-w-2xl px-4">
         <h3 className="text-xl font-semibold text-white">
           {language === "pt" ? "A ouvir..." : "Listening..."}
         </h3>
         {transcript ? (
-          <p className="text-gray-300 text-lg">{transcript}</p>
+          <div className="bg-black/40 backdrop-blur-sm rounded-xl p-4 border-2 border-[var(--brand)]/30">
+            <p className="text-white text-lg font-medium break-words whitespace-pre-wrap">
+              {transcript}
+            </p>
+            <p className="text-gray-400 text-sm mt-2">
+              {language === "pt" 
+                ? "O texto será salvo quando parar de falar" 
+                : "Text will be saved when you stop speaking"}
+            </p>
+          </div>
         ) : (
-          <p className="text-gray-400">
-            {language === "pt" ? "Fala agora" : "Speak now"}
-          </p>
+          <div className="space-y-2">
+            <p className="text-gray-300 text-lg font-medium">
+              {language === "pt" ? "Fala agora..." : "Speak now..."}
+            </p>
+            <p className="text-gray-500 text-sm">
+              {language === "pt" 
+                ? "Aguardando detecção de voz..." 
+                : "Waiting for voice detection..."}
+            </p>
+            <p className="text-gray-600 text-xs mt-4">
+              {language === "pt"
+                ? "💡 Dica: Fala claramente e verifica se o microfone está funcionando"
+                : "💡 Tip: Speak clearly and check if your microphone is working"}
+            </p>
+          </div>
         )}
       </div>
 
@@ -58,7 +80,7 @@ export function VoiceIndicator({
           onClick={onStop}
           className="bg-[var(--brand)] text-white px-6 py-3 rounded-2xl font-bold hover:brightness-110 transition-all flex items-center gap-2"
         >
-          <MicOff className="h-5 w-5" />
+          <Mic className="h-5 w-5 opacity-75" />
           {language === "pt" ? "Parar" : "Stop"}
         </button>
       </div>

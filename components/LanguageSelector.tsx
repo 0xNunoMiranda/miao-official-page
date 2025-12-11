@@ -69,18 +69,18 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({ compact = false }) 
           flex items-center gap-2 rounded-xl border-2 border-[var(--border-color)] border-b-4 
           bg-[var(--bg-secondary)] hover:bg-[var(--bg-tertiary)]
           active:border-b-2 active:translate-y-0.5 transition-all
-          ${compact ? "w-11 h-11 justify-center" : "px-3 py-2"}
+          ${compact ? "w-11 h-11 justify-center" : "h-11 px-3"}
         `}
       >
-        <span className="text-lg">{currentLang?.flag}</span>
+        <span className="text-lg flex-shrink-0">{currentLang?.flag}</span>
         {!compact && (
           <>
-            <span className="text-sm font-bold text-[var(--text-primary)] hidden sm:block">
+            <span className="text-sm font-bold text-[var(--text-primary)] hidden sm:block whitespace-nowrap">
               {currentLang?.code.toUpperCase()}
             </span>
             <ChevronDown
               size={16}
-              className={`text-[var(--text-secondary)] transition-transform ${isOpen ? "rotate-180" : ""}`}
+              className={`text-[var(--text-secondary)] transition-transform flex-shrink-0 ${isOpen ? "rotate-180" : ""}`}
             />
           </>
         )}

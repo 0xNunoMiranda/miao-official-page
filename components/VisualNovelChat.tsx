@@ -2,7 +2,8 @@
 
 import type React from "react"
 import { useState, useRef, useEffect } from "react"
-import { Send, X, Loader2, Mic, Keyboard } from "lucide-react"
+import { Send, X, Loader2, Mic, Keyboard, Play, Pause } from "lucide-react"
+// Voice input component - uses Mic icon for both states (no MicOff needed)
 import TamagotchiCat from "./TamagotchiCat"
 import { useLanguage } from "../lib/language-context"
 import { useSpeechRecognition } from "../lib/hooks/use-speech-recognition"
@@ -32,6 +33,8 @@ export default function VisualNovelChat({ isOpen, onClose, videoRef }: VisualNov
   const [currentEmotion, setCurrentEmotion] = useState<string>("excited")
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const lastSpokenMessageIdRef = useRef<string | null>(null) // Rastrear última mensagem falada
+  const [playingMessageId, setPlayingMessageId] = useState<string | null>(null) // Rastrear qual mensagem está sendo reproduzida
 
   // Função para detectar emoção no texto da resposta
   const detectEmotion = (text: string): string => {
@@ -102,45 +105,75 @@ export default function VisualNovelChat({ isOpen, onClose, videoRef }: VisualNov
   // Speech synthesis hook - passa a emoção atual para ajustar a voz
   const { speak, cancel: cancelSpeech, isSpeaking } = useSpeechSynthesis(language, currentEmotion)
 
-  // Update input when transcript changes (voice input)
-  useEffect(() => {
-    // Always update input when transcript changes in voice mode
-    // This ensures real-time transcription display
-    if (inputMode === "voice") {
-      console.log("Transcript changed, updating input:", {
-        transcript,
-        transcriptLength: transcript.length,
-        isListening,
-        inputMode,
-      });
-      // Atualizar sempre que o transcript mudar, mesmo que esteja vazio (para limpar quando necessário)
-      setInput(transcript || "");
-    }
-  }, [transcript, inputMode])
-
   // Stop listening when TTS is speaking to prevent transcribing the cat's voice
+  // REMOVED: This was causing the microphone to turn off immediately in some cases
+  /*
   useEffect(() => {
     if (isSpeaking && isListening) {
-      console.log("TTS is speaking, stopping speech recognition to avoid transcribing cat's voice");
+      console.log("[VisualNovelChat] TTS is speaking, stopping speech recognition to avoid transcribing cat's voice");
       stopListening();
     }
   }, [isSpeaking, isListening, stopListening])
+  */
 
-  // Auto-speak assistant messages
+  // Cancel speech when switching to voice mode
+  // REMOVED: Potential conflict
+  /*
   useEffect(() => {
-    if (messages.length > 0 && inputMode === "voice") {
+    if (inputMode === "text" && isListening) {
+      stopListening();
+    } else if (inputMode === "voice") {
+      cancelSpeech();
+    }
+  }, [inputMode, isListening, stopListening, cancelSpeech])
+  */
+
+  // NÃO reiniciar automaticamente o reconhecimento - isso causa loops
+  // O usuário deve clicar no microfone para iniciar/parar manualmente
+  // Removido o useEffect que reiniciava automaticamente para evitar loops
+
+  // Auto-speak assistant messages - APENAS UMA VEZ por mensagem
+  // IMPORTANTE: Não falar se o usuário está ouvindo (tentando falar)
+  // IMPORTANTE: Não falar quando apenas muda o modo, apenas quando nova mensagem é adicionada
+  const previousMessagesLengthRef = useRef(0);
+  useEffect(() => {
+    // Só processar se realmente há uma nova mensagem (length aumentou)
+    if (messages.length > previousMessagesLengthRef.current && messages.length > 0 && inputMode === "voice") {
       const lastMessage = messages[messages.length - 1]
-      if (lastMessage.role === "assistant" && !loading) {
-        // Stop listening before speaking to avoid transcribing the cat's voice
-        if (isListening) {
-          stopListening();
-        }
+      
+      // Só falar se:
+      // 1. É uma mensagem do assistente
+      // 2. Não está carregando
+      // 3. Usuário não está ouvindo (e não está tentando ouvir - dar mais tempo)
+      // 4. É uma NOVA mensagem (não foi falada antes)
+      if (
+        lastMessage.role === "assistant" && 
+        !loading && 
+        !isListening &&
+        lastMessage.id !== lastSpokenMessageIdRef.current
+      ) {
+        // Marcar que esta mensagem já foi falada
+        lastSpokenMessageIdRef.current = lastMessage.id;
+        console.log("[VisualNovelChat] Auto-speaking NEW assistant message (user not listening)");
         cancelSpeech()
+        // Delay maior para garantir que o reconhecimento não está sendo iniciado
         setTimeout(() => {
-          speak(lastMessage.content, currentEmotion)
-        }, 500)
+          // Verificar novamente se não está ouvindo antes de falar
+          if (!isListening) {
+            speak(lastMessage.content, currentEmotion)
+          } else {
+            console.log("[VisualNovelChat] User started listening, skipping auto-speak");
+          }
+        }, 1000) // Aumentar delay para dar mais tempo ao usuário
+      } else if (isListening) {
+        console.log("[VisualNovelChat] Skipping auto-speak: user is listening (trying to speak)");
+      } else if (lastMessage.id === lastSpokenMessageIdRef.current) {
+        console.log("[VisualNovelChat] Skipping auto-speak: message already spoken");
       }
     }
+    
+    // Atualizar o comprimento anterior
+    previousMessagesLengthRef.current = messages.length;
   }, [messages, inputMode, loading, speak, cancelSpeech, isListening, stopListening, currentEmotion])
 
   // Auto-scroll para a última mensagem
@@ -165,8 +198,13 @@ export default function VisualNovelChat({ isOpen, onClose, videoRef }: VisualNov
         document.body.style.overflow = originalOverflow
         document.body.style.paddingRight = originalPaddingRight
       }
+    } else {
+      // Stop listening when chat closes
+      if (isListening) {
+        stopListening();
+      }
     }
-  }, [isOpen])
+  }, [isOpen, isListening, stopListening])
 
   // Focus input when chat opens
   useEffect(() => {
@@ -184,67 +222,116 @@ export default function VisualNovelChat({ isOpen, onClose, videoRef }: VisualNov
         es: "¡Hola! Soy Miao, el gato verde más rebelde de la blockchain! 🐱✨ ¿Qué quieres saber?",
         fr: "Salut! Je suis Miao, le chat vert le plus rebelle de la blockchain! 🐱✨ Que veux-tu savoir?",
         de: "Hallo! Ich bin Miao, die rebellischste grüne Katze der Blockchain! 🐱✨ Was möchtest du wissen?",
+        zh: "你好！我是Miao，区块链上最叛逆的绿猫！🐱✨ 你想知道什么？",
+        ar: "مرحباً! أنا مياو، القطة الخضراء الأكثر تمرداً في البلوك تشين! 🐱✨ ماذا تريد أن تعرف؟",
       }
       
+      const welcomeContent = welcomeMessages[language] || welcomeMessages["en"]
       const welcomeMessage: Message = {
         id: Date.now().toString(),
         role: "assistant",
-        content: welcomeMessages[language] || welcomeMessages["en"],
+        content: welcomeContent,
         timestamp: Date.now(),
       }
       setMessages([welcomeMessage])
       // Emoção inicial para a mensagem de boas-vindas
       setCurrentEmotion("excited")
+      // Falar a mensagem de boas-vindas na voz do idioma correto
+      // Delay pequeno para garantir que a voz está carregada
+      setTimeout(() => {
+        speak(welcomeContent, "excited")
+      }, 500)
     }
-  }, [isOpen, messages.length, language])
+  }, [isOpen, messages.length, language, speak])
 
-  const handleStartVoice = () => {
-    // Don't start if TTS is speaking
-    if (isSpeaking) {
-      console.log("Cannot start voice input: TTS is speaking");
+  // O vídeo de fundo é gerenciado pelo Hero component - não precisa fazer nada aqui
+
+  const handleToggleVoice = () => {
+    // Se já está ouvindo, parar
+    if (isListening) {
+      console.log("[VisualNovelChat] 🛑 Stopping voice input (toggle)");
+      handleStopVoice();
       return;
     }
     
-    console.log("Starting voice input...");
+    // Don't start if TTS is speaking
+    if (isSpeaking) {
+      console.log("[VisualNovelChat] ⚠️ Cannot start voice input: TTS is speaking");
+      return;
+    }
+    
+    console.log("[VisualNovelChat] 🎤 Starting voice input...");
     resetTranscript();
-    setInput(""); // Clear input field
-    // Pequeno delay para garantir que o reset foi processado
-    setTimeout(() => {
-      startListening();
-    }, 100);
+    setInput("");
+    cancelSpeech();
+    
+    // Start listening immediately
+    startListening();
+    console.log("[VisualNovelChat] ✅ Speech recognition started");
   }
 
   const handleStopVoice = () => {
-    stopListening()
-    // Pequeno delay para garantir que o transcript final foi processado
-    setTimeout(() => {
-      // O transcript já deve estar atualizado no input via useEffect
-      // Mas garantimos que está sincronizado
-      if (transcript.trim() && !input.trim()) {
-        setInput(transcript.trim());
-      }
-      // Não enviar automaticamente - deixar o usuário decidir quando enviar
-    }, 300);
+    console.log("[VisualNovelChat] 🛑 Stopping voice input");
+    stopListening();
+    
+    // Ensure final transcript is captured
+    if (transcript.trim()) {
+      setInput(transcript.trim());
+      console.log("[VisualNovelChat] ✅ Transcript captured:", transcript.trim());
+    }
   }
 
   const handleCancelVoice = () => {
+    console.log("[VisualNovelChat] 🚫 Cancelling voice input");
     stopListening()
     resetTranscript()
     setInput("")
+    // Focus on input after cancelling
+    setTimeout(() => {
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
+    }, 100);
   }
 
   const handleSend = async () => {
-    if (!input.trim() || loading) return
+    // Obter o texto do input de múltiplas fontes para garantir que capturamos o valor correto
+    const inputValue = inputRef.current?.value.trim() || input.trim();
+    console.log("[VisualNovelChat] 🚀 handleSend called");
+    console.log("[VisualNovelChat] 📋 Input state:", input);
+    console.log("[VisualNovelChat] 📋 Input ref value:", inputRef.current?.value);
+    console.log("[VisualNovelChat] 📋 Final message text:", inputValue);
+    
+    if (!inputValue || loading) {
+      console.log("[VisualNovelChat] ⚠️ Cannot send: empty input or loading");
+      return;
+    }
 
     // Stop listening if active
     if (isListening) {
-      stopListening()
+      console.log("[VisualNovelChat] 🛑 Stopping listening before send");
+      stopListening();
+      // Aguardar um pouco para garantir que o transcript final foi processado
+      await new Promise(resolve => setTimeout(resolve, 500));
+      // Atualizar inputValue com o valor mais recente
+      const updatedText = inputRef.current?.value.trim() || input.trim();
+      if (updatedText && updatedText !== inputValue) {
+        console.log("[VisualNovelChat] 📝 Updated message text from input ref:", updatedText);
+      }
+    }
+
+    const finalMessageText = inputRef.current?.value.trim() || input.trim();
+    console.log("[VisualNovelChat] 📤 Sending message to MIAO:", finalMessageText);
+    
+    if (!finalMessageText) {
+      console.error("[VisualNovelChat] ❌ ERROR: Final message text is empty!");
+      return;
     }
 
     const userMessage: Message = {
       id: Date.now().toString(),
       role: "user",
-      content: input.trim(),
+      content: finalMessageText,
       timestamp: Date.now(),
     }
 
@@ -396,17 +483,11 @@ export default function VisualNovelChat({ isOpen, onClose, videoRef }: VisualNov
         
         if (streamError.includes("Input payload validation failed") || 
             streamError.includes("validation failed")) {
-          errorMessage = language === "pt"
-            ? "Parâmetros inválidos. Por favor, tenta novamente!"
-            : "Invalid parameters. Please try again!"
+          errorMessage = t("chat.invalidParams")
         } else if (streamError.includes("timeout") || streamError.includes("timed out")) {
-          errorMessage = language === "pt"
-            ? "Tempo de espera esgotado. O serviço pode estar ocupado. Tenta novamente mais tarde!"
-            : "Request timed out. The service may be busy. Please try again later!"
+          errorMessage = t("chat.timeout")
         } else if (streamError.includes("not found") || streamError.includes("404")) {
-          errorMessage = language === "pt"
-            ? "Serviço temporariamente indisponível. Tenta novamente mais tarde!"
-            : "Service temporarily unavailable. Please try again later!"
+          errorMessage = t("chat.serviceUnavailable")
         }
         
         throw new Error(errorMessage)
@@ -414,11 +495,7 @@ export default function VisualNovelChat({ isOpen, onClose, videoRef }: VisualNov
 
       // Verificar se recebemos texto
       if (!generatedText) {
-        throw new Error(
-          language === "pt"
-            ? "Não foi possível gerar uma resposta. Tenta novamente!"
-            : "Could not generate a response. Please try again!"
-        )
+        throw new Error(t("chat.noResponse"))
       }
 
       const assistantMessage: Message = {
@@ -450,23 +527,12 @@ export default function VisualNovelChat({ isOpen, onClose, videoRef }: VisualNov
       console.error("Chat error:", error)
       
       // Check if all API keys failed - show friendly cat message
-      // Import the constant from the generator
       if (error?.message?.includes("MIAO_ALL_KEYS_FAILED") || 
           error?.message?.includes("ALL_KEYS_FAILED")) {
-        const tiredMessages: Record<string, string> = {
-          pt: "Miau... Estou um pouco cansado agora 😴. Tenta novamente mais tarde, sim? Preciso de descansar um bocado!",
-          en: "Meow... I'm a bit tired right now 😴. Try again later, okay? I need to rest a bit!",
-          es: "Miau... Estoy un poco cansado ahora 😴. ¡Inténtalo de nuevo más tarde! Necesito descansar un poco.",
-          fr: "Miaou... Je suis un peu fatigué maintenant 😴. Réessaye plus tard, d'accord? J'ai besoin de me reposer un peu!",
-          de: "Miau... Ich bin gerade ein bisschen müde 😴. Versuche es später noch einmal, okay? Ich muss mich ein bisschen ausruhen!",
-          ar: "مياو... أنا متعب قليلاً الآن 😴. حاول مرة أخرى لاحقاً، حسناً؟ أحتاج للراحة قليلاً!",
-          zh: "喵...我现在有点累了😴。稍后再试，好吗？我需要休息一下！",
-        }
-        
         const tiredMessage: Message = {
           id: Date.now().toString(),
           role: "assistant",
-          content: tiredMessages[language] || tiredMessages["en"],
+          content: t("chat.tired"),
           timestamp: Date.now(),
         }
         
@@ -491,20 +557,10 @@ export default function VisualNovelChat({ isOpen, onClose, videoRef }: VisualNov
       if (error?.message?.toLowerCase().includes("authentication failed") || 
           error?.message?.toLowerCase().includes("authentication required")) {
         // Silently retry or show generic error
-        const genericMessages: Record<string, string> = {
-          pt: "Desculpa, não consegui gerar uma resposta. Tenta novamente!",
-          en: "Sorry, I couldn't generate a response. Please try again!",
-          es: "Lo siento, no pude generar una respuesta. ¡Inténtalo de nuevo!",
-          fr: "Désolé, je n'ai pas pu générer de réponse. Réessaye!",
-          de: "Entschuldigung, ich konnte keine Antwort generieren. Versuche es bitte erneut!",
-          ar: "آسف، لم أتمكن من إنشاء رد. يرجى المحاولة مرة أخرى!",
-          zh: "抱歉，我无法生成回复。请重试！",
-        }
-        
         const genericMessage: Message = {
           id: Date.now().toString(),
           role: "assistant",
-          content: genericMessages[language] || genericMessages["en"],
+          content: t("chat.genericError"),
           timestamp: Date.now(),
         }
         setMessages((prev) => [...prev, genericMessage])
@@ -512,53 +568,14 @@ export default function VisualNovelChat({ isOpen, onClose, videoRef }: VisualNov
       }
       
       // Mensagem de erro mais específica baseada no idioma
-      const errorMessages: Record<string, Record<string, string>> = {
-        pt: {
-          default: "Desculpa, não consegui gerar uma resposta. Tenta novamente!",
-          timeout: "O tempo de espera expirou. Por favor, tenta novamente!",
-          network: "Erro de conexão. Verifica a tua ligação à internet e tenta novamente!",
-        },
-        en: {
-          default: "Sorry, I couldn't generate a response. Please try again!",
-          timeout: "Request timed out. Please try again!",
-          network: "Connection error. Please check your internet connection and try again!",
-        },
-        es: {
-          default: "Lo siento, no pude generar una respuesta. ¡Inténtalo de nuevo!",
-          timeout: "Tiempo de espera agotado. ¡Por favor, inténtalo de nuevo!",
-          network: "Error de conexión. Verifica tu conexión a internet e inténtalo de nuevo!",
-        },
-        fr: {
-          default: "Désolé, je n'ai pas pu générer de réponse. Réessaye!",
-          timeout: "Temps d'attente expiré. Réessaye s'il te plaît!",
-          network: "Erreur de connexion. Vérifie ta connexion internet et réessaye!",
-        },
-        de: {
-          default: "Entschuldigung, ich konnte keine Antwort generieren. Versuche es bitte erneut!",
-          timeout: "Wartezeit abgelaufen. Bitte versuche es erneut!",
-          network: "Verbindungsfehler. Überprüfe deine Internetverbindung und versuche es erneut!",
-        },
-        ar: {
-          default: "آسف، لم أتمكن من إنشاء رد. يرجى المحاولة مرة أخرى!",
-          timeout: "انتهت مهلة الانتظار. يرجى المحاولة مرة أخرى!",
-          network: "خطأ في الاتصال. يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى!",
-        },
-        zh: {
-          default: "抱歉，我无法生成回复。请重试！",
-          timeout: "请求超时。请重试！",
-          network: "连接错误。请检查您的互联网连接并重试！",
-        },
-      }
-      
-      const langErrors = errorMessages[language] || errorMessages["en"]
-      let errorMessageText = langErrors.default
+      let errorMessageText = t("chat.genericError")
       
       if (error?.message) {
         // Se for um erro de timeout ou conexão, usar mensagem específica
         if (error.name === "AbortError" || error.message.includes("timeout")) {
-          errorMessageText = langErrors.timeout
+          errorMessageText = t("chat.timeout")
         } else if (error.message.includes("network") || error.message.includes("fetch")) {
-          errorMessageText = langErrors.network
+          errorMessageText = t("chat.serviceUnavailable")
         } else {
           // Usar a mensagem de erro específica se disponível (mas não mostrar "Authentication failed")
           if (!error.message.toLowerCase().includes("authentication")) {
@@ -587,58 +604,80 @@ export default function VisualNovelChat({ isOpen, onClose, videoRef }: VisualNov
     }
   }
 
+  // Função para reproduzir/pausar áudio de uma mensagem específica
+  const handlePlayPauseMessage = (message: Message) => {
+    if (playingMessageId === message.id && isSpeaking) {
+      // Se está reproduzindo esta mensagem, pausar
+      cancelSpeech()
+      setPlayingMessageId(null)
+    } else {
+      // Se não está reproduzindo ou é outra mensagem, reproduzir
+      cancelSpeech()
+      setPlayingMessageId(message.id)
+      
+      // Detectar emoção da mensagem
+      const detectedEmotion = detectEmotion(message.content)
+      setCurrentEmotion(detectedEmotion)
+      
+      // Reproduzir após pequeno delay
+      setTimeout(() => {
+        speak(message.content, detectedEmotion)
+      }, 100)
+    }
+  }
+
+  // Atualizar playingMessageId quando a fala terminar
+  useEffect(() => {
+    if (!isSpeaking && playingMessageId) {
+      setPlayingMessageId(null)
+    }
+  }, [isSpeaking, playingMessageId])
+
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-[var(--bg-primary)]">
-      {/* Mobile: Gato em caixa no topo */}
-      <div className="md:hidden flex flex-col w-full border-b-2 border-[var(--border-color)] bg-[var(--bg-secondary)] max-h-[200px] flex-shrink-0">
-        <div className="flex-shrink-0 p-2 border-b border-[var(--border-color)] bg-[var(--bg-tertiary)]">
-          <h3 className="text-xs font-bold text-[var(--text-primary)]">Miao</h3>
-        </div>
-        <div className="flex-1 flex items-center justify-center p-2 overflow-hidden">
-          <TamagotchiCat isChatMode={true} emotion={currentEmotion} />
-        </div>
-      </div>
+    <div className="fixed inset-0 z-50 flex flex-col bg-transparent overflow-hidden">
+      {/* O vídeo de fundo já está instanciado no Hero - apenas deixamos o background transparente para ele aparecer */}
 
-      {/* Layout estilo Messenger: Gato à esquerda em caixa, Chat à direita */}
-      <div className="flex flex-row h-full w-full flex-1 min-h-0">
-        {/* Caixa do Gato - Estilo Messenger à esquerda (desktop/tablet) */}
-        <div className="hidden md:flex flex-col w-[280px] lg:w-[320px] xl:w-[360px] border-r-2 border-[var(--border-color)] bg-[var(--bg-secondary)] flex-shrink-0">
-          {/* Header da caixa do gato */}
-          <div className="flex-shrink-0 p-4 border-b-2 border-[var(--border-color)] bg-[var(--bg-tertiary)]">
-            <h3 className="text-sm font-bold text-[var(--text-primary)]">
-              {language === "pt" ? "Miao" : "Miao"}
-            </h3>
-          </div>
-          
-          {/* Área do gato - centralizado verticalmente */}
-          <div className="flex-1 flex items-center justify-center p-4 overflow-hidden relative min-h-0">
-            <div className="w-full h-full max-h-[500px] flex items-center justify-center">
-              <TamagotchiCat isChatMode={true} emotion={currentEmotion} />
-            </div>
-          </div>
-        </div>
-        
-        {/* Chat Area - Ocupa o resto do espaço */}
-        <div className="flex-1 flex flex-col min-w-0 h-full">
-          {/* Área de mensagens */}
-          <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-4 md:p-4 lg:p-6 space-y-3 sm:space-y-4 pt-14 sm:pt-20 md:pt-6 pb-20 sm:pb-32 md:pb-24 lg:pb-6 relative">
+      {/* Layout vertical em todas as resoluções: Chat → Gato → Input */}
+      <div className="flex flex-col h-full w-full flex-1 min-h-0 relative z-10">
+        {/* Chat Area - No topo - Sem background para transição suave */}
+        <div className="flex-1 flex flex-col min-w-0 min-h-0 relative overflow-hidden bg-transparent">
+          {/* Área de mensagens - Visual Novel Style com balões de conversa */}
+          <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-4 md:p-4 lg:p-6 space-y-3 sm:space-y-4 pt-14 sm:pt-20 md:pt-6 pb-8 relative">
         {messages.map((message) => (
           <div
             key={message.id}
             className={`flex ${message.role === "user" ? "justify-end" : "justify-start"} w-full`}
           >
             <div
-              className={`max-w-[90%] sm:max-w-[80%] md:max-w-[75%] lg:max-w-[70%] rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-xl transition-all duration-200 ${
-                message.role === "user"
-                  ? "bg-[var(--brand)] text-white shadow-[var(--brand)]/30"
-                  : "bg-[var(--bg-secondary)]/95 backdrop-blur-md text-[var(--text-primary)] border-2 border-[var(--border-color)]/80 shadow-black/20"
-              }`}
+              className={
+                `max-w-[90%] sm:max-w-[80%] md:max-w-[75%] lg:max-w-[70%] rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-xl transition-all duration-200 ${
+                  message.role === "user"
+                    ? "bg-[var(--brand)] text-white shadow-[var(--brand)]/30"
+                    : "bg-[var(--bg-secondary)]/95 backdrop-blur-md text-[var(--text-primary)] border-2 border-[var(--border-color)]/80 shadow-black/20"
+                }`
+              }
             >
-              <p className="text-xs sm:text-sm md:text-base whitespace-pre-wrap break-words leading-relaxed">
-                {message.content}
-              </p>
+              <div className="flex items-start gap-2">
+                <p className="text-xs sm:text-sm md:text-base whitespace-pre-wrap break-words leading-relaxed flex-1">
+                  {message.content}
+                </p>
+                {/* Botão de play/pause apenas para mensagens do assistente */}
+                {message.role === "assistant" && (
+                  <button
+                    onClick={() => handlePlayPauseMessage(message)}
+                    className="flex-shrink-0 w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded-full bg-[var(--bg-tertiary)] hover:bg-[var(--bg-primary)] border border-[var(--border-color)] transition-all hover:scale-110 active:scale-95"
+                    title={playingMessageId === message.id && isSpeaking ? t("chat.pause") : t("chat.play")}
+                  >
+                    {playingMessageId === message.id && isSpeaking ? (
+                      <Pause size={12} className="sm:w-3.5 sm:h-3.5 text-[var(--text-primary)]" />
+                    ) : (
+                      <Play size={12} className="sm:w-3.5 sm:h-3.5 text-[var(--text-primary)]" />
+                    )}
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         ))}
@@ -649,14 +688,10 @@ export default function VisualNovelChat({ isOpen, onClose, videoRef }: VisualNov
               <Loader2 className="animate-spin" size={16} />
               <span className="text-xs sm:text-sm text-[var(--text-primary)]">
                 {queueProgress && queueProgress.queuePosition === -1
-                  ? language === "pt"
-                    ? "A aguardar workers disponíveis..."
-                    : "Waiting for available workers..."
+                  ? t("chat.waitingWorkers")
                   : queueProgress && queueProgress.queuePosition > 0
-                  ? `${language === "pt" ? "Na fila" : "In queue"}: ${queueProgress.queuePosition}`
-                  : language === "pt"
-                  ? "Miao está a pensar..."
-                  : "Miao is thinking..."}
+                  ? `${t("chat.inQueue")}: ${queueProgress.queuePosition}`
+                  : t("chat.thinking")}
               </span>
             </div>
           </div>
@@ -664,33 +699,77 @@ export default function VisualNovelChat({ isOpen, onClose, videoRef }: VisualNov
 
             <div ref={messagesEndRef} />
           </div>
-          
-          {/* Footer - Input area fixed at bottom */}
-          <div className="flex-shrink-0 p-2 sm:p-4 bg-[var(--bg-secondary)]/95 backdrop-blur-md border-t-2 border-[var(--border-color)] shadow-[0_-4px_20px_rgba(0,0,0,0.15)]">
+        </div>
+
+        {/* Caixa do Gato - No meio, entre chat e input - Sem divisórias visíveis, por trás do input */}
+        <div className="flex flex-col w-full bg-transparent flex-shrink-0 relative" style={{ zIndex: 10, margin: 0, padding: 0 }}>
+          {/* Área do gato - Visual Novel: centralizado, não trespassa o topo, sem paddings/margins */}
+          <div 
+            className="flex items-center justify-center relative"
+            style={{ 
+              minHeight: "350px", 
+              maxHeight: "500px",
+              height: "400px",
+              margin: 0,
+              padding: 0,
+              overflow: 'hidden', // Não trespassa o topo
+              position: 'relative',
+            }}
+          >
+            <div className="w-full h-full flex items-center justify-center relative" style={{ overflow: 'hidden', margin: 0, padding: 0 }}>
+              <TamagotchiCat isChatMode={true} emotion={currentEmotion} />
+            </div>
+            
+            {/* Label Miao - Sobreposta ao gradient bottom */}
+            <div 
+              className="absolute bottom-0 left-0 right-0 flex-shrink-0 pointer-events-none"
+              style={{ 
+                zIndex: 20,
+                paddingBottom: '10px',
+              }}
+            >
+              <h3 className="text-xs sm:text-sm font-bold text-[var(--text-primary)] text-center">
+                {t("chat.miao")}
+              </h3>
+            </div>
+          </div>
+        </div>
+        
+        {/* Footer - Input area no final - Visual Novel Style - Por cima do gato */}
+        <div className="flex-shrink-0 p-2 sm:p-4 bg-[var(--bg-secondary)]/95 backdrop-blur-md border-t-2 border-[var(--border-color)] shadow-[0_-4px_20px_rgba(0,0,0,0.15)] relative" style={{ zIndex: 30 }}>
             <div className="w-full max-w-full">
               {/* Mode toggle - ocultar em mobile muito pequeno */}
               {sttSupported && (
                 <div className="flex flex-col gap-2 mb-2">
                   <div className="flex items-center gap-2">
                     <button
-                      onClick={() => setInputMode(inputMode === "text" ? "voice" : "text")}
+                      onClick={() => {
+                        const newMode = inputMode === "text" ? "voice" : "text";
+                        console.log(`[VisualNovelChat] 🔄 Changing input mode from ${inputMode} to ${newMode}`);
+                        setInputMode(newMode);
+                        // Se mudou para voice, cancelar qualquer fala em andamento
+                        if (newMode === "voice") {
+                          cancelSpeech();
+                          console.log("[VisualNovelChat] 🔇 Cancelled any ongoing speech when switching to voice mode");
+                        }
+                      }}
                       className="text-xs px-2 sm:px-3 py-1 rounded-lg bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-secondary)] hover:bg-[var(--bg-primary)] transition-all flex items-center gap-1"
                     >
                       {inputMode === "text" ? (
                         <>
                           <Mic size={12} className="sm:w-3.5 sm:h-3.5" />
-                          <span className="hidden sm:inline">{language === "pt" ? "Modo Voz" : "Voice Mode"}</span>
+                          <span className="hidden sm:inline">{t("chat.voiceMode")}</span>
                         </>
                       ) : (
                         <>
                           <Keyboard size={12} className="sm:w-3.5 sm:h-3.5" />
-                          <span className="hidden sm:inline">{language === "pt" ? "Modo Texto" : "Text Mode"}</span>
+                          <span className="hidden sm:inline">{t("chat.textMode")}</span>
                         </>
                       )}
                     </button>
                   </div>
-                  {/* Mostrar erro de microfone se houver */}
-                  {speechError && (
+                  {/* Mostrar erro de microfone se houver, exceto network error que pode ser transiente */}
+                  {speechError && speechError !== "network" && !speechError.includes("network") && (
                     <div className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-2 py-1">
                       {speechError}
                     </div>
@@ -699,39 +778,60 @@ export default function VisualNovelChat({ isOpen, onClose, videoRef }: VisualNov
               )}
               
               <div className="flex gap-2">
-                <input
-                  ref={inputRef}
-                  type="text"
-                  value={input}
-                  onChange={(e) => {
-                    // Allow manual editing even in voice mode (user can correct transcription)
-                    setInput(e.target.value);
-                  }}
-                  onKeyPress={handleKeyPress}
-                  placeholder={
-                    inputMode === "voice"
-                      ? language === "pt" 
-                        ? (isListening ? "A falar..." : "Clique no microfone para falar...")
-                        : (isListening ? "Speaking..." : "Click microphone to speak...")
-                      : language === "pt" ? "Escreve uma mensagem..." : "Type a message..."
-                  }
-                  disabled={loading}
-                  readOnly={inputMode === "voice" && isListening}
-                  className="flex-1 bg-[var(--bg-tertiary)] border-2 border-[var(--border-color)] rounded-xl sm:rounded-2xl px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-none focus:border-[var(--brand)] disabled:opacity-50"
-                />
+                <div className="flex-1 relative">
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    value={input}
+                    onChange={(e) => {
+                      // Allow manual editing even in voice mode (user can correct transcription)
+                      const newValue = e.target.value;
+                      setInput(newValue);
+                      console.log("[VisualNovelChat] Input manually changed to:", newValue);
+                    }}
+                    onKeyPress={handleKeyPress}
+                    placeholder={
+                      inputMode === "voice"
+                        ? (isListening ? t("chat.speaking") : (input.trim() ? t("chat.editOrSend") : t("chat.clickToSpeak")))
+                        : t("chat.typeMessage")
+                    }
+                    disabled={loading}
+                    readOnly={inputMode === "voice" && isListening}
+                    className="w-full bg-[var(--bg-tertiary)] border-2 border-[var(--border-color)] rounded-xl sm:rounded-2xl px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-none focus:border-[var(--brand)] disabled:opacity-50"
+                  />
+                  {/* Indicador visual quando há texto transcrito */}
+                  {inputMode === "voice" && !isListening && input.trim() && (
+                    <div className="absolute -top-6 left-0 text-xs text-[var(--brand)] bg-[var(--bg-secondary)] px-2 py-1 rounded border border-[var(--brand)]/30">
+                      {t("chat.transcribed")} ✓
+                    </div>
+                  )}
+                </div>
                 
-                {sttSupported && inputMode === "voice" && !isListening && (
+                {sttSupported && inputMode === "voice" && (
                   <button
-                    onClick={handleStartVoice}
+                    onClick={handleToggleVoice}
                     disabled={loading || isSpeaking}
-                    className="bg-[var(--brand)] text-white px-3 sm:px-4 py-2 sm:py-3 rounded-xl sm:rounded-2xl font-bold hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center"
+                    className={`${
+                      isListening 
+                        ? "bg-red-500 hover:bg-red-600" 
+                        : "bg-[var(--brand)] hover:brightness-110"
+                    } text-white px-3 sm:px-4 py-2 sm:py-3 rounded-xl sm:rounded-2xl font-bold disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center`}
                     title={
                       isSpeaking 
-                        ? (language === "pt" ? "Aguarda o gato terminar de falar" : "Wait for cat to finish speaking")
-                        : (language === "pt" ? "Iniciar gravação de voz" : "Start voice recording")
+                        ? t("chat.waitCatFinish")
+                        : isListening
+                        ? t("chat.stopRecording")
+                        : t("chat.startRecording")
                     }
                   >
-                    <Mic size={18} className="sm:w-5 sm:h-5" />
+                    <Mic 
+                      size={18} 
+                      className={`sm:w-5 sm:h-5 ${isListening ? 'animate-pulse' : ''}`}
+                      style={isListening ? { 
+                        filter: 'brightness(1.5)',
+                        transform: 'scale(1.1)'
+                      } : undefined}
+                    />
                   </button>
                 )}
                 
@@ -741,15 +841,14 @@ export default function VisualNovelChat({ isOpen, onClose, videoRef }: VisualNov
                   className="bg-[var(--brand)] text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl sm:rounded-2xl font-bold hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center"
                 >
                   {loading ? (
-                    <Loader2 className="animate-spin" size={18} className="sm:w-5 sm:h-5" />
+                    <Loader2 className="animate-spin sm:w-5 sm:h-5" size={18} />
                   ) : (
-                    <Send size={18} className="sm:w-5 sm:h-5" />
+                    <Send className="sm:w-5 sm:h-5" size={18} />
                   )}
                 </button>
               </div>
             </div>
           </div>
-        </div>
       </div>
 
       {/* Close button - floating top right */}

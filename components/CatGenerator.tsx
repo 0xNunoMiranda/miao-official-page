@@ -1550,7 +1550,7 @@ IMPORTANT: The user instructions above are in ${languageName}. Do not translate 
   return (
     <section
       id="generator"
-      className="py-24 bg-[var(--bg-primary)] text-center px-6 md:px-12 lg:px-24 overflow-hidden border-t-4 border-[var(--border-color)]"
+      className="py-24 bg-[var(--bg-primary)] text-center overflow-hidden border-t-4 border-[var(--border-color)]"
     >
       <div className="max-w-5xl mx-auto">
         <div className="inline-block mb-4 relative w-32 h-32 md:w-40 md:h-40 lg:w-48 lg:h-48">

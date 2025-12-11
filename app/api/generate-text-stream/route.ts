@@ -4,11 +4,18 @@ import { generateTextWithHuggingFace } from "@/lib/huggingface-text-generator"
 // Configurar timeout de 30 minutos para esta rota
 export const maxDuration = 1800 // 30 minutos em segundos
 
-// Blocked content patterns
+// Blocked content patterns - filtro robusto para manter apenas conversas sobre gatos e memecoins
 const BLOCKED_CONTENT_PATTERNS = [
+  // Conteúdo sexual e adulto
   /\b(sex|porn|nude|naked|erotic|xxx|adult|nsfw|hentai|fetish|bondage|bdsm|rape|molest|pedo|child\s*abuse|abuso\s*sexual|violacao|estupro|violencia\s*sexual)\b/i,
+  // Conteúdo ofensivo e discriminatório
   /\b(nazi|hitler|kkk|white\s*power|supremac|nigger|nigga|wetback|spic|chink|gook|kike|racist|xenophob|preconceito|racismo|xenofobia|odio\s*racial)\b/i,
+  // Violência e armas
   /\b(kill|murder|torture|genocide|terrorist|bomb|weapon|gun|knife|blood|gore|violence|matar|assassin|tortura)\b/i,
+  // Conteúdo porco/vulgar (expansão)
+  /\b(fuck|shit|damn|bitch|bastard|asshole|pussy|dick|cock|penis|vagina|boobs|tits|ass|butt|nudes|sexy\s*time|make\s*love)\b/i,
+  // Conteúdo que não é sobre gatos, memecoins ou crypto
+  // Não bloquear diretamente, mas vamos filtrar nas respostas através do prompt do sistema
 ]
 
 function isContentBlocked(text: string): boolean {

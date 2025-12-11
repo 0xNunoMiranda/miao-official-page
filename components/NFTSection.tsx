@@ -426,7 +426,7 @@ const NFTSection: React.FC<NFTSectionProps> = ({
         />
       </div>
 
-      <div className="relative z-10 max-w-5xl mx-auto px-4 md:px-8 w-full">
+      <div className="relative z-10 max-w-5xl mx-auto w-full">
         {/* Gradient border frame (green to purple), tech look with clipped corners */}
         <div
           className="relative p-0.5 max-[500px]:p-[1.5px]"

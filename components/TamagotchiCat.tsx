@@ -50,28 +50,25 @@ export default function TamagotchiCat({ isChatMode = false, emotion }: Tamagotch
     return () => clearTimeout(timer)
   }, [])
 
-  // Preload images
+  // Preload images - carregar todas as imagens de emoção
   useEffect(() => {
     const loadPromises: Promise<void>[] = []
     
     catEmotions.forEach((emotion, index) => {
-      if (index === 0) {
-        // First image - mark as loaded immediately
-        setLoadedImages(prev => new Set([...prev, index]))
-        return
-      }
-      
       const img = new Image()
       const loadPromise = new Promise<void>((resolve) => {
         img.onload = () => {
           setLoadedImages(prev => {
             const newSet = new Set([...prev, index])
+            console.log(`[TamagotchiCat] Image loaded: ${emotion.name} (${emotion.src}), index: ${index}`)
             return newSet
           })
           resolve()
         }
         img.onerror = () => {
-          // If image fails to load, still mark as loaded to avoid blocking
+          // Se a imagem falhar ao carregar, ainda marcar como carregada para não bloquear
+          // Mas logar o erro para debug
+          console.warn(`[TamagotchiCat] Failed to load image: ${emotion.name} (${emotion.src})`)
           setLoadedImages(prev => new Set([...prev, index]))
           resolve()
         }
@@ -79,16 +76,30 @@ export default function TamagotchiCat({ isChatMode = false, emotion }: Tamagotch
       img.src = emotion.src
       loadPromises.push(loadPromise)
     })
+    
+    // Log todas as imagens que devem ser carregadas
+    console.log('[TamagotchiCat] Preloading images:', catEmotions.map(e => `${e.name}: ${e.src}`))
   }, [])
 
-  const changeEmotion = useCallback((newIndex: number) => {
-    // Only change if image is loaded and index is valid
-    if (newIndex >= 0 && newIndex < catEmotions.length && loadedImages.has(newIndex)) {
-      setCurrentEmotion(newIndex)
-      return true
+  const changeEmotion = useCallback((newIndex: number, force: boolean = false) => {
+    // Verificar se o índice é válido
+    if (newIndex >= 0 && newIndex < catEmotions.length) {
+      // No modo chat ou se forçado, mudar mesmo que a imagem não esteja carregada
+      // A imagem será carregada quando necessário
+      if (force || isChatMode || loadedImages.has(newIndex)) {
+        // Se já está na mesma emoção, não fazer nada
+        if (newIndex === currentEmotion) {
+          return true
+        }
+        
+        // Mudança direta sem transição complexa - apenas atualizar o estado
+        // A transição CSS cuidará do fade suave
+        setCurrentEmotion(newIndex)
+        return true
+      }
     }
     return false
-  }, [loadedImages])
+  }, [loadedImages, isChatMode, currentEmotion])
 
   // Atualizar emoção quando receber nova do chat
   useEffect(() => {
@@ -142,31 +153,50 @@ export default function TamagotchiCat({ isChatMode = false, emotion }: Tamagotch
       }
       
       const emotionIndex = mapEmotionToIndex(emotion)
-      console.log("Mapping emotion:", emotion, "to index:", emotionIndex, "image:", catEmotions[emotionIndex]?.src)
-      // Sempre atualizar, mesmo que a imagem não esteja carregada ainda
-      setCurrentEmotion(emotionIndex)
-      setIsPaused(true)
-      // Voltar a animar após 3 segundos
-      const timeoutId = setTimeout(() => setIsPaused(false), 3000)
-      return () => clearTimeout(timeoutId)
+      
+      // Sempre atualizar a emoção imediatamente, forçando a mudança
+      // No modo chat, queremos que a imagem mude imediatamente
+      if (emotionIndex !== currentEmotion) {
+        const emotionData = catEmotions[emotionIndex]
+        const imageSrc = emotionData?.src || "/images/header-cat.png"
+        
+        console.log(`[TamagotchiCat] Emotion changed: "${emotion}" -> index: ${emotionIndex}, image: ${imageSrc}, name: ${emotionData?.name}`)
+        
+        setCurrentEmotion(emotionIndex)
+        setIsPaused(true)
+        
+        // Voltar a animar após 3 segundos
+        const timeoutId = setTimeout(() => setIsPaused(false), 3000)
+        return () => clearTimeout(timeoutId)
+      }
     }
-  }, [isChatMode, emotion])
+  }, [isChatMode, emotion, currentEmotion])
 
   useEffect(() => {
-    // Não animar automaticamente em modo chat
-    if (isChatMode || isPaused) return
+    // Não animar automaticamente em modo chat ou quando stats estão abertos
+    if (isChatMode || isPaused || showStats) return
 
     const interval = setInterval(() => {
       const nextIndex = (currentEmotion + 1) % catEmotions.length
-      // Only change if next image is loaded
+      // Preload da próxima imagem antes de mudar para evitar flicker
       if (loadedImages.has(nextIndex)) {
-        changeEmotion(nextIndex)
+        // Garantir que a imagem está realmente carregada no cache do navegador
+        const img = new Image()
+        img.src = catEmotions[nextIndex].src
+        img.onload = () => {
+          // Quando a imagem estiver carregada, fazer a mudança
+          changeEmotion(nextIndex)
+        }
+        // Se já está no cache, mudar imediatamente
+        if (img.complete) {
+          changeEmotion(nextIndex)
+        }
       }
       // If not loaded, wait for next interval (image will be loaded by then)
     }, 5000)
 
     return () => clearInterval(interval)
-  }, [currentEmotion, isPaused, isChatMode, changeEmotion, loadedImages])
+  }, [currentEmotion, isPaused, isChatMode, showStats, changeEmotion, loadedImages])
 
   const handleFeed = () => {
     setIsPaused(true)
@@ -245,11 +275,13 @@ export default function TamagotchiCat({ isChatMode = false, emotion }: Tamagotch
   }) => (
     <button
       onClick={onClick}
-      className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 lg:w-18 lg:h-18 rounded-full bg-[var(--bg-primary)] hover:bg-[var(--bg-secondary)] border-2 border-[var(--border-color)] border-b-4 active:border-b-2 active:translate-y-[2px] flex items-center justify-center transition-all shadow-sm relative z-40"
+      className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 lg:w-18 lg:h-18 rounded-full bg-[var(--bg-primary)] hover:bg-[var(--bg-secondary)] border-4 border-[var(--border-color)] border-b-6 active:border-b-4 active:translate-y-[2px] flex items-center justify-center transition-all shadow-sm relative z-40"
       style={{
         boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
         position: 'relative',
         zIndex: 40,
+        borderColor: 'var(--border-color)',
+        opacity: 1,
       }}
       title={label}
     >
@@ -257,26 +289,67 @@ export default function TamagotchiCat({ isChatMode = false, emotion }: Tamagotch
     </button>
   )
 
-  // Se estiver em modo chat, renderizar estilo Messenger (caixa compacta)
+  // Se estiver em modo chat, renderizar estilo Visual Novel (apenas da barriga para cima)
   if (isChatMode) {
     const emotionIndex = currentEmotion >= 0 && currentEmotion < catEmotions.length ? currentEmotion : 0
-    const currentImageSrc = catEmotions[emotionIndex]?.src || "/images/header-cat.png"
+    const emotionData = catEmotions[emotionIndex]
+    const currentImageSrc = emotionData?.src || "/images/header-cat.png"
+    const emotionName = emotionData?.name || 'excited'
+    
+    // Log para debug apenas quando a emoção realmente mudou (usando useRef para rastrear)
+    // Removido log repetitivo que estava causando spam no console
     
     return (
-      <div className="w-full h-full relative flex items-center justify-center overflow-hidden">
-        <img
-          src={currentImageSrc}
-          alt={`Miao ${catEmotions[emotionIndex]?.name || 'cat'}`}
-          className="w-full h-full object-contain transition-all duration-500 ease-in-out"
-          key={emotionIndex}
-          style={{ 
-            filter: 'drop-shadow(0 8px 20px rgba(0,0,0,0.25))',
-            animation: 'fadeIn 0.3s ease-in-out, cat-vertical-float 3s ease-in-out infinite',
-            maxHeight: '100%',
-            maxWidth: '100%',
+      <div className="w-full h-full relative flex items-center justify-center" style={{ overflow: 'hidden' }}>
+        {/* Visual Novel Style: mostrar apenas metade superior (da barriga para cima), centralizado */}
+        <div 
+          className="relative w-full h-full"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            overflow: 'hidden',
+            position: 'relative',
           }}
-          draggable={false}
-        />
+        >
+          <img
+            src={currentImageSrc}
+            alt={`Miao ${emotionName}`}
+            className="relative w-full h-full transition-opacity duration-300 ease-in-out"
+            key={`chat-emotion-${emotionIndex}`}
+            onLoad={() => {
+              console.log(`[TamagotchiCat] Image loaded successfully: ${currentImageSrc} (emotion: ${emotionName})`)
+            }}
+            onError={(e) => {
+              // Fallback se a imagem não carregar
+              console.warn(`[TamagotchiCat] Failed to load image: ${currentImageSrc}, using fallback`)
+              const target = e.target as HTMLImageElement
+              target.src = "/images/header-cat.png"
+            }}
+            style={{ 
+              filter: 'drop-shadow(0 8px 20px rgba(0,0,0,0.3))',
+              animation: 'cat-vertical-float 3s ease-in-out infinite',
+              objectFit: 'contain',
+              objectPosition: 'center bottom',
+              width: 'auto',
+              height: 'auto',
+              maxWidth: '100%',
+              maxHeight: '100%',
+              position: 'relative',
+              opacity: 1,
+            }}
+            draggable={false}
+          />
+          {/* Gradient na parte inferior para esconder suavemente as pernas - vai até o input do chat - escuro mesmo no light mode */}
+          <div 
+            className="absolute bottom-0 left-0 right-0 pointer-events-none"
+            style={{
+              height: '45%',
+              background: 'linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.85) 100%)',
+              zIndex: 10,
+            }}
+          />
+        </div>
       </div>
     )
   }
@@ -296,7 +369,7 @@ export default function TamagotchiCat({ isChatMode = false, emotion }: Tamagotch
         <ActionButton icon={BookOpen} onClick={handleStudy} label={t("tamagotchi.study")} />
         <button
           onClick={() => setShowStats(!showStats)}
-          className={`w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 lg:w-18 lg:h-18 rounded-full border-2 border-b-4 active:border-b-2 active:translate-y-[2px] flex items-center justify-center transition-all shadow-sm relative z-40 ${
+          className={`w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 lg:w-18 lg:h-18 rounded-full border-4 border-b-6 active:border-b-4 active:translate-y-[2px] flex items-center justify-center transition-all shadow-sm relative z-40 ${
             showStats
               ? "bg-[var(--bg-secondary)] text-[var(--text-primary)] border-[var(--border-color)]"
               : "bg-[var(--bg-primary)] text-[var(--text-primary)] border-[var(--border-color)]"
@@ -305,6 +378,8 @@ export default function TamagotchiCat({ isChatMode = false, emotion }: Tamagotch
             boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
             position: 'relative',
             zIndex: 40,
+            borderColor: 'var(--border-color)',
+            opacity: 1,
           }}
           title={t("tamagotchi.stats")}
         >
@@ -331,27 +406,43 @@ export default function TamagotchiCat({ isChatMode = false, emotion }: Tamagotch
           }}
         />
         <img
-          src={catEmotions[currentEmotion].src || "/placeholder.svg"}
-          alt={`Miao ${catEmotions[currentEmotion].name}`}
-          className="relative w-full max-w-[200px] sm:max-w-[280px] md:max-w-[350px] lg:max-w-[450px] xl:max-w-[550px] h-auto object-contain mx-auto"
+          src={catEmotions[currentEmotion]?.src || "/images/header-cat.png"}
+          alt={`Miao ${catEmotions[currentEmotion]?.name || 'cat'}`}
+          className="relative w-full max-w-[200px] sm:max-w-[280px] md:max-w-[350px] lg:max-w-[450px] xl:max-w-[550px] h-auto object-contain mx-auto transition-opacity duration-300 ease-in-out"
+          key={`emotion-${currentEmotion}`}
+          onError={(e) => {
+            // Fallback se a imagem não carregar
+            console.warn(`[TamagotchiCat] Failed to load image: ${catEmotions[currentEmotion]?.src}, using fallback`)
+            const target = e.target as HTMLImageElement
+            target.src = "/images/header-cat.png"
+          }}
           style={{ 
             maxHeight: 'calc(100vh - 200px)',
             animation: 'cat-vertical-float 3s ease-in-out infinite',
+            opacity: 1,
           }}
           draggable={false}
         />
       </div>
 
-      {showStats && (
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[var(--bg-secondary)] border-2 border-[var(--border-color)] border-b-4 rounded-2xl p-6 md:p-8 w-full max-w-[400px] md:max-w-[450px] shadow-2xl z-50">
-          <div className="space-y-4 md:space-y-5">
-            <StatBar label={t("tamagotchi.hunger")} value={stats.hunger} color="#FF6B6B" />
-            <StatBar label={t("tamagotchi.energy")} value={stats.energy} color="#4ECDC4" />
-            <StatBar label={t("tamagotchi.happiness")} value={stats.happiness} color="#FFE66D" />
-            <StatBar label={t("tamagotchi.intelligence")} value={stats.intelligence} color="#A78BFA" />
-          </div>
+      <div 
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[var(--bg-secondary)] border-4 border-[var(--border-color)] border-b-6 rounded-2xl p-6 md:p-8 w-full max-w-[400px] md:max-w-[450px] shadow-2xl transition-opacity duration-300 ease-in-out"
+        style={{
+          borderColor: 'var(--border-color)',
+          opacity: showStats ? 1 : 0,
+          visibility: showStats ? 'visible' : 'hidden',
+          pointerEvents: showStats ? 'auto' : 'none',
+          transform: 'translate(-50%, -50%)',
+          zIndex: 9999,
+          isolation: 'isolate',
+        }}>
+        <div className="space-y-4 md:space-y-5">
+          <StatBar label={t("tamagotchi.hunger")} value={stats.hunger} color="#FF6B6B" />
+          <StatBar label={t("tamagotchi.energy")} value={stats.energy} color="#4ECDC4" />
+          <StatBar label={t("tamagotchi.happiness")} value={stats.happiness} color="#FFE66D" />
+          <StatBar label={t("tamagotchi.intelligence")} value={stats.intelligence} color="#A78BFA" />
         </div>
-      )}
+      </div>
     </div>
   )
 }
@@ -360,10 +451,20 @@ function StatBar({ label, value, color }: { label: string; value: number; color:
   return (
     <div className="flex items-center gap-3">
       <span className="text-sm md:text-base font-bold w-16 md:w-20 text-[var(--text-primary)]">{label}</span>
-      <div className="flex-1 h-4 md:h-5 bg-[var(--bg-tertiary)] rounded-full overflow-hidden border-2 border-[var(--border-color)]">
+      <div className="flex-1 h-4 md:h-5 bg-[var(--bg-tertiary)] rounded-full overflow-hidden border-4 border-[var(--border-color)]"
+        style={{
+          borderColor: 'var(--border-color)',
+          opacity: 1,
+          willChange: 'auto',
+        }}>
         <div
-          className="h-full rounded-full transition-all duration-500"
-          style={{ width: `${value}%`, backgroundColor: color }}
+          className="h-full rounded-full transition-all duration-700 ease-out"
+          style={{ 
+            width: `${value}%`, 
+            backgroundColor: color,
+            willChange: 'width',
+            backfaceVisibility: 'hidden',
+          }}
         />
       </div>
       <span className="text-sm md:text-base font-bold w-10 md:w-12 text-right text-[var(--text-primary)]">{value}%</span>

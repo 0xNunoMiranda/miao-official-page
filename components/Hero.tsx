@@ -284,25 +284,33 @@ const Hero: React.FC<HeroProps> = ({
     const videoFall = videoRefFall.current;
     const videoWinter = videoRefWinter.current;
 
-    // Reset all opacities when season changes
-    setVideoOpacity({ normal: 0, fall: 0, winter: 0 });
-    // Mostrar imagem da season atual enquanto o vídeo carrega (sempre mostrar inicialmente se já carregou)
+    // Não resetar tudo de uma vez - fazer transição suave
+    // Primeiro, garantir que a imagem da nova estação esteja visível (se já carregou)
+    // ou manter a anterior até a nova estar pronta
     const currentSeasonImage =
       season === "winter" ? "winter" : season === "fall" ? "fall" : "normal";
-    // Se a imagem já carregou, mostrar com fade in
+    
+    // Se a imagem da nova estação já carregou, mostrar imediatamente
     if (imageLoaded[currentSeasonImage]) {
-      setTimeout(() => {
-        if (season === "winter") {
-          setImageOpacity({ normal: 0, fall: 0, winter: 1 });
-        } else if (season === "fall") {
-          setImageOpacity({ normal: 0, fall: 1, winter: 0 });
-        } else {
-          setImageOpacity({ normal: 1, fall: 0, winter: 0 });
-        }
-      }, 100);
+      // Fazer fade out das outras e fade in da nova
+      if (season === "winter") {
+        setImageOpacity({ normal: 0, fall: 0, winter: 1 });
+      } else if (season === "fall") {
+        setImageOpacity({ normal: 0, fall: 1, winter: 0 });
+      } else {
+        setImageOpacity({ normal: 1, fall: 0, winter: 0 });
+      }
+    }
+    // Se a imagem ainda não carregou, manter a anterior visível até carregar
+    // (não resetar para 0, isso será feito quando a nova imagem carregar)
+    
+    // Reset vídeos apenas da nova estação (não todos de uma vez)
+    if (season === "winter") {
+      setVideoOpacity((prev) => ({ ...prev, normal: 0, fall: 0 }));
+    } else if (season === "fall") {
+      setVideoOpacity((prev) => ({ ...prev, normal: 0, winter: 0 }));
     } else {
-      // Se a imagem ainda não carregou, começar com opacidade 0 (será mostrada quando carregar)
-      setImageOpacity({ normal: 0, fall: 0, winter: 0 });
+      setVideoOpacity((prev) => ({ ...prev, fall: 0, winter: 0 }));
     }
 
     // Load and play video for current season
@@ -398,11 +406,12 @@ const Hero: React.FC<HeroProps> = ({
         }}
         onLoad={() => {
           setImageLoaded((prev) => ({ ...prev, normal: true }));
-          // Se for a season atual, mostrar imagem com fade in inicialmente
+          // Se for a season atual, mostrar imagem imediatamente
           if (season === "normal") {
-            setTimeout(() => {
-              setImageOpacity((prev) => ({ ...prev, normal: 1 }));
-            }, 100);
+            setImageOpacity((prev) => {
+              // Fade out outras e fade in esta
+              return { normal: 1, fall: 0, winter: 0 };
+            });
           }
         }}
       />
@@ -420,11 +429,12 @@ const Hero: React.FC<HeroProps> = ({
         }}
         onLoad={() => {
           setImageLoaded((prev) => ({ ...prev, fall: true }));
-          // Se for a season atual, mostrar imagem com fade in inicialmente
+          // Se for a season atual, mostrar imagem imediatamente
           if (season === "fall") {
-            setTimeout(() => {
-              setImageOpacity((prev) => ({ ...prev, fall: 1 }));
-            }, 100);
+            setImageOpacity((prev) => {
+              // Fade out outras e fade in esta
+              return { normal: 0, fall: 1, winter: 0 };
+            });
           }
         }}
       />
@@ -442,11 +452,12 @@ const Hero: React.FC<HeroProps> = ({
         }}
         onLoad={() => {
           setImageLoaded((prev) => ({ ...prev, winter: true }));
-          // Se for a season atual, mostrar imagem com fade in inicialmente
+          // Se for a season atual, mostrar imagem imediatamente
           if (season === "winter") {
-            setTimeout(() => {
-              setImageOpacity((prev) => ({ ...prev, winter: 1 }));
-            }, 100);
+            setImageOpacity((prev) => {
+              // Fade out outras e fade in esta
+              return { normal: 0, fall: 0, winter: 1 };
+            });
           }
         }}
       />
@@ -458,12 +469,13 @@ const Hero: React.FC<HeroProps> = ({
         muted={true}
         playsInline
         preload={season === "normal" ? "metadata" : "none"}
-        className="absolute inset-0 w-full h-full object-cover z-0 transition-opacity duration-1000 ease-in-out"
+        className={`${isChatOpen ? "fixed" : "absolute"} inset-0 w-full h-full object-cover z-0 transition-opacity duration-1000 ease-in-out`}
         style={{
           objectFit: "cover",
           objectPosition: "left top",
           opacity: videoOpacity.normal,
           pointerEvents: videoOpacity.normal === 0 ? "none" : "auto",
+          zIndex: isChatOpen ? 40 : 0,
         }}
         onError={() => {
           setVideoError((prev) => ({ ...prev, normal: true }));
@@ -483,12 +495,13 @@ const Hero: React.FC<HeroProps> = ({
         muted={true}
         playsInline
         preload={season === "fall" ? "metadata" : "none"}
-        className="absolute inset-0 w-full h-full object-cover z-0 transition-opacity duration-1000 ease-in-out"
+        className={`${isChatOpen ? "fixed" : "absolute"} inset-0 w-full h-full object-cover z-0 transition-opacity duration-1000 ease-in-out`}
         style={{
           objectFit: "cover",
           objectPosition: "left top",
           opacity: videoOpacity.fall,
           pointerEvents: videoOpacity.fall === 0 ? "none" : "auto",
+          zIndex: isChatOpen ? 40 : 0,
         }}
         onError={() => {
           setVideoError((prev) => ({ ...prev, fall: true }));
@@ -511,12 +524,13 @@ const Hero: React.FC<HeroProps> = ({
         muted={true}
         playsInline
         preload={season === "winter" ? "metadata" : "none"}
-        className="absolute inset-0 w-full h-full object-cover z-0 transition-opacity duration-1000 ease-in-out"
+        className={`${isChatOpen ? "fixed" : "absolute"} inset-0 w-full h-full object-cover z-0 transition-opacity duration-1000 ease-in-out`}
         style={{
           objectFit: "cover",
           objectPosition: "left top",
           opacity: videoOpacity.winter,
           pointerEvents: videoOpacity.winter === 0 ? "none" : "auto",
+          zIndex: isChatOpen ? 40 : 0,
         }}
         onError={() => {
           setVideoError((prev) => ({ ...prev, winter: true }));
@@ -569,38 +583,38 @@ const Hero: React.FC<HeroProps> = ({
               />
 
               {/* Social Media Buttons - Between logo and cloud */}
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-2">
                 <a
                   href="https://t.me/miaotokensol"
                   target="_blank"
                   rel="noopener nofollow"
-                  className="w-7 h-7 rounded-lg flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-2 border-[var(--border-color)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-all"
+                  className="w-12 h-12 rounded-lg flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-2 border-[var(--border-color)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-all"
                 >
-                  <Send size={14} />
+                  <Send size={22} />
                 </a>
                 <a
                   href="https://x.com/miaoonsol"
                   target="_blank"
                   rel="noopener nofollow"
-                  className="w-7 h-7 rounded-lg flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-2 border-[var(--border-color)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-all"
+                  className="w-12 h-12 rounded-lg flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-2 border-[var(--border-color)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-all"
                 >
-                  <Twitter size={14} />
+                  <Twitter size={22} />
                 </a>
                 <a
                   href="https://www.instagram.com/miaotoken/"
                   target="_blank"
                   rel="noopener nofollow"
-                  className="w-7 h-7 rounded-lg flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-2 border-[var(--border-color)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-all"
+                  className="w-12 h-12 rounded-lg flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-2 border-[var(--border-color)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-all"
                 >
-                  <Instagram size={14} />
+                  <Instagram size={22} />
                 </a>
                 <a
                   href="https://www.tiktok.com/@miaoonsol"
                   target="_blank"
                   rel="noopener nofollow"
-                  className="w-7 h-7 rounded-lg flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-2 border-[var(--border-color)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-all"
+                  className="w-12 h-12 rounded-lg flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-2 border-[var(--border-color)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-all"
                 >
-                  <TikTokIcon size={14} />
+                  <TikTokIcon size={22} />
                 </a>
               </div>
             </div>
@@ -619,15 +633,15 @@ const Hero: React.FC<HeroProps> = ({
                 style={{
                   opacity: 1,
                   WebkitTextStroke: isDark
-                    ? "2px rgba(0, 0, 0, 1)"
-                    : "2px rgba(255, 255, 255, 1)",
+                    ? "4px rgba(0, 0, 0, 1)"
+                    : "4px rgba(255, 255, 255, 1)",
                   textStroke: isDark
-                    ? "2px rgba(0, 0, 0, 1)"
-                    : "2px rgba(255, 255, 255, 1)",
+                    ? "4px rgba(0, 0, 0, 1)"
+                    : "4px rgba(255, 255, 255, 1)",
                   paintOrder: "stroke fill",
                   textShadow: isDark
-                    ? "3px 3px 6px rgba(0, 0, 0, 0.7)"
-                    : "3px 3px 6px rgba(0, 0, 0, 0.4)",
+                    ? "3px 3px 6px rgba(0, 0, 0, 0.9)"
+                    : "3px 3px 6px rgba(0, 0, 0, 0.6)",
                   letterSpacing: "0.5px",
                 }}
               >

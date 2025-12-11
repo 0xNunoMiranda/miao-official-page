@@ -124,54 +124,61 @@ const Header: React.FC<HeaderProps> = ({
         }
       >
         <div className="max-w-[1400px] mx-auto px-4 md:px-8 lg:px-12 relative overflow-visible">
-          <div className="flex items-center justify-between h-20 overflow-visible">
-            {/* Logo visível apenas após scroll */}
-            <a
-              href="#hero"
-              className={`flex items-center group h-full transition-opacity duration-300 ${
-                scrolled ? "opacity-100" : "opacity-0 pointer-events-none"
-              }`}
-              title="MIAO — Solana memecoin home"
-            >
-              <img
-                src="/logo.png"
-                alt="MIAO — The Green Cat Token on Solana"
-                className="h-10 w-auto object-contain group-hover:scale-110 transition-transform"
-                loading="lazy"
-              />
-            </a>
+          <div className="flex items-center justify-between h-20 overflow-visible flex-nowrap min-w-0">
+            {/* Left: Logo + Nav Links */}
+            <div className="flex items-center gap-4 flex-shrink-0">
+              {/* Logo visível apenas após scroll */}
+              <a
+                href="#hero"
+                className={`flex items-center group h-full transition-opacity duration-300 flex-shrink-0 ${
+                  scrolled ? "opacity-100" : "opacity-0 pointer-events-none"
+                }`}
+                title="MIAO — Solana memecoin home"
+              >
+                <img
+                  src="/logo.png"
+                  alt="MIAO — The Green Cat Token on Solana"
+                  className="h-10 w-auto object-contain group-hover:scale-110 transition-transform"
+                  loading="lazy"
+                />
+              </a>
 
-            {/* Desktop Nav Links */}
-            <div
-              className="hidden lg:flex items-center gap-0.5 bg-[var(--bg-secondary)] rounded-xl p-1 border-2 border-[var(--border-color)]"
-              style={{ direction: "ltr" }}
-            >
-              {navLinks.map((link) => (
-                <a
-                  key={link.name}
-                  href={link.href}
-                  className="px-3 py-1.5 rounded-lg font-bold text-[10px] uppercase tracking-wide text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-all"
-                  title={`MIAO Solana memecoin — ${link.name}`}
-                  style={{ direction: "ltr", textAlign: "center" }}
-                >
-                  {link.name}
-                </a>
-              ))}
+              {/* Desktop Nav Links */}
+              <div
+                className="hidden lg:flex items-center gap-0.5 bg-[var(--bg-secondary)] rounded-xl p-1 border-2 border-[var(--border-color)] flex-shrink-0 h-11"
+                style={{ direction: "ltr" }}
+              >
+                {navLinks.map((link) => (
+                  <a
+                    key={link.name}
+                    href={link.href}
+                    className="px-3 h-full rounded-lg font-bold text-sm uppercase tracking-wide text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-all whitespace-nowrap flex items-center justify-center flex-shrink-0"
+                    title={`MIAO Solana memecoin — ${link.name}`}
+                    style={{ direction: "ltr", textAlign: "center" }}
+                  >
+                    {link.name}
+                  </a>
+                ))}
+              </div>
             </div>
 
             {/* Right Controls */}
-            <div className="hidden lg:flex flex-col items-end gap-2 overflow-visible">
-              <div className="flex items-center gap-2 overflow-visible">
-                <LanguageSelector compact />
+            <div className="hidden lg:flex flex-col items-end gap-2 overflow-visible flex-shrink-0">
+              <div className="flex items-center gap-2 overflow-visible flex-nowrap">
+                <div className="flex-shrink-0">
+                  <LanguageSelector compact />
+                </div>
 
-                <SeasonSelector
-                  season={season}
-                  onSeasonChange={onSeasonChange}
-                />
+                <div className="flex-shrink-0">
+                  <SeasonSelector
+                    season={season}
+                    onSeasonChange={onSeasonChange}
+                  />
+                </div>
 
                 <button
                   onClick={toggleTheme}
-                  className="w-11 h-11 rounded-2xl bg-[var(--bg-secondary)] border-2 border-[var(--border-color)] border-b-4 flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--duo-yellow)] active:border-b-2 active:translate-y-0.5 transition-all"
+                  className="w-11 h-11 rounded-2xl bg-[var(--bg-secondary)] border-2 border-[var(--border-color)] border-b-4 flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--duo-yellow)] active:border-b-2 active:translate-y-0.5 transition-all flex-shrink-0"
                   aria-label="Toggle Theme"
                 >
                   {isDark ? <Sun size={20} /> : <Moon size={20} />}
@@ -179,7 +186,7 @@ const Header: React.FC<HeaderProps> = ({
 
                 <button
                   onClick={toggleSound}
-                  className={`w-11 h-11 rounded-2xl border-2 border-b-4 items-center justify-center transition-all active:border-b-2 active:translate-y-0.5 flex ${
+                  className={`w-11 h-11 rounded-2xl border-2 border-b-4 items-center justify-center transition-all active:border-b-2 active:translate-y-0.5 flex flex-shrink-0 ${
                     soundEnabled
                       ? "bg-[var(--bg-secondary)] border-[var(--border-color)] text-[var(--text-secondary)] hover:text-[var(--duo-green)]"
                       : "bg-[var(--bg-tertiary)] border-[var(--border-color)] text-[var(--text-muted)]"
@@ -190,21 +197,21 @@ const Header: React.FC<HeaderProps> = ({
                 </button>
 
                 {walletState?.isConnected ? (
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-shrink-0">
                     <button
                       onClick={onSwapClick}
-                      className="h-11 px-5 rounded-2xl font-bold text-sm uppercase tracking-wide bg-[var(--duo-green)] text-white border-2 border-b-4 border-[var(--btn-shadow)] hover:brightness-105 active:border-b-2 active:translate-y-0.5 transition-all flex items-center gap-2"
+                      className="h-11 px-5 rounded-2xl font-bold text-sm uppercase tracking-wide bg-[var(--duo-green)] text-white border-2 border-b-4 border-[var(--btn-shadow)] hover:brightness-105 active:border-b-2 active:translate-y-0.5 transition-all flex items-center gap-2 whitespace-nowrap flex-shrink-0"
                     >
                       {t("header.buy")}
                     </button>
-                    <div className="flex items-center gap-2 h-11 px-4 rounded-2xl bg-[var(--bg-secondary)] border-2 border-[var(--duo-green)]">
-                      <span className="text-[var(--duo-green)] font-mono font-bold text-sm">
+                    <div className="flex items-center gap-2 h-11 px-4 rounded-2xl bg-[var(--bg-secondary)] border-2 border-[var(--duo-green)] flex-shrink-0">
+                      <span className="text-[var(--duo-green)] font-mono font-bold text-sm whitespace-nowrap">
                         {walletState.address?.slice(0, 4)}...
                         {walletState.address?.slice(-4)}
                       </span>
                       <button
                         onClick={onDisconnectClick}
-                        className="w-7 h-7 rounded-lg bg-[var(--bg-tertiary)] flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--duo-red)] transition-all"
+                        className="w-7 h-7 rounded-lg bg-[var(--bg-tertiary)] flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--duo-red)] transition-all flex-shrink-0"
                         title={t("header.disconnect")}
                       >
                         <LogOut size={14} />
@@ -214,7 +221,7 @@ const Header: React.FC<HeaderProps> = ({
                 ) : (
                   <button
                     onClick={onConnectClick}
-                    className="h-11 px-6 rounded-2xl font-bold text-sm uppercase tracking-wide bg-[var(--duo-green)] text-white border-2 border-b-4 border-[var(--btn-shadow)] hover:brightness-105 active:border-b-2 active:translate-y-0.5 transition-all flex items-center gap-2"
+                    className="h-11 px-6 rounded-2xl font-bold text-sm uppercase tracking-wide bg-[var(--duo-green)] text-white border-2 border-b-4 border-[var(--btn-shadow)] hover:brightness-105 active:border-b-2 active:translate-y-0.5 transition-all flex items-center gap-2 whitespace-nowrap flex-shrink-0"
                   >
                     <Wallet size={18} />
                     {t("header.connect")}
@@ -465,33 +472,33 @@ const Header: React.FC<HeaderProps> = ({
                   href="https://t.me/miaotokensol"
                   target="_blank"
                   rel="noopener nofollow"
-                  className="w-10 h-10 rounded-lg flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-2 border-[var(--border-color)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-all"
+                  className="w-14 h-14 rounded-lg flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-2 border-[var(--border-color)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-all"
                 >
-                  <Send size={18} />
+                  <Send size={26} />
                 </a>
                 <a
                   href="https://x.com/miaoonsol"
                   target="_blank"
                   rel="noopener nofollow"
-                  className="w-10 h-10 rounded-lg flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-2 border-[var(--border-color)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-all"
+                  className="w-14 h-14 rounded-lg flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-2 border-[var(--border-color)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-all"
                 >
-                  <Twitter size={18} />
+                  <Twitter size={26} />
                 </a>
                 <a
                   href="https://www.instagram.com/miaotoken/"
                   target="_blank"
                   rel="noopener nofollow"
-                  className="w-10 h-10 rounded-lg flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-2 border-[var(--border-color)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-all"
+                  className="w-14 h-14 rounded-lg flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-2 border-[var(--border-color)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-all"
                 >
-                  <Instagram size={18} />
+                  <Instagram size={26} />
                 </a>
                 <a
                   href="https://www.tiktok.com/@miaoonsol"
                   target="_blank"
                   rel="noopener nofollow"
-                  className="w-10 h-10 rounded-lg flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-2 border-[var(--border-color)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-all"
+                  className="w-14 h-14 rounded-lg flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-2 border-[var(--border-color)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-all"
                 >
-                  <TikTokIcon size={18} />
+                  <TikTokIcon size={26} />
                 </a>
               </div>
             </div>
