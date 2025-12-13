@@ -4,6 +4,7 @@ import type React from "react";
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { LanguageProvider, useLanguage } from "@/lib/language-context";
+import DisclaimerBanner from "@/components/DisclaimerBanner";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import About from "@/components/About";
@@ -43,9 +44,11 @@ const AppContent: React.FC = () => {
   const [isChristmasMode, setIsChristmasMode] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
+      setIsMounted(true);
       // Detecta viewport mobile uma vez no cliente
       setIsMobile(window.innerWidth < 768);
 
@@ -81,6 +84,7 @@ const AppContent: React.FC = () => {
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
   const [isSwapModalOpen, setIsSwapModalOpen] = useState(false);
   const [isSwapChartModalOpen, setIsSwapChartModalOpen] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
   const [walletState, setWalletState] = useState<WalletState>({
     isConnected: false,
     address: null,
@@ -89,24 +93,98 @@ const AppContent: React.FC = () => {
   });
 
   const handleConnect = async (type: WalletType, address: string) => {
-    let balance = 0;
-    if (type !== "metamask") {
-      balance = await getSolBalance(address);
-    }
+    try {
+      // Autenticar wallet na API (cria usuário se não existir)
+      const response = await fetch('/api/auth/wallet', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ wallet: address }),
+      });
 
-    setWalletState({
-      isConnected: true,
-      address: address,
-      balance: balance,
-      type: type,
-    });
-    setIsWalletModalOpen(false);
+      let data;
+      try {
+        data = await response.json();
+      } catch (e) {
+        console.error('Failed to parse auth response:', e);
+        data = { success: false, error: 'Invalid server response' };
+      }
+
+      if (!response.ok || !data.success) {
+        // Silently handle database/auth errors - don't log to console
+        // Still allow local connection without authentication
+        // Database errors are non-critical - wallet works locally without auth
+        // Only log unexpected errors (not database/auth related)
+        if (data.error && 
+            !data.error.toLowerCase().includes('database error') &&
+            !data.error.toLowerCase().includes('authentication failed') &&
+            !data.error.toLowerCase().includes('wallet authentication')) {
+          // Only log unexpected errors for debugging
+          console.warn('Wallet authentication issue (non-critical):', data.error);
+        }
+      } else {
+        // Salvar token de autenticação
+        if (data.token) {
+          localStorage.setItem('miao_wallet_token', data.token);
+          localStorage.setItem('miao_wallet_auth', JSON.stringify({
+            isAuthenticated: true,
+            wallet: data.wallet,
+            isAdmin: data.isAdmin,
+          }));
+        }
+      }
+
+      // Obter balance (opcional, não bloqueia se falhar)
+      let balance = 0;
+      if (type !== "metamask") {
+        try {
+          balance = await getSolBalance(address);
+        } catch (error) {
+          // Balance não é crítico, continua sem ele
+          console.warn('Failed to get balance:', error);
+        }
+      }
+
+      setWalletState({
+        isConnected: true,
+        address: address,
+        balance: balance,
+        type: type,
+      });
+      setIsWalletModalOpen(false);
+    } catch (error) {
+      console.error('Error connecting wallet:', error);
+      // Ainda permite conectar localmente mesmo se a API falhar
+      let balance = 0;
+      if (type !== "metamask") {
+        try {
+          balance = await getSolBalance(address);
+        } catch (error) {
+          // Balance não é crítico, continua sem ele
+          console.warn('Failed to get balance:', error);
+        }
+      }
+
+      setWalletState({
+        isConnected: true,
+        address: address,
+        balance: balance,
+        type: type,
+      });
+      setIsWalletModalOpen(false);
+    }
   };
 
   const handleDisconnect = async () => {
     if (walletState.type) {
       await disconnectWallet(walletState.type);
     }
+    
+    // Limpar autenticação
+    localStorage.removeItem('miao_wallet_token');
+    localStorage.removeItem('miao_wallet_auth');
+    
     setWalletState({
       isConnected: false,
       address: null,
@@ -124,6 +202,7 @@ const AppContent: React.FC = () => {
 
   return (
     <>
+      <DisclaimerBanner />
       <Header
         walletState={walletState}
         onConnectClick={() => setIsWalletModalOpen(true)}
@@ -140,9 +219,14 @@ const AppContent: React.FC = () => {
         onWhitepaperClick={() => redirectToWhitepaper(language)}
         season={season}
         onSeasonChange={handleSeasonChange}
+        isChatOpen={isChatOpen}
       />
       <div
-        className="min-h-screen text-(--text-primary) transition-colors duration-500 relative"
+        className={
+          !isMounted || !isChatOpen
+            ? "min-h-screen text-(--text-primary) transition-colors duration-500 relative"
+            : "min-h-screen text-(--text-primary) transition-colors duration-500 relative overflow-hidden h-screen"
+        }
         style={{
           backgroundImage: `url(${
             season === "winter"
@@ -155,8 +239,9 @@ const AppContent: React.FC = () => {
           backgroundPosition: "bottom center",
           backgroundRepeat: "no-repeat",
         }}
+        suppressHydrationWarning
       >
-        <div className="fixed inset-0 bg-(--bg-primary)/85 pointer-events-none z-0" />
+        <div className={`fixed inset-0 pointer-events-none z-0 transition-opacity duration-300 ${isChatOpen ? 'bg-transparent' : 'bg-(--bg-primary)/85'}`} />
 
         {!isMobile && isChristmasMode && (
           <div className="fixed inset-0 pointer-events-none z-1">
@@ -185,6 +270,8 @@ const AppContent: React.FC = () => {
                   onToolsClick={() => setCurrentView("tools")}
                   onGamesClick={() => setCurrentView("games")}
                   onWhitepaperClick={() => redirectToWhitepaper(language)}
+                  isChatOpen={isChatOpen}
+                  onChatOpenChange={setIsChatOpen}
                 />
                 {/* SEO-only heading and nav: accessible to crawlers, visually hidden */}
                 <h1 className="sr-only">

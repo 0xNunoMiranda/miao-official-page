@@ -13,6 +13,8 @@ export interface Step {
 export interface GeneratedCat {
   id: string
   imageUrl: string
+  videoUrl?: string // Optional video URL for video generations
+  type?: "image" | "video" // Type of generated content
 }
 
 export type ImageSize = "1K" | "2K" | "4K"
@@ -39,10 +41,6 @@ export interface WalletState {
 
 // Add Puter to window type
 declare global {
-  interface AIStudio {
-    hasSelectedApiKey: () => Promise<boolean>
-    openSelectKey: () => Promise<void>
-  }
 
   interface PhantomProvider {
     isPhantom?: boolean
@@ -72,7 +70,44 @@ declare global {
   interface Window {
     puter?: {
       ai: {
-        txt2img: (prompt: string, options?: { model?: string; quality?: string }) => Promise<HTMLImageElement>
+        // Image generation - conforme documentação: txt2img(prompt, options?)
+        // Docs: https://docs.puter.com/AI/txt2img/
+        // Exemplo: puter.ai.txt2img("a cat playing the piano", { model: "gpt-image-1", quality: "low" })
+        txt2img: (
+          prompt: string,
+          options?: {
+            model?: string
+            quality?: "low" | "medium" | "high" | "ultra"
+            testMode?: boolean
+            input_reference?: File | Blob | string
+          }
+        ) => Promise<HTMLImageElement>
+        // Video generation - conforme documentação: txt2vid(prompt, options?)
+        // Docs: https://docs.puter.com/AI/txt2vid/
+        // Exemplo: puter.ai.txt2vid("A fox sprinting...", { model: "sora-2-pro", seconds: 8, size: "1280x720" })
+        txt2vid: (
+          prompt: string,
+          options?: {
+            model?: "sora-2" | "sora-2-pro"
+            seconds?: 4 | 8 | 12
+            duration?: 4 | 8 | 12
+            size?: "720x1280" | "1280x720" | "1024x1792" | "1792x1024"
+            resolution?: "720x1280" | "1280x720" | "1024x1792" | "1792x1024"
+            input_reference?: File | Blob | string
+            testMode?: boolean
+          }
+        ) => Promise<HTMLVideoElement>
+        // Text to speech
+        txt2speech?: (text: string, options?: { voice?: string; speed?: number }) => Promise<HTMLAudioElement>
+        // Chat
+        chat?: (prompt: string, options?: { model?: string; stream?: boolean }) => Promise<string | AsyncIterable<{ text?: string }>>
+      }
+      auth: {
+        // User authentication
+        signIn: () => Promise<void>
+        signOut: () => Promise<void>
+        isSignedIn: () => boolean
+        getUser: () => Promise<{ username?: string; email?: string; [key: string]: any }>
       }
     }
     solana?: PhantomProvider

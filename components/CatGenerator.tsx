@@ -3,12 +3,13 @@
 import type React from "react"
 import { useState, useEffect, useRef } from "react"
 import type { GeneratedCat } from "@/types"
-import { Sparkles, RefreshCw, Zap, Share2, Download, X, AlertTriangle } from "lucide-react"
+import { Sparkles, RefreshCw, Zap, Share2, Download, X, AlertTriangle, Video, Image as ImageIcon } from "lucide-react"
 import SnowCap from "./SnowCap"
 import SnowEffect from "./SnowEffect"
 import LeafEffect from "./LeafEffect"
 import { useLanguage } from "../lib/language-context"
 import { type Season } from "./SeasonSelector"
+import { generateImageWithPuter, generateVideoWithPuter, getVideoURL, getImageURL, QuotaExceededError } from "../lib/puter-generator"
 
 interface CatGeneratorProps {
   isChristmasMode?: boolean
@@ -16,8 +17,26 @@ interface CatGeneratorProps {
 }
 
 const CAT_REFERENCE_IMAGE = "/images/cat.png"
-const MAX_GENERATIONS_PER_DAY = 3
-const STORAGE_KEY = "miao_generator_daily_count"
+
+// Função para verificar se está em modo de desenvolvimento
+const isDevelopmentMode = (): boolean => {
+  if (typeof window === "undefined") return false
+  const hostname = window.location.hostname
+  return hostname === "localhost" || 
+         hostname === "127.0.0.1" || 
+         hostname.includes("localhost") || 
+         hostname.includes("192.168.") ||
+         hostname.includes(".local")
+}
+
+const MAX_IMAGES_PER_DAY = 3
+const MAX_VIDEOS_PER_DAY = 1
+
+// Funções helper para obter limites efetivos (sem limite em desenvolvimento)
+const getMaxImagesPerDay = (): number => isDevelopmentMode() ? 999 : MAX_IMAGES_PER_DAY
+const getMaxVideosPerDay = (): number => isDevelopmentMode() ? 999 : MAX_VIDEOS_PER_DAY
+const STORAGE_KEY_IMAGES = "miao_generator_daily_images_count"
+const STORAGE_KEY_VIDEOS = "miao_generator_daily_videos_count"
 const IMAGES_STORAGE_KEY = "miao_generator_images"
 const IMAGE_EXPIRATION_HOURS = 24
 const MAX_STORED_IMAGES = 10 // Limite máximo de imagens salvas para evitar exceder quota
@@ -35,9 +54,10 @@ const getTodayKey = (): string => {
   return `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`
 }
 
-const getDailyCount = (): number => {
+const getDailyCount = (type: "image" | "video"): number => {
   if (typeof window === "undefined") return 0
-  const stored = localStorage.getItem(STORAGE_KEY)
+  const storageKey = type === "image" ? STORAGE_KEY_IMAGES : STORAGE_KEY_VIDEOS
+  const stored = localStorage.getItem(storageKey)
   if (!stored) return 0
   
   try {
@@ -55,13 +75,14 @@ const getDailyCount = (): number => {
   }
 }
 
-const incrementDailyCount = (): number => {
+const incrementDailyCount = (type: "image" | "video"): number => {
   if (typeof window === "undefined") return 0
+  const storageKey = type === "image" ? STORAGE_KEY_IMAGES : STORAGE_KEY_VIDEOS
   const todayKey = getTodayKey()
-  const currentCount = getDailyCount()
+  const currentCount = getDailyCount(type)
   const newCount = currentCount + 1
   
-  localStorage.setItem(STORAGE_KEY, JSON.stringify({
+  localStorage.setItem(storageKey, JSON.stringify({
     date: todayKey,
     count: newCount
   }))
@@ -177,52 +198,87 @@ const clearAllImages = (): void => {
   }
 }
 
-// Declaração de tipo para Puter
-declare global {
-  interface Window {
-    puter?: {
-      ai?: {
-        txt2img: (
-          prompt: string,
-          options?: { model?: string; quality?: string }
-        ) => Promise<HTMLImageElement>
-      }
-      auth?: {
-        isSignedIn: () => boolean
-        signIn: () => Promise<void>
-      }
-    }
-  }
-}
-
 const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false, season = "normal" }) => {
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
   const [cats, setCats] = useState<GeneratedCat[]>([])
   const [loading, setLoading] = useState(false)
   const [prompt, setPrompt] = useState("")
   const [error, setError] = useState<string | null>(null)
-  const [model, setModel] = useState("gpt-image-1")
-  const [quality, setQuality] = useState("medium")
-  const [puterReady, setPuterReady] = useState(false)
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [isAuthenticating, setIsAuthenticating] = useState(false)
-  const [dailyCount, setDailyCount] = useState(0)
+  const [showQuotaExceeded, setShowQuotaExceeded] = useState(false)
+  const [dailyImageCount, setDailyImageCount] = useState(0)
+  const [dailyVideoCount, setDailyVideoCount] = useState(0)
   const [showLimitModal, setShowLimitModal] = useState(false)
+  const [mounted, setMounted] = useState(false)
+  const [puterReady, setPuterReady] = useState(false)
+  const [puterAuthenticated, setPuterAuthenticated] = useState(false)
+  const [checkingAuth, setCheckingAuth] = useState(false)
+  const [generationType, setGenerationType] = useState<"image" | "video">("image")
   const latestCatRef = useRef<HTMLDivElement | null>(null)
+  const catReferenceBlobRef = useRef<Blob | null>(null)
+
+  // Função para carregar a imagem de referência cat.png como Blob (para imagens)
+  const loadCatReferenceImage = async (): Promise<Blob> => {
+    // Se já foi carregado, retornar do cache
+    if (catReferenceBlobRef.current) {
+      return catReferenceBlobRef.current
+    }
+
+    try {
+      const response = await fetch(CAT_REFERENCE_IMAGE)
+      if (!response.ok) {
+        throw new Error("Failed to load cat reference image")
+      }
+      const blob = await response.blob()
+      catReferenceBlobRef.current = blob
+      return blob
+    } catch (error) {
+      console.error("Error loading cat reference image:", error)
+      throw new Error("Failed to load cat reference image")
+    }
+  }
+
+  // Função para carregar a imagem de referência como data URL (string) para vídeos
+  // Puter.js txt2vid parece esperar string (URL) para input_reference, não Blob
+  const loadCatReferenceImageAsDataURL = async (): Promise<string> => {
+    try {
+      const blob = await loadCatReferenceImage()
+      // Converter Blob para data URL (string)
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onloadend = () => resolve(reader.result as string)
+        reader.onerror = reject
+        reader.readAsDataURL(blob)
+      })
+    } catch (error) {
+      console.error("Error converting reference image to data URL:", error)
+      throw new Error("Failed to convert reference image to data URL")
+    }
+  }
 
   // Carrega a contagem diária do servidor e imagens salvas ao montar o componente
   useEffect(() => {
-    // Buscar rate limit do servidor (por IP)
-    fetch("/api/generate")
-      .then((res) => res.json())
-      .then((data) => {
-        setDailyCount(data.count || 0)
-      })
-      .catch((err) => {
-        console.warn("Failed to fetch rate limit:", err)
-        // Fallback para localStorage se o servidor falhar
-        setDailyCount(getDailyCount())
-      })
+    setMounted(true)
+    // Buscar rate limit do servidor (por IP) - apenas em produção
+    if (!isDevelopmentMode()) {
+      Promise.all([
+        fetch("/api/generate?type=image").then((res) => res.json()),
+        fetch("/api/generate?type=video").then((res) => res.json())
+      ])
+        .then(([imageData, videoData]) => {
+          setDailyImageCount(imageData.count || 0)
+          setDailyVideoCount(videoData.count || 0)
+        })
+        .catch((err) => {
+          console.warn("Failed to fetch rate limit:", err)
+          // Fallback para localStorage se o servidor falhar
+          setDailyImageCount(getDailyCount("image"))
+          setDailyVideoCount(getDailyCount("video"))
+        })
+    } else {
+      // Em desenvolvimento, usar localStorage apenas
+      setDailyImageCount(getDailyCount("image"))
+      setDailyVideoCount(getDailyCount("video"))
+    }
     
     // Carrega imagens salvas
     const storedImages = getStoredImages()
@@ -246,58 +302,419 @@ const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false, se
     return () => clearInterval(cleanupInterval)
   }, [])
 
-  // Verifica se Puter.js está carregado e se o usuário está autenticado
+  // Scroll para a seção #generator quando a página carregar com esse hash
   useEffect(() => {
-    const checkPuter = () => {
-      if (window.puter && window.puter.ai && window.puter.auth) {
-        setPuterReady(true)
-        // Verifica se o usuário já está autenticado - AUTENTICAÇÃO OBRIGATÓRIA
-        if (window.puter.auth.isSignedIn()) {
-          setIsAuthenticated(true)
-        } else {
-          // Garante que o estado está sincronizado se não estiver autenticado
-          setIsAuthenticated(false)
-        }
-      } else {
-        setTimeout(checkPuter, 100)
+    if (!mounted) return
+
+    // Função para fazer scroll para o elemento
+    const scrollToGenerator = () => {
+      const element = document.getElementById("generator")
+      if (element) {
+        // Calcular a posição considerando o header fixo (se houver)
+        const headerOffset = 80 // Ajustar conforme necessário
+        const elementPosition = element.getBoundingClientRect().top
+        const offsetPosition = elementPosition + window.pageYOffset - headerOffset
+
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: "smooth"
+        })
       }
     }
+
+    // Se já tem o hash na URL, fazer scroll após um delay para garantir renderização
+    if (window.location.hash === "#generator") {
+      // Tentar múltiplas vezes com delays crescentes para garantir que o elemento está renderizado
+      const attempts = [100, 300, 500, 1000]
+      attempts.forEach((delay) => {
+        setTimeout(() => {
+          scrollToGenerator()
+        }, delay)
+      })
+    }
+
+    // Escutar mudanças no hash
+    const handleHashChange = () => {
+      if (window.location.hash === "#generator") {
+        setTimeout(() => {
+          scrollToGenerator()
+        }, 100)
+      }
+    }
+
+    window.addEventListener("hashchange", handleHashChange)
+
+    return () => {
+      window.removeEventListener("hashchange", handleHashChange)
+    }
+  }, [mounted])
+
+  // Verificar se Puter.js está carregado e autenticado
+  useEffect(() => {
+    let checkCount = 0
+    const maxChecks = 30 // Máximo de 30 segundos
+    let intervalId: NodeJS.Timeout | null = null
+    let hasCheckedAuth = false // Flag para evitar verificar autenticação múltiplas vezes
+    
+    const checkPuter = async () => {
+      checkCount++
+      
+      // Verificar se txt2img e txt2vid estão disponíveis
+      const hasTxt2Img = window.puter && window.puter.ai && typeof window.puter.ai.txt2img === 'function'
+      const hasTxt2Vid = window.puter && window.puter.ai && typeof window.puter.ai.txt2vid === 'function'
+      
+      if (hasTxt2Img || hasTxt2Vid) {
+        console.log("Puter está pronto! (txt2img:", hasTxt2Img, ", txt2vid:", hasTxt2Vid, ")")
+        setPuterReady(true)
+        
+        // Limpar o intervalo assim que o Puter estiver pronto
+        if (intervalId) {
+          clearInterval(intervalId)
+          intervalId = null
+        }
+        
+        // Verificar autenticação APENAS UMA VEZ usando puter.auth.isSignedIn()
+        if (!hasCheckedAuth && window.puter.auth && typeof window.puter.auth.isSignedIn === 'function') {
+          hasCheckedAuth = true // Marcar como verificado para evitar loops
+          
+          try {
+            setCheckingAuth(true)
+            const isSignedIn = window.puter.auth.isSignedIn()
+            setPuterAuthenticated(isSignedIn)
+            console.log("Status de autenticação verificado:", isSignedIn)
+            
+            // NÃO chamar getUser() aqui - isso causa loop de requisições
+            // getUser() só deve ser chamado quando o usuário faz login explicitamente
+            // ou quando necessário para obter dados específicos do usuário
+          } catch (error) {
+            console.warn("Erro ao verificar autenticação do Puter:", error)
+            setPuterAuthenticated(false)
+          } finally {
+            setCheckingAuth(false)
+          }
+        } else if (!hasCheckedAuth) {
+          // Se não tem sistema de autenticação, verificar se precisa mesmo
+          hasCheckedAuth = true
+          console.log("Sistema de autenticação do Puter não disponível. Tentando usar sem autenticação.")
+          setPuterAuthenticated(false)
+        }
+        
+        return true
+      } else {
+        if (checkCount < maxChecks) {
+          console.log(`Aguardando Puter... (tentativa ${checkCount}/${maxChecks})`)
+          setPuterReady(false)
+          if (!hasCheckedAuth) {
+            setPuterAuthenticated(false)
+          }
+        } else {
+          console.warn("Puter não carregou após 30 segundos")
+          setPuterReady(false)
+          setPuterAuthenticated(false)
+          if (intervalId) {
+            clearInterval(intervalId)
+            intervalId = null
+          }
+        }
+        return false
+      }
+    }
+    
+    // Verificar imediatamente
     checkPuter()
     
-    // Verifica periodicamente o estado de autenticação
-    const authCheckInterval = setInterval(() => {
-      if (window.puter?.auth) {
-        const signedIn = window.puter.auth.isSignedIn()
-        if (signedIn !== isAuthenticated) {
-          setIsAuthenticated(signedIn)
+    // Verificar periodicamente até estar pronto
+    intervalId = setInterval(() => {
+      const isReady = checkPuter()
+      if (isReady || checkCount >= maxChecks) {
+        if (intervalId) {
+          clearInterval(intervalId)
+          intervalId = null
         }
       }
     }, 1000)
     
-    return () => clearInterval(authCheckInterval)
-  }, [isAuthenticated])
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId)
+      }
+    }
+  }, [])
 
-  // Função para autenticar o usuário
-  const handleSignIn = async () => {
-    if (!window.puter?.auth) {
-      setError(t("generator.puterNotLoaded"))
+  // Função para autenticar com outra conta (faz logout e depois signIn)
+  const handleAuthenticateWithDifferentAccount = async () => {
+    console.log("handleAuthenticateWithDifferentAccount chamado")
+    
+    if (!window.puter || !window.puter.auth) {
+      const errorMsg = t("generator.puterNotAvailable") || "Puter.js não está disponível"
+      console.error("Puter não disponível:", errorMsg)
+      setError(errorMsg)
       return
     }
 
-    setIsAuthenticating(true)
-    setError(null)
+    try {
+      setCheckingAuth(true)
+      setError(null)
+      setShowQuotaExceeded(false)
+      
+      // Fazer logout primeiro se estiver autenticado
+      if (window.puter.auth.isSignedIn && typeof window.puter.auth.isSignedIn === 'function' && window.puter.auth.isSignedIn()) {
+        if (window.puter.auth.signOut && typeof window.puter.auth.signOut === 'function') {
+          console.log("Fazendo logout...")
+          await window.puter.auth.signOut()
+          setPuterAuthenticated(false)
+          // Aguardar um pouco para o logout processar
+          await new Promise(resolve => setTimeout(resolve, 500))
+        }
+      }
+      
+      // Agora fazer signIn com nova conta
+      if (window.puter.auth.signIn && typeof window.puter.auth.signIn === 'function') {
+        console.log("Chamando puter.auth.signIn() para nova conta...")
+        await window.puter.auth.signIn()
+        console.log("signIn() retornou")
+        
+        // Aguardar um pouco para o Puter processar a autenticação
+        await new Promise(resolve => setTimeout(resolve, 1000))
+        
+        // Verificar se autenticou com sucesso
+        if (window.puter.auth.isSignedIn && typeof window.puter.auth.isSignedIn === 'function') {
+          let isSignedIn = false
+          // Tentar verificar algumas vezes (o Puter pode demorar a atualizar)
+          for (let i = 0; i < 5; i++) {
+            console.log(`Verificando autenticação (tentativa ${i + 1}/5)...`)
+            isSignedIn = window.puter.auth.isSignedIn()
+            console.log(`isSignedIn retornou:`, isSignedIn)
+            if (isSignedIn) break
+            await new Promise(resolve => setTimeout(resolve, 500))
+          }
+          
+          setPuterAuthenticated(isSignedIn)
+          
+          if (isSignedIn) {
+            console.log("Autenticação com nova conta bem-sucedida!")
+            setError(null)
+            setShowQuotaExceeded(false)
+          } else {
+            setError(t("generator.pleaseAuthenticate") || "Por favor, autentica-te primeiro para gerar imagens.")
+          }
+        } else {
+          // Se não tem função de verificação, assumir que autenticou (modo otimista)
+          console.log("isSignedIn não disponível, assumindo autenticação bem-sucedida")
+          setPuterAuthenticated(true)
+          setError(null)
+          setShowQuotaExceeded(false)
+        }
+      } else {
+        setError("Função de autenticação do Puter não está disponível. Por favor, atualiza a página.")
+      }
+    } catch (error: any) {
+      console.error("Erro ao autenticar com outra conta:", error)
+      console.error("Tipo do erro:", typeof error)
+      console.error("Stack trace:", error?.stack)
+      console.error("Propriedades do erro:", Object.keys(error || {}))
+      
+      // Tentar extrair mensagem de erro de várias formas
+      let errorMessage = "Erro ao autenticar com outra conta. Por favor, tenta novamente."
+      
+      if (error instanceof Error) {
+        errorMessage = error.message || error.name || errorMessage
+      } else if (typeof error === "string") {
+        errorMessage = error
+      } else if (error && typeof error === "object") {
+        // Tentar todas as propriedades possíveis
+        errorMessage = error.message 
+          || error.error 
+          || error.errorMessage 
+          || error.msg 
+          || error.description
+          || error.reason
+          || error.details
+          || error.code
+          || error.status
+          || errorMessage
+        
+        // Se ainda não tem mensagem, verificar se é um erro vazio
+        if (!errorMessage || errorMessage === "Erro ao autenticar com outra conta. Por favor, tenta novamente.") {
+          try {
+            const errorStr = JSON.stringify(error)
+            console.error("String do erro:", errorStr)
+            
+            if (errorStr === "{}" || errorStr.trim() === "" || errorStr === "null" || errorStr === "undefined") {
+              // Erro vazio - pode ser que o usuário cancelou o popup ou foi bloqueado
+              errorMessage = "Autenticação cancelada ou popup bloqueado. Por favor, permite popups e tenta novamente."
+            } else if (errorStr.includes("auth") || errorStr.includes("sign") || errorStr.includes("login") || errorStr.includes("unauthorized")) {
+              errorMessage = "Erro de autenticação. Por favor, tenta novamente."
+            } else if (errorStr.includes("popup") || errorStr.includes("blocked") || errorStr.includes("cancel")) {
+              errorMessage = "Popup de autenticação bloqueado ou cancelado. Por favor, permite popups e tenta novamente."
+            } else if (errorStr.includes("network") || errorStr.includes("fetch") || errorStr.includes("CORS")) {
+              errorMessage = "Erro de conexão. Por favor, verifica a tua ligação à internet e tenta novamente."
+            } else {
+              errorMessage = `Erro ao autenticar: ${errorStr.substring(0, 150)}`
+            }
+          } catch (e) {
+            console.error("Erro ao processar objeto de erro:", e)
+            // Se o erro é vazio, provavelmente foi cancelado ou bloqueado
+            errorMessage = "Autenticação cancelada ou popup bloqueado. Por favor, permite popups e tenta novamente."
+          }
+        }
+      } else if (error !== null && error !== undefined) {
+        errorMessage = String(error)
+      }
+      
+      // Garantir que temos uma mensagem útil
+      if (!errorMessage || errorMessage.trim() === "" || errorMessage === "{}") {
+        errorMessage = "Autenticação cancelada ou popup bloqueado. Por favor, permite popups e tenta novamente."
+      }
+      
+      console.error("Mensagem de erro final:", errorMessage)
+      setError(errorMessage)
+      setPuterAuthenticated(false)
+    } finally {
+      setCheckingAuth(false)
+    }
+  }
+
+  // Função para autenticar com Puter usando puter.auth.signIn()
+  const handleAuthenticate = async () => {
+    console.log("handleAuthenticate chamado")
+    console.log("window.puter:", window.puter)
+    console.log("window.puter?.auth:", window.puter?.auth)
+    
+    if (!window.puter || !window.puter.auth) {
+      const errorMsg = t("generator.puterNotAvailable") || "Puter.js não está disponível"
+      console.error("Puter não disponível:", errorMsg)
+      setError(errorMsg)
+      return
+    }
+
+    if (!window.puter.auth.signIn || typeof window.puter.auth.signIn !== 'function') {
+      const errorMsg = "Função de autenticação do Puter não está disponível. Por favor, atualiza a página."
+      console.error(errorMsg)
+      setError(errorMsg)
+      return
+    }
 
     try {
-      await window.puter.auth.signIn()
-      // Verifica novamente após o login
-      if (window.puter.auth.isSignedIn()) {
-        setIsAuthenticated(true)
+      setCheckingAuth(true)
+      setError(null)
+      
+      console.log("Chamando puter.auth.signIn()...")
+      // Chamar signIn() - abre popup de autenticação
+      // IMPORTANTE: signIn() deve ser chamado em resposta a uma ação do usuário (como um clique)
+      
+      // Verificar se popups estão bloqueados antes de tentar
+      try {
+        const testPopup = window.open("", "_blank", "width=1,height=1")
+        if (!testPopup || testPopup.closed || typeof testPopup.closed === "undefined") {
+          console.warn("Popups podem estar bloqueados pelo navegador")
+          // Não bloquear, apenas avisar - alguns navegadores permitem popups de autenticação mesmo se outros estão bloqueados
+        } else {
+          testPopup.close()
+        }
+      } catch (e) {
+        console.warn("Não foi possível verificar bloqueio de popups:", e)
       }
-    } catch (err) {
-      console.error("Authentication error:", err)
-      setError(err instanceof Error ? err.message : t("generator.authFailed"))
+      
+      await window.puter.auth.signIn()
+      console.log("signIn() retornou")
+      
+      // Aguardar um pouco para o Puter processar a autenticação
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      
+      // Verificar se autenticou com sucesso
+      if (window.puter.auth.isSignedIn && typeof window.puter.auth.isSignedIn === 'function') {
+        let isSignedIn = false
+        // Tentar verificar algumas vezes (o Puter pode demorar a atualizar)
+        for (let i = 0; i < 5; i++) {
+          console.log(`Verificando autenticação (tentativa ${i + 1}/5)...`)
+          isSignedIn = window.puter.auth.isSignedIn()
+          console.log(`isSignedIn retornou:`, isSignedIn)
+          if (isSignedIn) break
+          await new Promise(resolve => setTimeout(resolve, 500))
+        }
+        
+        setPuterAuthenticated(isSignedIn)
+        
+        if (isSignedIn) {
+          // NÃO chamar getUser() aqui automaticamente após signIn - isso causa loop
+          // O fato de isSignedIn() retornar true já é suficiente para considerar autenticado
+          // getUser() só deve ser chamado quando necessário para obter dados específicos do usuário
+          console.log("Autenticação bem-sucedida!")
+          setError(null)
+        } else {
+          setError(t("generator.pleaseAuthenticate") || "Por favor, autentica-te primeiro para gerar imagens.")
+        }
+      } else {
+        // Se não tem função de verificação, assumir que autenticou (modo otimista)
+        console.log("isSignedIn não disponível, assumindo autenticação bem-sucedida")
+        setPuterAuthenticated(true)
+        setError(null)
+      }
+    } catch (error: any) {
+      console.error("Erro ao autenticar com Puter:", error)
+      console.error("Tipo do erro:", typeof error)
+      console.error("Stack trace:", error?.stack)
+      console.error("Propriedades do erro:", Object.keys(error || {}))
+      
+      // Tentar extrair mensagem de erro de várias formas
+      let errorMessage = "Erro ao autenticar com Puter. Por favor, tenta novamente."
+      
+      if (error instanceof Error) {
+        errorMessage = error.message || error.name || errorMessage
+      } else if (typeof error === "string") {
+        errorMessage = error
+      } else if (error && typeof error === "object") {
+        // Tentar todas as propriedades possíveis
+        errorMessage = error.message 
+          || error.error 
+          || error.errorMessage 
+          || error.msg 
+          || error.description
+          || error.reason
+          || error.details
+          || error.code
+          || error.status
+          || errorMessage
+        
+        // Se ainda não tem mensagem, verificar se é um erro vazio
+        if (!errorMessage || errorMessage === "Erro ao autenticar com Puter. Por favor, tenta novamente.") {
+          try {
+            const errorStr = JSON.stringify(error)
+            console.error("String do erro:", errorStr)
+            
+            if (errorStr === "{}" || errorStr.trim() === "" || errorStr === "null" || errorStr === "undefined") {
+              // Erro vazio - pode ser que o usuário cancelou o popup ou foi bloqueado
+              errorMessage = "Autenticação cancelada ou popup bloqueado. Por favor, permite popups e tenta novamente."
+            } else if (errorStr.includes("auth") || errorStr.includes("sign") || errorStr.includes("login") || errorStr.includes("unauthorized")) {
+              errorMessage = "Erro de autenticação. Por favor, tenta novamente."
+            } else if (errorStr.includes("popup") || errorStr.includes("blocked") || errorStr.includes("cancel")) {
+              errorMessage = "Popup de autenticação bloqueado ou cancelado. Por favor, permite popups e tenta novamente."
+            } else if (errorStr.includes("network") || errorStr.includes("fetch") || errorStr.includes("CORS")) {
+              errorMessage = "Erro de conexão. Por favor, verifica a tua ligação à internet e tenta novamente."
+            } else {
+              errorMessage = `Erro ao autenticar: ${errorStr.substring(0, 150)}`
+            }
+          } catch (e) {
+            console.error("Erro ao processar objeto de erro:", e)
+            // Se o erro é vazio, provavelmente foi cancelado ou bloqueado
+            errorMessage = "Autenticação cancelada ou popup bloqueado. Por favor, permite popups e tenta novamente."
+          }
+        }
+      } else if (error !== null && error !== undefined) {
+        errorMessage = String(error)
+      }
+      
+      // Garantir que temos uma mensagem útil
+      if (!errorMessage || errorMessage.trim() === "" || errorMessage === "{}") {
+        errorMessage = "Autenticação cancelada ou popup bloqueado. Por favor, permite popups e tenta novamente."
+      }
+      
+      console.error("Mensagem de erro final:", errorMessage)
+      setError(errorMessage)
+      setPuterAuthenticated(false)
     } finally {
-      setIsAuthenticating(false)
+      setCheckingAuth(false)
     }
   }
 
@@ -307,103 +724,690 @@ const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false, se
       return
     }
 
-    // Verifica se Puter está carregado
-    if (!puterReady) {
-      setError(t("generator.puterNotLoaded"))
-      return
-    }
-
-    // Verifica se Puter.auth está disponível
-    if (!window.puter?.auth) {
-      setError(t("generator.puterNotLoaded"))
-      return
-    }
-
-    // AUTENTICAÇÃO OBRIGATÓRIA: Verifica se o usuário está autenticado no Puter
-    if (!window.puter.auth.isSignedIn()) {
-      setError(t("generator.pleaseAuthenticate") || "Por favor, autentique-se primeiro")
-      // Atualiza o estado de autenticação
-      setIsAuthenticated(false)
-      return
-    }
-
-    // Atualiza o estado de autenticação se estiver autenticado
-    if (!isAuthenticated) {
-      setIsAuthenticated(true)
-    }
-
     setLoading(true)
     setError(null)
 
     try {
-      // Verificar rate limit no servidor (por IP)
-      const rateLimitResponse = await fetch("/api/generate", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
+      // Verificar rate limit no servidor (por IP) - SEM incrementar ainda
+      // Em desenvolvimento, pular a verificação de limite
+      if (!isDevelopmentMode()) {
+        const rateLimitResponse = await fetch("/api/generate", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ action: "check", type: generationType }),
+        })
 
-      if (!rateLimitResponse.ok) {
-        if (rateLimitResponse.status === 429) {
-          const errorData = await rateLimitResponse.json()
+        if (!rateLimitResponse.ok) {
+          if (rateLimitResponse.status === 429) {
+            const errorData = await rateLimitResponse.json()
+            setShowLimitModal(true)
+            setLoading(false)
+            return
+          }
+          throw new Error("Failed to check rate limit")
+        }
+
+        const rateLimitData = await rateLimitResponse.json()
+        if (!rateLimitData.allowed) {
           setShowLimitModal(true)
           setLoading(false)
           return
         }
-        throw new Error("Failed to check rate limit")
       }
 
-      const rateLimitData = await rateLimitResponse.json()
-      if (!rateLimitData.allowed) {
-        setShowLimitModal(true)
+      const userInput = prompt.trim()
+      
+      // Verificar se Puter está pronto
+      if (!puterReady) {
+        const errorMsg = t("generator.puterNotLoaded") || "Puter.js ainda não está carregado. Por favor, aguarda um momento."
+        setError(errorMsg)
         setLoading(false)
         return
       }
-
-      // Atualizar contador local baseado na resposta do servidor
-      setDailyCount(MAX_GENERATIONS_PER_DAY - rateLimitData.remaining)
-
-      // Constrói o prompt final garantindo que tudo que o usuário digitar seja sobre o gato
-      const userInput = prompt.trim()
-      // Usa "está" ou "tem" dependendo do contexto, mas sempre referindo-se ao gato
-      const finalPrompt = `${baseCharacteristics}, ${userInput}. Estilo cartoon animado, personagem mascote expressivo, fundo branco ou transparente, alta qualidade, detalhes nítidos, cores vibrantes`
-
-      if (!window.puter?.ai?.txt2img) {
-        throw new Error(t("generator.puterNotAvailable"))
-      }
-
-      const img = await window.puter.ai.txt2img(finalPrompt, { model, quality })
-
-      const newCat: GeneratedCat = {
-        id: Date.now().toString(),
-        imageUrl: img.src,
-      }
-      setCats((prev) => [newCat, ...prev])
       
-      // Salva a imagem no localStorage com expiração de 24h
-      saveImage(newCat)
-
-      // Enviar imagem para o Telegram automaticamente (em background, não bloqueia a UI)
-      // Converte a imagem para data URL válida antes de enviar
-      sendImageToTelegram(img, userInput).catch((err) => {
-        // Silenciosamente falha se não conseguir enviar (não afeta a experiência do usuário)
-        console.warn("Failed to send image to Telegram:", err)
-      })
-
-      // Scroll para a nova imagem após um pequeno delay para garantir que foi renderizada
-      setTimeout(() => {
-        if (latestCatRef.current) {
-          latestCatRef.current.scrollIntoView({ behavior: "smooth", block: "center" })
+      // Verificar se está autenticado usando puter.auth.isSignedIn()
+      if (!puterAuthenticated) {
+        // Tentar verificar uma última vez se está autenticado
+        if (window.puter?.auth?.isSignedIn && typeof window.puter.auth.isSignedIn === 'function') {
+          try {
+            const isSignedIn = window.puter.auth.isSignedIn()
+            if (isSignedIn) {
+              setPuterAuthenticated(true)
+              // Continuar com a geração
+            } else {
+              const errorMsg = t("generator.pleaseAuthenticate") || "Por favor, autentica-te primeiro para gerar imagens."
+              setError(errorMsg)
+              setLoading(false)
+              return
+            }
+          } catch (error) {
+            console.warn("Erro ao verificar autenticação:", error)
+            // Se der erro na verificação, tentar gerar mesmo assim (modo otimista)
+          }
+        } else {
+          // Se não tem função de verificação, tentar gerar mesmo assim
+          // Se funcionar, então não precisa de autenticação
+          console.log("Sem função de verificação de auth, tentando gerar diretamente...")
         }
-      }, 300)
-    } catch (err) {
-      console.error("Generation error:", err)
-      setError(err instanceof Error ? err.message : t("generator.generationFailed"))
+      }
+      
+      // Gerar imagem ou vídeo (se der erro, não incrementa o contador)
+      if (generationType === "video") {
+        await handleGenerateVideo(userInput)
+      } else {
+        await handleGenerateImage(userInput)
+      }
+      
+      // Se chegou aqui, a geração foi bem-sucedida - confirmar no servidor
+      // Em desenvolvimento, não precisa confirmar no servidor
+      if (!isDevelopmentMode()) {
+        const confirmResponse = await fetch("/api/generate", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ action: "confirm", type: generationType }),
+        })
+
+        if (confirmResponse.ok) {
+          const confirmData = await confirmResponse.json()
+          // Atualizar contador local baseado na resposta do servidor
+          if (generationType === "video") {
+            setDailyVideoCount(MAX_VIDEOS_PER_DAY - confirmData.remaining)
+          } else {
+            setDailyImageCount(MAX_IMAGES_PER_DAY - confirmData.remaining)
+          }
+        } else {
+          // Se falhar ao confirmar, ainda assim foi gerado
+          // Mas vamos atualizar o contador local de qualquer forma
+          console.warn("Failed to confirm generation on server, but content was generated")
+          if (generationType === "video") {
+            setDailyVideoCount(prev => Math.min(prev + 1, MAX_VIDEOS_PER_DAY))
+          } else {
+            setDailyImageCount(prev => Math.min(prev + 1, MAX_IMAGES_PER_DAY))
+          }
+        }
+      } else {
+        // Em desenvolvimento, apenas incrementar localmente para mostrar no UI
+        if (generationType === "video") {
+          setDailyVideoCount(prev => prev + 1)
+        } else {
+          setDailyImageCount(prev => prev + 1)
+        }
+      }
+    } catch (error: any) {
+      // Verificar se é erro de quota excedida (402)
+      if (error instanceof QuotaExceededError) {
+        console.error("Erro de quota excedida detectado:", error.message)
+        setShowQuotaExceeded(true)
+        setError(error.message)
+        setLoading(false)
+        return
+      }
+      
+      // Log detalhado do erro para debug
+      console.error("=== Generation Error Debug ===")
+      console.error("Error:", error)
+      console.error("Error type:", typeof error)
+      console.error("Error constructor:", error?.constructor?.name)
+      console.error("Error keys:", error && typeof error === "object" ? Object.keys(error) : "N/A")
+      console.error("Error valueOf:", error?.valueOf?.())
+      
+      // Melhor tratamento de erros para capturar diferentes tipos
+      let errorMessage = t("generator.generationFailed") || "Erro ao gerar conteúdo"
+      
+      // Tentar extrair mensagem de erro de várias formas
+      if (error instanceof Error) {
+        errorMessage = error.message || error.name || errorMessage
+        console.error("Error name:", error.name)
+        console.error("Error message:", error.message)
+        console.error("Error stack:", error.stack)
+      } else if (typeof error === "string") {
+        errorMessage = error
+      } else if (error && typeof error === "object") {
+        // Tenta extrair mensagem de objetos de erro
+        const errorObj = error as any
+        
+        // Tentar várias propriedades comuns
+        errorMessage = errorObj.message 
+          || errorObj.error 
+          || errorObj.errorMessage
+          || errorObj.msg
+          || errorObj.description
+          || errorObj.reason
+          || errorObj.details
+          || errorObj.cause
+          || (errorObj.toString && typeof errorObj.toString === "function" && errorObj.toString() !== "[object Object]" ? errorObj.toString() : null)
+          || errorMessage
+        
+        // Se ainda não tem mensagem, tentar serializar
+        if (!errorMessage || errorMessage === t("generator.generationFailed")) {
+          try {
+            const errorStr = JSON.stringify(errorObj, Object.getOwnPropertyNames(errorObj))
+            console.error("Error serialized:", errorStr)
+            
+            // Se o erro é vazio {}
+            if (errorStr === "{}" || errorStr === "null" || errorStr === "undefined") {
+              errorMessage = null // Será tratado abaixo
+            } else if (errorStr.length > 0 && errorStr !== "{}") {
+              // Tentar extrair informação útil do JSON
+              if (errorStr.length < 200) {
+                errorMessage = errorStr
+              } else {
+                errorMessage = errorStr.substring(0, 200) + "..."
+              }
+            }
+          } catch (e) {
+            console.error("Erro ao serializar:", e)
+          }
+        }
+        
+        // Log do objeto completo para debug
+        try {
+          console.error("Error object:", JSON.stringify(errorObj, Object.getOwnPropertyNames(errorObj), 2))
+        } catch (e) {
+          console.error("Error object (raw):", errorObj)
+          // Tentar acessar propriedades comuns mesmo se não conseguir serializar
+          if (errorObj.message) console.error("Error.message:", errorObj.message)
+          if (errorObj.error) console.error("Error.error:", errorObj.error)
+          if (errorObj.stack) console.error("Error.stack:", errorObj.stack)
+          if (errorObj.cause) console.error("Error.cause:", errorObj.cause)
+        }
+      } else if (error !== null && error !== undefined) {
+        errorMessage = String(error)
+      }
+      
+      // Garantir que errorMessage é sempre uma string antes de usar métodos de string
+      if (typeof errorMessage !== "string") {
+        errorMessage = String(errorMessage) || t("generator.generationFailed") || "Erro ao gerar conteúdo"
+      }
+      
+      // Se ainda não temos uma mensagem útil ou é um erro vazio, verificar estado
+      if (!errorMessage || errorMessage === t("generator.generationFailed") || errorMessage === "{}" || (errorMessage.trim && errorMessage.trim() === "") || errorMessage === "null" || errorMessage === "undefined") {
+        console.error("Erro vazio detectado, verificando estado do Puter...")
+        
+        // Verificar se Puter está disponível
+        if (typeof window === "undefined" || !window.puter) {
+          errorMessage = "Puter.js não está carregado. Por favor, recarrega a página."
+        } else if (!window.puter.ai) {
+          errorMessage = "Puter.js AI não está disponível. Por favor, verifica a conexão."
+        } else if (!window.puter.ai.txt2img && !window.puter.ai.txt2vid) {
+          errorMessage = "Funções de geração não estão disponíveis. Por favor, verifica a autenticação."
+        } else if (window.puter.auth && window.puter.auth.isSignedIn && !window.puter.auth.isSignedIn()) {
+          errorMessage = "Por favor, autentica-te primeiro para gerar conteúdo."
+        } else {
+          errorMessage = "Erro desconhecido ao gerar conteúdo. O Puter.js pode ter retornado um erro vazio. Por favor, verifica a autenticação e tenta novamente."
+        }
+      }
+      
+      // Garantir que temos uma mensagem útil e que é uma string
+      if (typeof errorMessage !== "string") {
+        errorMessage = String(errorMessage) || "Erro ao gerar conteúdo. Por favor, verifica se estás autenticado e tenta novamente."
+      }
+      
+      if (!errorMessage || (errorMessage.trim && errorMessage.trim() === "") || errorMessage === "{}" || errorMessage === "null") {
+        errorMessage = "Erro ao gerar conteúdo. Por favor, verifica se estás autenticado e tenta novamente."
+      }
+      
+      console.error("=== Final Error Message ===", errorMessage)
+      
+      // Detectar se é erro de autenticação e atualizar estado
+      const errorLower = String(errorMessage).toLowerCase()
+      const isAuthError = errorLower.includes('autentic') 
+        || errorLower.includes('auth') 
+        || errorLower.includes('sign in')
+        || errorLower.includes('login')
+        || errorLower.includes('api key') 
+        || errorLower.includes('verifica se estás autenticado')
+        || errorLower.includes('verifica a tua api key')
+        || errorLower.includes('autentica-te')
+      
+      if (isAuthError) {
+        // Atualizar estado de autenticação para false para mostrar o card de autenticação
+        setPuterAuthenticated(false)
+      }
+      
+      setError(errorMessage)
     } finally {
       setLoading(false)
     }
   }
+
+  const handleGenerateVideo = async (userInput: string) => {
+    // Verificar se Puter está disponível e tem suporte para vídeo
+    if (!window.puter) {
+      throw new Error("Puter.js não está carregado. Por favor, recarrega a página.")
+    }
+    
+    if (!window.puter.ai) {
+      throw new Error("Puter.js AI não está disponível. Por favor, verifica a conexão.")
+    }
+    
+    if (!window.puter.ai.txt2vid || typeof window.puter.ai.txt2vid !== 'function') {
+      throw new Error("Função txt2vid não está disponível. Por favor, verifica a autenticação.")
+    }
+
+    // Prompt base com constituição física do gato (mesmo usado para imagens)
+    const basePrompt = `[CAT PHYSICAL CONSTITUTION - ONLY REFERS TO THE CAT'S APPEARANCE:]
+
+green cat, bright green teal mint emerald green cartoon cat character, ENTIRE BODY IS SOLID GREEN COLOR;
+
+bright green teal body, green cat body, green mascot character;
+
+big round black eyes with white highlight dots, NOT green eyes;
+
+wide open mouth showing sharp white teeth, pink inner mouth and pink tongue;
+
+pointy cat ears with darker green inner ear;
+
+black whiskers on both sides of the face;
+
+long curved green tail (same green color as the body);
+
+simple flat cartoon style, mascot-style, no fur texture, bold black outlines;
+
+playful, energetic, joyful expression;
+
+stands on two legs, green paws, all body parts are green.
+
+🔧 RULE TO APPLY ADDITIONAL USER INSTRUCTIONS (ANY LANGUAGE):
+
+After this base description, accept and integrate ANY user instructions written in ANY language.
+
+Additional user prompts may modify:
+
+pose
+
+action
+
+environment / background
+
+props
+
+clothing / accessories
+
+emotion
+
+camera angle
+
+rendering style (2D, vector, 3D, cel-shaded, etc.)
+
+…but must NOT override or contradict the CAT PHYSICAL CONSTITUTION above.`
+    
+    // Obter nome do idioma para contexto
+    const languageNames: Record<string, string> = {
+      "pt": "Portuguese",
+      "en": "English",
+      "es": "Spanish",
+      "fr": "French",
+      "de": "German",
+      "zh": "Chinese",
+      "ar": "Arabic",
+    }
+    const languageName = languageNames[language] || "English"
+    
+    // Construir prompt final: base + instruções do usuário no idioma do website
+    let fullPrompt = basePrompt
+    
+    if (userInput.trim()) {
+      // Adicionar o prompt do usuário no idioma do website
+      fullPrompt = `${basePrompt}
+
+[USER INSTRUCTIONS IN ${languageName.toUpperCase()} - FOLLOW THESE INSTRUCTIONS WHILE MAINTAINING THE CAT PHYSICAL CONSTITUTION ABOVE]:
+
+${userInput.trim()}
+
+IMPORTANT: The user instructions above are in ${languageName}. Do not translate or ignore them. Apply them exactly as specified while maintaining all the physical characteristics of the green cat described in the base constitution.`
+    }
+
+    // Gerar vídeo usando helper unificado conforme documentação oficial
+    // txt2vid(prompt, options?) - usar opções mais leves para conseguir gerar
+    // Docs: https://docs.puter.com/AI/txt2vid/
+    // Usar sora-2 (modelo mais leve), 4 segundos (menor duração) e 720x1280 (menor resolução)
+    // NOTA: input_reference removido para vídeos pois causa erro "input.startsWith is not a function"
+    // O Puter.js pode não suportar input_reference para vídeos da mesma forma que para imagens
+    const videoElement = await generateVideoWithPuter(fullPrompt, {
+      model: "sora-2", // Modelo mais leve (sora-2 é mais fraco que sora-2-pro)
+      seconds: 4, // 4 segundos - menor duração, mais rápido e leve
+      size: "720x1280", // Menor resolução para ser mais leve
+      // input_reference removido - não funciona com vídeos no Puter.js
+    })
+
+    const videoUrl = getVideoURL(videoElement)
+
+    // Validar URL do vídeo
+    if (!videoUrl || typeof videoUrl !== "string" || (!videoUrl.startsWith("data:") && !videoUrl.startsWith("http") && !videoUrl.startsWith("blob:"))) {
+      throw new Error("Invalid video URL format from Puter")
+    }
+
+    // Aguardar o vídeo carregar
+    await new Promise<void>((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        reject(new Error("Video loading timeout (30s)"))
+      }, 30000) // 30 segundos de timeout para vídeos
+      
+      if (videoElement.readyState >= 2) {
+        // Já tem dados suficientes
+        clearTimeout(timeout)
+        resolve()
+      } else {
+        videoElement.addEventListener('loadeddata', () => {
+          clearTimeout(timeout)
+          resolve()
+        }, { once: true })
+        
+        videoElement.addEventListener('error', (error) => {
+          clearTimeout(timeout)
+          console.error("Video load error:", error)
+          reject(new Error("Failed to load generated video. The video data may be corrupted."))
+        }, { once: true })
+      }
+    })
+
+    const newCat: GeneratedCat = {
+      id: Date.now().toString(),
+      imageUrl: videoUrl, // Usar imageUrl para compatibilidade (pode ser thumbnail)
+      videoUrl: videoUrl,
+      type: "video"
+    }
+    setCats((prev) => [newCat, ...prev])
+    
+    // Salva o vídeo no localStorage com expiração de 24h
+    saveImage(newCat)
+
+    // Enviar vídeo para o Telegram automaticamente (em background, não bloqueia a UI)
+    sendVideoToTelegram(videoUrl, userInput).catch((err) => {
+      // Silenciosamente falha se não conseguir enviar (não afeta a experiência do usuário)
+      console.warn("Failed to send video to Telegram:", err)
+    })
+
+    // Scroll para o novo vídeo após um pequeno delay
+    setTimeout(() => {
+      if (latestCatRef.current) {
+        latestCatRef.current.scrollIntoView({ behavior: "smooth", block: "center" })
+      }
+    }, 300)
+  }
+
+  const handleGenerateImage = async (userInput: string) => {
+    // Verificar se Puter está disponível
+    if (!window.puter) {
+      throw new Error("Puter.js não está carregado. Por favor, recarrega a página.")
+    }
+    
+    if (!window.puter.ai) {
+      throw new Error("Puter.js AI não está disponível. Por favor, verifica a conexão.")
+    }
+    
+    if (!window.puter.ai.txt2img || typeof window.puter.ai.txt2img !== 'function') {
+      throw new Error("Função txt2img não está disponível. Por favor, verifica a autenticação.")
+    }
+
+    // Prompt base com constituição física do gato (NUNCA ALTERAR)
+    const basePrompt = `[CAT PHYSICAL CONSTITUTION - ONLY REFERS TO THE CAT'S APPEARANCE:]
+
+green cat, bright green teal mint emerald green cartoon cat character, ENTIRE BODY IS SOLID GREEN COLOR;
+
+bright green teal body, green cat body, green mascot character;
+
+big round black eyes with white highlight dots, NOT green eyes;
+
+wide open mouth showing sharp white teeth, pink inner mouth and pink tongue;
+
+pointy cat ears with darker green inner ear;
+
+black whiskers on both sides of the face;
+
+long curved green tail (same green color as the body);
+
+simple flat cartoon style, mascot-style, no fur texture, bold black outlines;
+
+playful, energetic, joyful expression;
+
+stands on two legs, green paws, all body parts are green.
+
+🔧 RULE TO APPLY ADDITIONAL USER INSTRUCTIONS (ANY LANGUAGE):
+
+After this base description, accept and integrate ANY user instructions written in ANY language.
+
+Additional user prompts may modify:
+
+pose
+
+action
+
+environment / background
+
+props
+
+clothing / accessories
+
+emotion
+
+camera angle
+
+rendering style (2D, vector, 3D, cel-shaded, etc.)
+
+…but must NOT override or contradict the CAT PHYSICAL CONSTITUTION above.`
+    
+    // Obter nome do idioma para contexto
+    const languageNames: Record<string, string> = {
+      "pt": "Portuguese",
+      "en": "English",
+      "es": "Spanish",
+      "fr": "French",
+      "de": "German",
+      "zh": "Chinese",
+      "ar": "Arabic",
+    }
+    const languageName = languageNames[language] || "English"
+    
+    // Construir prompt final: base + instruções do usuário no idioma do website
+    let fullPrompt = basePrompt
+    
+    if (userInput.trim()) {
+      // Adicionar o prompt do usuário no idioma do website
+      fullPrompt = `${basePrompt}
+
+[USER INSTRUCTIONS IN ${languageName.toUpperCase()} - FOLLOW THESE INSTRUCTIONS WHILE MAINTAINING THE CAT PHYSICAL CONSTITUTION ABOVE:]
+
+${userInput.trim()}
+
+IMPORTANT: The user instructions above are in ${languageName}. Do not translate or ignore them. Apply them exactly as specified while maintaining all the physical characteristics of the green cat described in the base constitution.`
+    }
+
+    // Gerar imagem usando Puter.js conforme documentação oficial
+    // txt2img(prompt, testMode?) retorna Promise<HTMLImageElement>
+    let img: HTMLImageElement
+    
+    // Validações antes de chamar txt2img
+    if (!window.puter) {
+      throw new Error("Puter.js não está carregado. Por favor, recarrega a página.")
+    }
+    
+    if (!window.puter.ai) {
+      throw new Error("Puter.js AI não está disponível. Por favor, verifica a conexão.")
+    }
+    
+    if (!window.puter.ai.txt2img || typeof window.puter.ai.txt2img !== 'function') {
+      throw new Error("Função txt2img não está disponível. Por favor, verifica a autenticação.")
+    }
+    
+    // Verificar autenticação uma última vez antes de gerar
+    if (window.puter.auth && window.puter.auth.isSignedIn && !window.puter.auth.isSignedIn()) {
+      throw new Error("Por favor, autentica-te primeiro para gerar imagens.")
+    }
+    
+    try {
+      console.log("Chamando txt2img com prompt:", fullPrompt.substring(0, 100) + "...")
+      console.log("Puter disponível:", !!window.puter)
+      console.log("Puter.ai disponível:", !!window.puter.ai)
+      console.log("txt2img disponível:", typeof window.puter.ai.txt2img)
+      
+      // Carregar imagem de referência cat.png como Blob
+      // Puter.js aceita File ou Blob para input_reference
+      const catReferenceBlob = await loadCatReferenceImage()
+
+      // Gerar imagem usando helper unificado conforme documentação
+      // txt2img(prompt, options?) - conforme exemplo: puter.ai.txt2img("a cat playing the piano", { model: "gpt-image-1", quality: "low" })
+      // Incluir input_reference com a imagem cat.png como Blob
+      const txt2imgPromise = generateImageWithPuter(fullPrompt, {
+        input_reference: catReferenceBlob // Incluir referência da imagem cat.png como Blob
+      })
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error("Timeout ao gerar imagem (60s). Por favor, tenta novamente.")), 60000)
+      })
+      
+      img = await Promise.race([txt2imgPromise, timeoutPromise])
+      console.log("txt2img retornou:", img)
+      
+      if (!img) {
+        throw new Error("Puter.js retornou null ou undefined. Por favor, tenta novamente.")
+      }
+    } catch (error: any) {
+      console.error("Erro ao chamar txt2img:", error)
+      
+      // Se for QuotaExceededError, relançar diretamente para que seja capturado no catch principal
+      if (error instanceof QuotaExceededError) {
+        throw error
+      }
+      
+      // Tentar serializar o erro para debug
+      try {
+        const errorSerialized = JSON.stringify(error, Object.getOwnPropertyNames(error))
+        console.error("Erro serializado:", errorSerialized)
+      } catch (e) {
+        console.error("Não foi possível serializar o erro:", e)
+      }
+      
+      // Extrair mensagem de erro de várias formas possíveis
+      let errorMessage = "Erro ao gerar imagem com Puter.js"
+      
+      if (error instanceof Error) {
+        errorMessage = error.message || error.name || errorMessage
+        console.error("Erro é uma instância de Error:", {
+          name: error.name,
+          message: error.message,
+          stack: error.stack
+        })
+      } else if (typeof error === "string") {
+        errorMessage = error
+      } else if (error && typeof error === "object") {
+        // Tentar todas as propriedades possíveis
+        errorMessage = error.message 
+          || error.error 
+          || error.errorMessage 
+          || error.msg 
+          || error.description
+          || error.reason
+          || error.details
+          || errorMessage
+        
+        // Se ainda não tem mensagem, verificar conteúdo do objeto
+        if (!errorMessage || errorMessage === "Erro ao gerar imagem com Puter.js") {
+          try {
+            const errorStr = JSON.stringify(error)
+            console.error("String do erro:", errorStr)
+            
+            if (errorStr === "{}" || errorStr.trim() === "" || errorStr === "null") {
+              // Erro vazio - verificar estado do Puter
+              if (window.puter.auth && window.puter.auth.isSignedIn && !window.puter.auth.isSignedIn()) {
+                errorMessage = "Por favor, autentica-te primeiro para gerar imagens."
+              } else {
+                errorMessage = "Erro desconhecido ao gerar imagem. Por favor, verifica a autenticação e tenta novamente."
+              }
+            } else if (errorStr.includes("auth") || errorStr.includes("sign") || errorStr.includes("login") || errorStr.includes("unauthorized")) {
+              errorMessage = "Por favor, autentica-te primeiro para gerar imagens."
+            } else if (errorStr.includes("quota") || errorStr.includes("limit") || errorStr.includes("rate")) {
+              errorMessage = "Limite de gerações atingido. Por favor, tenta mais tarde."
+            } else {
+              errorMessage = `Erro ao gerar imagem: ${errorStr.substring(0, 100)}`
+            }
+          } catch (e) {
+            console.error("Erro ao processar objeto de erro:", e)
+            errorMessage = "Erro ao gerar imagem. Verifica se estás autenticado e tenta novamente."
+          }
+        }
+      } else if (error !== null && error !== undefined) {
+        errorMessage = String(error)
+      }
+      
+      // Garantir que errorMessage é sempre uma string antes de usar métodos de string
+      if (typeof errorMessage !== "string") {
+        errorMessage = String(errorMessage) || "Erro ao gerar imagem com Puter.js"
+      }
+      
+      // Garantir que temos uma mensagem útil
+      if (!errorMessage || (errorMessage.trim && errorMessage.trim() === "") || errorMessage === "{}") {
+        errorMessage = "Erro desconhecido ao gerar imagem. Por favor, verifica a autenticação e tenta novamente."
+      }
+      
+      throw new Error(errorMessage)
+    }
+    
+    if (!img) {
+      throw new Error("Puter.js não retornou uma imagem. Por favor, tenta novamente.")
+    }
+    
+    // Obter URL da imagem usando helper
+    const imageUrl = getImageURL(img)
+    
+    if (!imageUrl) {
+      throw new Error("Puter.js retornou uma imagem sem URL. Por favor, tenta novamente.")
+    }
+
+    // Validar URL da imagem
+    if (!imageUrl || typeof imageUrl !== "string" || (!imageUrl.startsWith("data:") && !imageUrl.startsWith("http") && !imageUrl.startsWith("blob:"))) {
+      throw new Error("Invalid image URL format from Puter")
+    }
+    
+    // Criar elemento de imagem para compatibilidade com sendImageToTelegram
+    const imageElement: HTMLImageElement = new Image()
+    imageElement.src = imageUrl
+    
+    await new Promise<void>((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        reject(new Error("Image loading timeout (10s)"))
+      }, 10000) // 10 segundos de timeout
+      
+      imageElement.onload = () => {
+        clearTimeout(timeout)
+        resolve()
+      }
+      
+      imageElement.onerror = (error) => {
+        clearTimeout(timeout)
+        console.error("Image load error:", error)
+        reject(new Error("Failed to load generated image. The image data may be corrupted."))
+      }
+    })
+
+    const newCat: GeneratedCat = {
+      id: Date.now().toString(),
+      imageUrl: imageUrl,
+      type: "image"
+    }
+    setCats((prev) => [newCat, ...prev])
+    
+    // Salva a imagem no localStorage com expiração de 24h
+    saveImage(newCat)
+
+    // Enviar imagem para o Telegram automaticamente (em background, não bloqueia a UI)
+    sendImageToTelegram(imageUrl, userInput).catch((err) => {
+      // Silenciosamente falha se não conseguir enviar (não afeta a experiência do usuário)
+      console.warn("Failed to send image to Telegram:", err)
+    })
+
+    // Scroll para a nova imagem após um pequeno delay para garantir que foi renderizada
+    setTimeout(() => {
+      if (latestCatRef.current) {
+        latestCatRef.current.scrollIntoView({ behavior: "smooth", block: "center" })
+      }
+    }, 300)
+  }
+
 
   const downloadImage = async (cat: GeneratedCat) => {
     try {
@@ -432,72 +1436,117 @@ const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false, se
     }
   }
 
-  // Função para converter imagem para data URL válida
-  const convertImageToDataURL = (imageElement: HTMLImageElement): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      // Se já é uma data URL válida de imagem, retorna diretamente
-      if (imageElement.src.startsWith("data:image/")) {
-        resolve(imageElement.src)
-        return
+  // Função para converter URL de imagem para data URL (via servidor para evitar CORS)
+  const convertImageUrlToDataURL = async (imageUrl: string): Promise<string> => {
+    // Se já é uma data URL, retorna diretamente
+    if (imageUrl.startsWith("data:image/")) {
+      return imageUrl
+    }
+
+    // Para URLs externas, fazemos o fetch através do servidor para evitar CORS
+    try {
+      const response = await fetch("/api/convert-image", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ imageUrl }),
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to convert image")
       }
 
-      // Se a imagem já está carregada, converte diretamente
-      if (imageElement.complete && imageElement.naturalWidth > 0) {
-        try {
-          const canvas = document.createElement("canvas")
-          canvas.width = imageElement.naturalWidth
-          canvas.height = imageElement.naturalHeight
-          const ctx = canvas.getContext("2d")
-          if (!ctx) {
-            reject(new Error("Could not get canvas context"))
-            return
+      const data = await response.json()
+      // Garantir que retorna data:image/...
+      if (data.dataURL && data.dataURL.startsWith("data:image/")) {
+        return data.dataURL
+      } else {
+        throw new Error("Invalid data URL format from server")
+      }
+    } catch (error) {
+      console.error("Error converting image via server:", error)
+      // Fallback: tenta fazer fetch direto (pode falhar por CORS)
+      try {
+        const response = await fetch(imageUrl)
+        const blob = await response.blob()
+        
+        // Verificar se o blob é realmente uma imagem
+        // Se o Content-Type não for image/*, tentar detectar pelo conteúdo
+        let mimeType = blob.type
+        
+        // Se o tipo não for imagem, tentar detectar pelo conteúdo do blob
+        if (!mimeType.startsWith("image/")) {
+          // Ler os primeiros bytes para detectar o formato
+          const arrayBuffer = await blob.slice(0, 4).arrayBuffer()
+          const bytes = new Uint8Array(arrayBuffer)
+          
+          // Detectar formato por magic numbers
+          if (bytes[0] === 0xFF && bytes[1] === 0xD8 && bytes[2] === 0xFF) {
+            mimeType = "image/jpeg"
+          } else if (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4E && bytes[3] === 0x47) {
+            mimeType = "image/png"
+          } else if (bytes[0] === 0x47 && bytes[1] === 0x49 && bytes[2] === 0x46) {
+            mimeType = "image/gif"
+          } else if (bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46) {
+            mimeType = "image/webp"
+          } else {
+            // Se não conseguir detectar, assumir PNG como padrão
+            mimeType = "image/png"
           }
-          ctx.drawImage(imageElement, 0, 0)
-          const dataURL = canvas.toDataURL("image/png")
-          resolve(dataURL)
-        } catch (error) {
-          reject(error)
         }
-        return
-      }
-
-      // Se a imagem ainda não está carregada, espera carregar
-      const onLoad = () => {
-        try {
-          const canvas = document.createElement("canvas")
-          canvas.width = imageElement.naturalWidth
-          canvas.height = imageElement.naturalHeight
-          const ctx = canvas.getContext("2d")
-          if (!ctx) {
-            reject(new Error("Could not get canvas context"))
-            return
+        
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader()
+          reader.onloadend = () => {
+            const result = reader.result as string
+            // Garantir que o data URL tem o formato correto data:image/...
+            if (result.startsWith("data:image/")) {
+              resolve(result)
+            } else {
+              // Se o FileReader retornou um tipo incorreto, substituir o prefixo
+              const base64Data = result.split(",")[1] || result
+              resolve(`data:${mimeType};base64,${base64Data}`)
+            }
           }
-          ctx.drawImage(imageElement, 0, 0)
-          const dataURL = canvas.toDataURL("image/png")
-          resolve(dataURL)
-        } catch (error) {
-          reject(error)
-        }
-        imageElement.removeEventListener("load", onLoad)
-        imageElement.removeEventListener("error", onError)
+          reader.onerror = reject
+          reader.readAsDataURL(blob)
+        })
+      } catch (fallbackError) {
+        console.error("Fallback conversion failed:", fallbackError)
+        throw new Error("Failed to convert image URL to data URL")
       }
+    }
+  }
 
-      const onError = () => {
-        imageElement.removeEventListener("load", onLoad)
-        imageElement.removeEventListener("error", onError)
-        reject(new Error("Failed to load image"))
-      }
+  // Função para converter URL de vídeo para data URL
+  const convertVideoUrlToDataURL = async (videoUrl: string): Promise<string> => {
+    // Se já é uma data URL, retorna diretamente
+    if (videoUrl.startsWith("data:video/")) {
+      return videoUrl
+    }
 
-      imageElement.addEventListener("load", onLoad, { once: true })
-      imageElement.addEventListener("error", onError, { once: true })
-    })
+    // Para URLs externas, fazemos o fetch para converter
+    try {
+      const response = await fetch(videoUrl)
+      const blob = await response.blob()
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onloadend = () => resolve(reader.result as string)
+        reader.onerror = reject
+        reader.readAsDataURL(blob)
+      })
+    } catch (error) {
+      console.error("Error converting video:", error)
+      throw new Error("Failed to convert video URL to data URL")
+    }
   }
 
   // Função para enviar imagem para o Telegram
-  const sendImageToTelegram = async (imageElement: HTMLImageElement, prompt: string) => {
+  const sendImageToTelegram = async (imageUrl: string, prompt: string) => {
     try {
-      // Converte a imagem para data URL válida
-      const dataURL = await convertImageToDataURL(imageElement)
+      // Converte a URL da imagem para data URL (via servidor se necessário)
+      const dataURL = await convertImageUrlToDataURL(imageUrl)
 
       const response = await fetch("/api/send-telegram", {
         method: "POST",
@@ -518,6 +1567,36 @@ const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false, se
       return await response.json()
     } catch (error) {
       console.error("Error sending to Telegram:", error)
+      throw error
+    }
+  }
+
+  // Função para enviar vídeo para o Telegram
+  const sendVideoToTelegram = async (videoUrl: string, prompt: string) => {
+    try {
+      // Converte a URL do vídeo para data URL
+      const dataURL = await convertVideoUrlToDataURL(videoUrl)
+
+      const response = await fetch("/api/send-telegram", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          videoUrl: dataURL,
+          prompt,
+          type: "video",
+        }),
+      })
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}))
+        throw new Error(error.error || "Failed to send video to Telegram")
+      }
+
+      return await response.json()
+    } catch (error) {
+      console.error("Error sending video to Telegram:", error)
       throw error
     }
   }
@@ -599,7 +1678,7 @@ const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false, se
   return (
     <section
       id="generator"
-      className="py-24 bg-[var(--bg-primary)] text-center px-6 md:px-12 lg:px-24 overflow-hidden border-t-4 border-[var(--border-color)]"
+      className="py-24 bg-[var(--bg-primary)] text-center overflow-hidden border-t-4 border-[var(--border-color)]"
     >
       <div className="max-w-5xl mx-auto">
         <div className="inline-block mb-4 relative w-32 h-32 md:w-40 md:h-40 lg:w-48 lg:h-48">
@@ -632,6 +1711,62 @@ const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false, se
           )}
           <SnowCap className="h-12" visible={isChristmasMode} />
 
+          {/* Loading overlay quando Puter não está pronto */}
+          {!puterReady && (
+            <div className="absolute inset-0 bg-[var(--bg-secondary)]/95 backdrop-blur-sm rounded-[2.5rem] z-50 flex flex-col items-center justify-center gap-4">
+              <RefreshCw className="animate-spin text-[var(--brand)]" size={48} />
+              <p className="text-[var(--text-primary)] font-bold text-lg">
+                {t("generator.puterNotLoaded") || "A carregar Puter.js..."}
+              </p>
+            </div>
+          )}
+
+          {/* Card de autenticação quando Puter está pronto mas não autenticado */}
+          {puterReady && !puterAuthenticated && !checkingAuth && (
+            <div className="mb-6 relative z-10 p-6 bg-yellow-100 dark:bg-yellow-900/30 border-2 border-yellow-300 dark:border-yellow-700 rounded-2xl">
+              <div className="flex flex-col items-center gap-4 text-center">
+                <AlertTriangle className="text-yellow-600 dark:text-yellow-400" size={32} />
+                <div>
+                  <p className="font-black text-lg text-yellow-800 dark:text-yellow-200 mb-2">
+                    {t("generator.authRequired") || "⚠️ Autenticação necessária"}
+                  </p>
+                  <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                    {t("generator.pleaseAuthenticate") || "Por favor, faz login com Puter para gerar imagens e vídeos."}
+                  </p>
+                </div>
+                <button
+                  onClick={handleAuthenticate}
+                  disabled={checkingAuth || !window.puter?.auth?.signIn}
+                  className="bg-[var(--brand)] text-white px-6 py-3 rounded-xl font-black text-lg border-b-4 border-[var(--brand-dark)] hover:brightness-110 active:border-b-0 active:translate-y-1 transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {checkingAuth ? (
+                    <>
+                      <RefreshCw className="animate-spin" size={20} />
+                      {t("generator.authenticating") || "A autenticar..."}
+                    </>
+                  ) : (
+                    <>
+                      <Zap size={20} />
+                      {t("generator.authenticate") || "Fazer Login com Puter"}
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Loading quando está verificando autenticação */}
+          {puterReady && checkingAuth && (
+            <div className="mb-6 relative z-10 p-6 bg-[var(--bg-tertiary)] border-2 border-[var(--border-color)] rounded-2xl">
+              <div className="flex items-center justify-center gap-3">
+                <RefreshCw className="animate-spin text-[var(--brand)]" size={24} />
+                <p className="text-[var(--text-primary)] font-bold">
+                  {t("generator.authenticating") || "A verificar autenticação..."}
+                </p>
+              </div>
+            </div>
+          )}
+
           <div className="mb-6 relative z-10 flex items-center gap-4 p-4 bg-[var(--bg-tertiary)] rounded-2xl border-2 border-[var(--border-color)]">
             <img
               src={CAT_REFERENCE_IMAGE || "/placeholder.svg"}
@@ -646,61 +1781,156 @@ const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false, se
             </div>
           </div>
 
-          {error && (
+          {/* Card especial para erro 402 - Quota excedida */}
+          {showQuotaExceeded && (
+            <div className="mb-6 relative z-10 p-6 bg-orange-100 dark:bg-orange-900/30 border-2 border-orange-300 dark:border-orange-700 rounded-2xl">
+              <div className="flex flex-col items-center gap-4 text-center">
+                <AlertTriangle className="text-orange-600 dark:text-orange-400" size={32} />
+                <div>
+                  <p className="font-black text-lg text-orange-800 dark:text-orange-200 mb-2">
+                    {t("generator.quotaExceededTitle") || "⚠️ Créditos Gratuitos Diários Esgotados"}
+                  </p>
+                  <p className="text-sm text-orange-700 dark:text-orange-300 mb-4">
+                    {t("generator.quotaExceededMessage") || "A tua conta atual atingiu o limite de créditos gratuitos diários. Podes autenticar-te com outra conta para continuar a gerar."}
+                  </p>
+                </div>
+                <button
+                  onClick={handleAuthenticateWithDifferentAccount}
+                  disabled={checkingAuth || !window.puter?.auth?.signIn}
+                  className="bg-[var(--brand)] text-white px-6 py-3 rounded-xl font-black text-lg border-b-4 border-[var(--brand-dark)] hover:brightness-110 active:border-b-0 active:translate-y-1 transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {checkingAuth ? (
+                    <>
+                      <RefreshCw className="animate-spin" size={20} />
+                      {t("generator.authenticating") || "A autenticar..."}
+                    </>
+                  ) : (
+                    <>
+                      <Zap size={20} />
+                      {t("generator.authenticateWithDifferentAccount") || "Autenticar com Outra Conta"}
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {error && !showQuotaExceeded && (
             <div className="mb-6 p-4 bg-red-100 dark:bg-red-900/30 border-2 border-red-300 dark:border-red-700 rounded-2xl">
               <p className="text-red-600 dark:text-red-400 font-bold text-sm">{error}</p>
             </div>
           )}
 
-          {puterReady && !isAuthenticated && (
-            <div className="mb-6 p-4 bg-yellow-100 dark:bg-yellow-900/30 border-2 border-yellow-300 dark:border-yellow-700 rounded-2xl">
-              <p className="text-yellow-600 dark:text-yellow-400 font-bold text-sm mb-3">
-                {t("generator.authRequired")}
-              </p>
+
+          {/* Indicador de gerações restantes - mostra apenas o relevante baseado no tipo selecionado */}
+          <div className="mb-6" suppressHydrationWarning>
+            {generationType === "image" ? (
+              /* Limite de Imagens */
+              <div className="p-4 bg-[var(--bg-tertiary)] border-2 border-[var(--border-color)] rounded-2xl">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-black text-sm uppercase text-[var(--text-secondary)] tracking-wide mb-1">
+                      {t("generator.imagesToday") || "Imagens Hoje"}
+                    </p>
+                    <p className="text-[var(--text-primary)] font-bold" suppressHydrationWarning>
+                      {mounted ? dailyImageCount : 0} / {MAX_IMAGES_PER_DAY} {t("generator.used")}
+                    </p>
+                  </div>
+                  <div className="flex gap-1">
+                    {Array.from({ length: MAX_IMAGES_PER_DAY }).map((_, index) => (
+                      <div
+                        key={index}
+                        className={`w-8 h-8 rounded-lg border-2 flex items-center justify-center ${
+                          mounted && index < dailyImageCount
+                            ? "bg-[var(--brand)] border-[var(--brand)]"
+                            : "bg-[var(--bg-secondary)] border-[var(--border-color)]"
+                        }`}
+                        suppressHydrationWarning
+                      >
+                        {mounted && index < dailyImageCount && <Sparkles size={16} className="text-white" />}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                {mounted && !isDevelopmentMode() && dailyImageCount >= MAX_IMAGES_PER_DAY && (
+                  <p className="mt-2 text-sm font-bold text-red-500">
+                    {t("generator.dailyLimit")}
+                  </p>
+                )}
+              </div>
+            ) : (
+              /* Limite de Vídeos */
+              <div className="p-4 bg-[var(--bg-tertiary)] border-2 border-[var(--border-color)] rounded-2xl">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-black text-sm uppercase text-[var(--text-secondary)] tracking-wide mb-1">
+                      {t("generator.videosToday") || "Vídeos Hoje"}
+                    </p>
+                    <p className="text-[var(--text-primary)] font-bold" suppressHydrationWarning>
+                      {mounted ? dailyVideoCount : 0} / {MAX_VIDEOS_PER_DAY} {t("generator.used")}
+                    </p>
+                  </div>
+                  <div className="flex gap-1">
+                    {Array.from({ length: MAX_VIDEOS_PER_DAY }).map((_, index) => (
+                      <div
+                        key={index}
+                        className={`w-8 h-8 rounded-lg border-2 flex items-center justify-center ${
+                          mounted && index < dailyVideoCount
+                            ? "bg-[var(--brand)] border-[var(--brand)]"
+                            : "bg-[var(--bg-secondary)] border-[var(--border-color)]"
+                        }`}
+                        suppressHydrationWarning
+                      >
+                        {mounted && index < dailyVideoCount && <Sparkles size={16} className="text-white" />}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                {mounted && !isDevelopmentMode() && dailyVideoCount >= MAX_VIDEOS_PER_DAY && (
+                  <p className="mt-2 text-sm font-bold text-red-500">
+                    {t("generator.dailyLimit")}
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Toggle para escolher entre imagem e vídeo - renderizar sempre para evitar problemas de hidratação */}
+          <div className="mb-6 relative z-10" suppressHydrationWarning>
+            <label className="block font-black text-sm uppercase text-[var(--text-secondary)] mb-3 tracking-widest" suppressHydrationWarning>
+              {t("generator.generationType") || "Tipo de Geração"}
+            </label>
+            <div className="flex gap-3">
               <button
-                onClick={handleSignIn}
-                disabled={isAuthenticating}
-                className="bg-[var(--duo-blue)] text-white px-6 py-3 rounded-xl font-bold uppercase tracking-wide border-b-4 border-[var(--blue-button-border)] active:border-b-0 active:translate-y-1 hover:brightness-110 transition-all disabled:opacity-70 disabled:cursor-wait"
+                onClick={() => setGenerationType("image")}
+                disabled={loading || !puterReady}
+                className={`flex-1 p-4 rounded-2xl border-2 font-black transition-all ${
+                  generationType === "image"
+                    ? "bg-[var(--brand)] text-white border-[var(--brand)] border-b-4"
+                    : "bg-[var(--bg-tertiary)] text-[var(--text-secondary)] border-[var(--border-color)] hover:border-[var(--brand)]"
+                } disabled:opacity-50 disabled:cursor-not-allowed`}
               >
-                {isAuthenticating ? t("generator.authenticating") : t("generator.authenticate")}
+                <div className="flex items-center justify-center gap-2">
+                  <ImageIcon size={20} />
+                  <span suppressHydrationWarning>{t("generator.image") || "Imagem"}</span>
+                </div>
+              </button>
+              <button
+                onClick={() => setGenerationType("video")}
+                disabled={loading || !puterReady || (typeof window !== "undefined" && !window.puter?.ai?.txt2vid)}
+                className={`flex-1 p-4 rounded-2xl border-2 font-black transition-all ${
+                  generationType === "video"
+                    ? "bg-[var(--brand)] text-white border-[var(--brand)] border-b-4"
+                    : "bg-[var(--bg-tertiary)] text-[var(--text-secondary)] border-[var(--border-color)] hover:border-[var(--brand)]"
+                } disabled:opacity-50 disabled:cursor-not-allowed`}
+              >
+                <div className="flex items-center justify-center gap-2">
+                  <Video size={20} />
+                  <span suppressHydrationWarning>{t("generator.video") || "Vídeo"}</span>
+                </div>
               </button>
             </div>
-          )}
-
-          {/* Indicador de gerações restantes */}
-          {isAuthenticated && (
-            <div className="mb-6 p-4 bg-[var(--bg-tertiary)] border-2 border-[var(--border-color)] rounded-2xl">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-black text-sm uppercase text-[var(--text-secondary)] tracking-wide mb-1">
-                    {t("generator.generationsToday")}
-                  </p>
-                  <p className="text-[var(--text-primary)] font-bold">
-                    {dailyCount} / {MAX_GENERATIONS_PER_DAY} {t("generator.used")}
-                  </p>
-                </div>
-                <div className="flex gap-1">
-                  {Array.from({ length: MAX_GENERATIONS_PER_DAY }).map((_, index) => (
-                    <div
-                      key={index}
-                      className={`w-8 h-8 rounded-lg border-2 flex items-center justify-center ${
-                        index < dailyCount
-                          ? "bg-[var(--brand)] border-[var(--brand)]"
-                          : "bg-[var(--bg-secondary)] border-[var(--border-color)]"
-                      }`}
-                    >
-                      {index < dailyCount && <Sparkles size={16} className="text-white" />}
-                    </div>
-                  ))}
-                </div>
-              </div>
-              {dailyCount >= MAX_GENERATIONS_PER_DAY && (
-                <p className="mt-2 text-sm font-bold text-red-500">
-                  {t("generator.dailyLimit")}
-                </p>
-              )}
-            </div>
-          )}
+          </div>
 
           <div className="mb-6 relative z-10">
             <label className="block font-black text-sm uppercase text-[var(--text-secondary)] mb-3 tracking-widest">
@@ -719,66 +1949,48 @@ const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false, se
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 relative z-10">
-            <div>
-              <label className="block font-black text-sm uppercase text-[var(--text-secondary)] mb-3 tracking-widest">
-                {t("generator.model")}
-              </label>
-              <select
-                value={model}
-                onChange={(e) => setModel(e.target.value)}
-                className="w-full bg-[var(--bg-tertiary)] border-2 border-[var(--border-color)] rounded-2xl p-4 font-bold text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand)] focus:ring-4 focus:ring-[var(--brand)]/20 transition-all"
-              >
-                <option value="gpt-image-1">GPT Image-1</option>
-                <option value="dall-e-3">DALL·E 3</option>
-                <option value="stabilityai/stable-diffusion-3-medium">Stable Diffusion 3</option>
-              </select>
-            </div>
-            <div>
-              <label className="block font-black text-sm uppercase text-[var(--text-secondary)] mb-3 tracking-widest">
-                {t("generator.quality")}
-              </label>
-              <select
-                value={quality}
-                onChange={(e) => setQuality(e.target.value)}
-                className="w-full bg-[var(--bg-tertiary)] border-2 border-[var(--border-color)] rounded-2xl p-4 font-bold text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand)] focus:ring-4 focus:ring-[var(--brand)]/20 transition-all"
-              >
-                <option value="low">{t("generator.quality.low")}</option>
-                <option value="medium">{t("generator.quality.medium")}</option>
-                <option value="high">{t("generator.quality.high")}</option>
-              </select>
-            </div>
-          </div>
-
           <button
             onClick={handleGenerate}
-            disabled={loading || !puterReady || (puterReady && !isAuthenticated) || dailyCount >= MAX_GENERATIONS_PER_DAY}
+            disabled={loading || (mounted && !isDevelopmentMode() && (generationType === "video" ? dailyVideoCount >= MAX_VIDEOS_PER_DAY : dailyImageCount >= MAX_IMAGES_PER_DAY)) || !puterReady || !puterAuthenticated}
             className={`
               w-full bg-[var(--brand)] text-white px-6 py-5 rounded-2xl font-black text-2xl 
-              flex items-center justify-center gap-3 uppercase tracking-wide
+              flex flex-col items-center justify-center gap-2 uppercase tracking-wide
               border-b-[6px] border-[var(--brand-dark)] active:border-b-0 active:translate-y-[6px]
-              hover:brightness-110 transition-all relative z-10
-              ${loading || !puterReady || (puterReady && !isAuthenticated) || dailyCount >= MAX_GENERATIONS_PER_DAY ? "opacity-70 cursor-not-allowed" : ""}
+              hover:brightness-110 transition-all relative z-10 overflow-hidden
+              ${loading || (mounted && !isDevelopmentMode() && (generationType === "video" ? dailyVideoCount >= MAX_VIDEOS_PER_DAY : dailyImageCount >= MAX_IMAGES_PER_DAY)) || !puterReady || !puterAuthenticated ? "opacity-70 cursor-not-allowed" : ""}
             `}
           >
-            {loading ? (
-              <RefreshCw className="animate-spin" size={28} />
-            ) : (
-              <Sparkles size={28} className="text-yellow-300 fill-current" />
+            <div className="flex items-center gap-3">
+              {loading ? (
+                <RefreshCw className="animate-spin" size={28} />
+              ) : (
+                <Sparkles size={28} className="text-yellow-300 fill-current" />
+              )}
+                  <span>
+                    {!puterReady
+                      ? t("generator.puterNotLoaded") || "Aguardar Puter..."
+                      : !puterAuthenticated
+                      ? t("generator.authenticateFirst") || "Autentica-te primeiro"
+                      : !mounted
+                      ? (generationType === "video" ? (t("generator.generateVideo") || "Gerar Vídeo") : (t("generator.generateImage") || "Gerar Imagem"))
+                      : loading
+                      ? (generationType === "video" ? (t("generator.generatingVideo") || "A gerar vídeo...") : (t("generator.generatingImage") || "A gerar imagem..."))
+                      : (!isDevelopmentMode() && (generationType === "video" ? dailyVideoCount >= MAX_VIDEOS_PER_DAY : dailyImageCount >= MAX_IMAGES_PER_DAY))
+                      ? t("generator.dailyLimitReached")
+                      : (generationType === "video" ? (t("generator.generateVideo") || "Gerar Vídeo") : (t("generator.generateImage") || "Gerar Imagem"))}
+                  </span>
+            </div>
+            
+            {/* Barra de progresso - aparece apenas no início do loading */}
+            {loading && (
+              <div className="w-full h-2 bg-black/20 rounded-full overflow-hidden">
+                <div className="h-full bg-yellow-300 animate-pulse" style={{ width: "100%" }} />
+              </div>
             )}
-            {loading
-              ? t("generator.generating")
-              : !puterReady
-              ? t("generator.loading")
-              : !isAuthenticated
-              ? t("generator.authenticateFirst")
-              : dailyCount >= MAX_GENERATIONS_PER_DAY
-              ? t("generator.dailyLimitReached")
-              : t("generator.generate")}
           </button>
         </div>
 
-        {cats.length > 0 && (
+        {mounted && cats.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-16">
             {cats.map((cat, index) => (
               <div
@@ -787,11 +1999,22 @@ const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false, se
                 className="bg-[var(--bg-secondary)] rounded-[2rem] p-4 border-b-8 border-[var(--border-color)] hover:-translate-y-2 transition-transform duration-300"
               >
                 <div className="aspect-square bg-[var(--bg-tertiary)] rounded-3xl overflow-hidden mb-4 border-2 border-[var(--border-color)]">
-                  <img
-                    src={cat.imageUrl || "/placeholder.svg"}
-                    alt="Generated Green Cat"
-                    className="w-full h-full object-cover"
-                  />
+                  {cat.type === "video" && cat.videoUrl ? (
+                    <video
+                      src={cat.videoUrl}
+                      controls
+                      className="w-full h-full object-cover"
+                      playsInline
+                    >
+                      Seu navegador não suporta vídeo HTML5.
+                    </video>
+                  ) : (
+                    <img
+                      src={cat.imageUrl || "/placeholder.svg"}
+                      alt="Generated Green Cat"
+                      className="w-full h-full object-cover"
+                    />
+                  )}
                 </div>
                 <div className="flex justify-between items-center px-2 pb-2">
                   <span className="font-bold text-sm text-[var(--text-secondary)] uppercase tracking-wide">
@@ -852,10 +2075,14 @@ const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false, se
               
               <div className="space-y-3 mb-6">
                 <p className="text-[var(--text-secondary)] font-bold">
-                  {t("generator.limitModalText1").replace("{count}", String(MAX_GENERATIONS_PER_DAY))}
+                  {generationType === "video" 
+                    ? t("generator.limitModalText1").replace("{count}", String(MAX_VIDEOS_PER_DAY))
+                    : t("generator.limitModalText1").replace("{count}", String(MAX_IMAGES_PER_DAY))}
                 </p>
                 <p className="text-sm text-[var(--text-secondary)]">
-                  {t("generator.limitModalText2").replace("{count}", String(MAX_GENERATIONS_PER_DAY))}
+                  {generationType === "video"
+                    ? t("generator.limitModalText2").replace("{count}", String(MAX_VIDEOS_PER_DAY))
+                    : t("generator.limitModalText2").replace("{count}", String(MAX_IMAGES_PER_DAY))}
                 </p>
                 <p className="text-sm text-[var(--text-secondary)] font-bold">
                   {t("generator.limitModalText3")}
@@ -865,7 +2092,7 @@ const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false, se
               <div className="bg-[var(--bg-tertiary)] rounded-2xl p-4 border-2 border-[var(--border-color)] mb-4">
                 <p className="text-xs font-bold text-[var(--text-secondary)] mb-2">{t("generator.limitModalGenerations")}</p>
                 <div className="flex justify-center gap-2">
-                  {Array.from({ length: MAX_GENERATIONS_PER_DAY }).map((_, index) => (
+                  {Array.from({ length: generationType === "video" ? MAX_VIDEOS_PER_DAY : MAX_IMAGES_PER_DAY }).map((_, index) => (
                     <div
                       key={index}
                       className="w-10 h-10 rounded-lg bg-[var(--brand)] border-2 border-[var(--brand)] flex items-center justify-center"

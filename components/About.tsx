@@ -53,7 +53,7 @@ const About: React.FC<AboutProps> = ({ isChristmasMode = false, season = "normal
   const { t } = useLanguage()
   
   return (
-    <section className="py-20 px-6 md:px-12 lg:px-24 text-center bg-[var(--bg-secondary)]">
+    <section className="py-20 text-center bg-[var(--bg-secondary)]">
       <div className="max-w-4xl mx-auto">
         {/* Duolingo speech bubble card */}
         <div className="relative bg-[var(--bg-primary)] rounded-3xl p-8 md:p-10 border-2 border-[var(--border-color)] border-b-4 overflow-hidden">

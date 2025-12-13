@@ -9,7 +9,41 @@
     transform: translate3d(0, 0, 0);
   }
   50% {
-    transform: translate3d(0, -10px, 0);
+    transform: translate3d(0, -15px, 0);
+  }
+}
+
+/* Animação de oscilação vertical suave para o gato no chat */
+/* Usa translate3d para compatibilidade com outros transforms e otimização GPU */
+@keyframes cat-vertical-float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -12px, 0);
+  }
+}
+
+/* Versão da animação para o modo chat - suporta tanto left-0 quanto left-1/2 */
+@keyframes cat-vertical-float-chat {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -12px, 0);
+  }
+}
+
+/* Versão da animação para mobile (com translateX(-50%)) */
+@keyframes cat-vertical-float-chat-mobile {
+  0%,
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+  50% {
+    transform: translate3d(-50%, -12px, 0);
   }
 }
 
@@ -130,6 +164,25 @@
 
 .animate-fade-in-up {
   animation: fade-in-up 0.7s ease-out forwards;
+}
+
+/* Fade in animation for emotion changes - Otimizada para GPU */
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
 }
 
 :root,

@@ -12,6 +12,7 @@ import {
   Instagram,
 } from "lucide-react";
 import TamagotchiCat from "./TamagotchiCat";
+import VisualNovelChat from "./VisualNovelChat";
 import { useVideoSound } from "@/lib/use-video-sound";
 import { useLanguage } from "../lib/language-context";
 
@@ -26,11 +27,31 @@ interface HeroProps {
   onToolsClick?: () => void;
   onGamesClick?: () => void;
   onWhitepaperClick?: () => void;
+  isChatOpen?: boolean;
+  onChatOpenChange?: (open: boolean) => void;
 }
 
 const TikTokIcon = ({ size = 20 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
     <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" />
+  </svg>
+);
+
+const FacebookIcon = ({ size = 20 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+  </svg>
+);
+
+const DiscordIcon = ({ size = 20 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 512 512" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+    <path d="m386 137c-24-11-49.5-19-76.3-23.7c-.5 0-1 0-1.2.6c-3.3 5.9-7 13.5-9.5 19.5c-29-4.3-57.5-4.3-85.7 0c-2.6-6.2-6.3-13.7-10-19.5c-.3-.4-.7-.7-1.2-.6c-23 4.6-52.4 13-76 23.7c-.2 0-.4.2-.5.4c-49 73-62 143-55 213c0 .3.2.7.5 1c32 23.6 63 38 93.6 47.3c.5 0 1 0 1.3-.4c7.2-9.8 13.6-20.2 19.2-31.2c.3-.6 0-1.4-.7-1.6c-10-4-20-8.6-29.3-14c-.7-.4-.8-1.5 0-2c2-1.5 4-3 5.8-4.5c.3-.3.8-.3 1.2-.2c61.4 28 128 28 188 0c.4-.2.9-.1 1.2.1c1.9 1.6 3.8 3.1 5.8 4.6c.7.5.6 1.6 0 2c-9.3 5.5-19 10-29.3 14c-.7.3-1 1-.6 1.7c5.6 11 12.1 21.3 19 31c.3.4.8.6 1.3.4c30.6-9.5 61.7-23.8 93.8-47.3c.3-.2.5-.5.5-1c7.8-80.9-13.1-151-55.4-213c0-.2-.3-.4-.5-.4Zm-192 171c-19 0-34-17-34-38c0-21 15-38 34-38c19 0 34 17 34 38c0 21-15 38-34 38zm125 0c-19 0-34-17-34-38c0-21 15-38 34-38c19 0 34 17 34 38c0 21-15 38-34 38z"/>
+  </svg>
+);
+
+const YoutubeIcon = ({ size = 20 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
   </svg>
 );
 
@@ -79,8 +100,10 @@ const Hero: React.FC<HeroProps> = ({
   onToolsClick,
   onGamesClick,
   onWhitepaperClick,
+  isChatOpen: externalIsChatOpen,
+  onChatOpenChange,
 }) => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const videoRef = useRef<HTMLVideoElement>(null);
   const videoRefFall = useRef<HTMLVideoElement>(null);
   const videoRefWinter = useRef<HTMLVideoElement>(null);
@@ -100,6 +123,44 @@ const Hero: React.FC<HeroProps> = ({
     fall: false,
     winter: false,
   });
+  // Usar estado externo se fornecido, senão usar estado interno
+  // Garantir que o estado inicial seja sempre false para evitar problemas de hidratação
+  const [internalIsChatOpen, setInternalIsChatOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+  
+  // Aguardar montagem do componente no cliente para evitar problemas de hidratação
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+  
+  // Durante SSR, sempre usar false para garantir consistência
+  const isChatOpen = isMounted 
+    ? (externalIsChatOpen !== undefined ? externalIsChatOpen : internalIsChatOpen)
+    : false;
+    
+  const setIsChatOpen = (open: boolean) => {
+    if (onChatOpenChange) {
+      onChatOpenChange(open);
+    } else {
+      setInternalIsChatOpen(open);
+    }
+  };
+  
+  // Calcular className de forma estática para evitar problemas de hidratação
+  // Durante SSR (isMounted = false), sempre usar o layout padrão
+  // Após hidratação, usar o estado real
+  const gridClassName = !isMounted 
+    ? 'grid lg:grid-cols-2 gap-2 sm:gap-4 md:gap-6 lg:gap-8 items-center justify-items-center lg:justify-items-stretch'
+    : (isChatOpen 
+      ? 'grid lg:grid-cols-1 gap-2 sm:gap-4 md:gap-6 lg:gap-8 items-center justify-items-center lg:justify-items-stretch'
+      : 'grid lg:grid-cols-2 gap-2 sm:gap-4 md:gap-6 lg:gap-8 items-center justify-items-center lg:justify-items-stretch');
+    
+  const contentRightClassName = !isMounted
+    ? 'order-1 lg:order-2 space-y-8 md:space-y-10 text-center lg:text-center w-full max-w-full px-2 sm:px-0'
+    : (isChatOpen
+      ? 'order-1 lg:order-2 space-y-8 md:space-y-10 text-center lg:text-center w-full max-w-full px-2 sm:px-0 hidden'
+      : 'order-1 lg:order-2 space-y-8 md:space-y-10 text-center lg:text-center w-full max-w-full px-2 sm:px-0');
+  
   const [videoReady, setVideoReady] = useState({
     normal: false,
     fall: false,
@@ -241,25 +302,33 @@ const Hero: React.FC<HeroProps> = ({
     const videoFall = videoRefFall.current;
     const videoWinter = videoRefWinter.current;
 
-    // Reset all opacities when season changes
-    setVideoOpacity({ normal: 0, fall: 0, winter: 0 });
-    // Mostrar imagem da season atual enquanto o vídeo carrega (sempre mostrar inicialmente se já carregou)
+    // Não resetar tudo de uma vez - fazer transição suave
+    // Primeiro, garantir que a imagem da nova estação esteja visível (se já carregou)
+    // ou manter a anterior até a nova estar pronta
     const currentSeasonImage =
       season === "winter" ? "winter" : season === "fall" ? "fall" : "normal";
-    // Se a imagem já carregou, mostrar com fade in
+    
+    // Se a imagem da nova estação já carregou, mostrar imediatamente
     if (imageLoaded[currentSeasonImage]) {
-      setTimeout(() => {
-        if (season === "winter") {
-          setImageOpacity({ normal: 0, fall: 0, winter: 1 });
-        } else if (season === "fall") {
-          setImageOpacity({ normal: 0, fall: 1, winter: 0 });
-        } else {
-          setImageOpacity({ normal: 1, fall: 0, winter: 0 });
-        }
-      }, 100);
+      // Fazer fade out das outras e fade in da nova
+      if (season === "winter") {
+        setImageOpacity({ normal: 0, fall: 0, winter: 1 });
+      } else if (season === "fall") {
+        setImageOpacity({ normal: 0, fall: 1, winter: 0 });
+      } else {
+        setImageOpacity({ normal: 1, fall: 0, winter: 0 });
+      }
+    }
+    // Se a imagem ainda não carregou, manter a anterior visível até carregar
+    // (não resetar para 0, isso será feito quando a nova imagem carregar)
+    
+    // Reset vídeos apenas da nova estação (não todos de uma vez)
+    if (season === "winter") {
+      setVideoOpacity((prev) => ({ ...prev, normal: 0, fall: 0 }));
+    } else if (season === "fall") {
+      setVideoOpacity((prev) => ({ ...prev, normal: 0, winter: 0 }));
     } else {
-      // Se a imagem ainda não carregou, começar com opacidade 0 (será mostrada quando carregar)
-      setImageOpacity({ normal: 0, fall: 0, winter: 0 });
+      setVideoOpacity((prev) => ({ ...prev, fall: 0, winter: 0 }));
     }
 
     // Load and play video for current season
@@ -355,11 +424,12 @@ const Hero: React.FC<HeroProps> = ({
         }}
         onLoad={() => {
           setImageLoaded((prev) => ({ ...prev, normal: true }));
-          // Se for a season atual, mostrar imagem com fade in inicialmente
+          // Se for a season atual, mostrar imagem imediatamente
           if (season === "normal") {
-            setTimeout(() => {
-              setImageOpacity((prev) => ({ ...prev, normal: 1 }));
-            }, 100);
+            setImageOpacity((prev) => {
+              // Fade out outras e fade in esta
+              return { normal: 1, fall: 0, winter: 0 };
+            });
           }
         }}
       />
@@ -377,11 +447,12 @@ const Hero: React.FC<HeroProps> = ({
         }}
         onLoad={() => {
           setImageLoaded((prev) => ({ ...prev, fall: true }));
-          // Se for a season atual, mostrar imagem com fade in inicialmente
+          // Se for a season atual, mostrar imagem imediatamente
           if (season === "fall") {
-            setTimeout(() => {
-              setImageOpacity((prev) => ({ ...prev, fall: 1 }));
-            }, 100);
+            setImageOpacity((prev) => {
+              // Fade out outras e fade in esta
+              return { normal: 0, fall: 1, winter: 0 };
+            });
           }
         }}
       />
@@ -399,11 +470,12 @@ const Hero: React.FC<HeroProps> = ({
         }}
         onLoad={() => {
           setImageLoaded((prev) => ({ ...prev, winter: true }));
-          // Se for a season atual, mostrar imagem com fade in inicialmente
+          // Se for a season atual, mostrar imagem imediatamente
           if (season === "winter") {
-            setTimeout(() => {
-              setImageOpacity((prev) => ({ ...prev, winter: 1 }));
-            }, 100);
+            setImageOpacity((prev) => {
+              // Fade out outras e fade in esta
+              return { normal: 0, fall: 0, winter: 1 };
+            });
           }
         }}
       />
@@ -415,12 +487,13 @@ const Hero: React.FC<HeroProps> = ({
         muted={true}
         playsInline
         preload={season === "normal" ? "metadata" : "none"}
-        className="absolute inset-0 w-full h-full object-cover z-0 transition-opacity duration-1000 ease-in-out"
+        className={`${isChatOpen ? "fixed" : "absolute"} inset-0 w-full h-full object-cover z-0 transition-opacity duration-1000 ease-in-out`}
         style={{
           objectFit: "cover",
           objectPosition: "left top",
           opacity: videoOpacity.normal,
           pointerEvents: videoOpacity.normal === 0 ? "none" : "auto",
+          zIndex: isChatOpen ? 40 : 0,
         }}
         onError={() => {
           setVideoError((prev) => ({ ...prev, normal: true }));
@@ -440,12 +513,13 @@ const Hero: React.FC<HeroProps> = ({
         muted={true}
         playsInline
         preload={season === "fall" ? "metadata" : "none"}
-        className="absolute inset-0 w-full h-full object-cover z-0 transition-opacity duration-1000 ease-in-out"
+        className={`${isChatOpen ? "fixed" : "absolute"} inset-0 w-full h-full object-cover z-0 transition-opacity duration-1000 ease-in-out`}
         style={{
           objectFit: "cover",
           objectPosition: "left top",
           opacity: videoOpacity.fall,
           pointerEvents: videoOpacity.fall === 0 ? "none" : "auto",
+          zIndex: isChatOpen ? 40 : 0,
         }}
         onError={() => {
           setVideoError((prev) => ({ ...prev, fall: true }));
@@ -468,12 +542,13 @@ const Hero: React.FC<HeroProps> = ({
         muted={true}
         playsInline
         preload={season === "winter" ? "metadata" : "none"}
-        className="absolute inset-0 w-full h-full object-cover z-0 transition-opacity duration-1000 ease-in-out"
+        className={`${isChatOpen ? "fixed" : "absolute"} inset-0 w-full h-full object-cover z-0 transition-opacity duration-1000 ease-in-out`}
         style={{
           objectFit: "cover",
           objectPosition: "left top",
           opacity: videoOpacity.winter,
           pointerEvents: videoOpacity.winter === 0 ? "none" : "auto",
+          zIndex: isChatOpen ? 40 : 0,
         }}
         onError={() => {
           setVideoError((prev) => ({ ...prev, winter: true }));
@@ -490,17 +565,29 @@ const Hero: React.FC<HeroProps> = ({
       </video>
 
       <div className="max-w-[1400px] mx-auto px-2 sm:px-4 md:px-8 lg:px-12 xl:px-24 w-full relative z-20">
-        <div className="grid lg:grid-cols-2 gap-2 sm:gap-4 md:gap-6 lg:gap-8 items-center justify-items-center lg:justify-items-stretch">
-          {/* Cat Image - Left */}
+        <div className={gridClassName} suppressHydrationWarning>
+          {/* Cat Image - Left - Mantém visível quando chat está aberto */}
           <div
-            className="order-2 lg:order-1 flex justify-center lg:justify-start lg:items-start w-full max-w-full min-w-0"
+            className="order-2 lg:order-1 flex flex-col items-center lg:items-start w-full max-w-full min-w-0 gap-4"
             style={{ overflow: "visible", padding: "0 4px" }}
           >
-            <TamagotchiCat />
+            {(!isMounted || !isChatOpen) && (
+              <>
+                <TamagotchiCat />
+                {/* Botão "Fala Comigo" */}
+                <button
+                  onClick={() => setIsChatOpen(true)}
+                  className="bg-[var(--brand)] text-white px-8 py-4 rounded-2xl font-black text-lg uppercase tracking-wide border-b-4 border-[var(--brand-dark)] hover:brightness-110 active:border-b-0 active:translate-y-[4px] transition-all shadow-lg"
+                  suppressHydrationWarning
+                >
+                  {t("hero.talkToMe") || (language === "pt" ? "Fala Comigo" : "Talk to Me")}
+                </button>
+              </>
+            )}
           </div>
 
-          {/* Content - Right */}
-          <div className="order-1 lg:order-2 space-y-8 md:space-y-10 text-center lg:text-center w-full max-w-full px-2 sm:px-0">
+          {/* Content - Right - Ocultar quando chat está aberto */}
+          <div className={contentRightClassName} suppressHydrationWarning>
             {/* Logo */}
             <div className="flex flex-col items-center gap-4">
               <h1 className="sr-only">
@@ -514,38 +601,64 @@ const Hero: React.FC<HeroProps> = ({
               />
 
               {/* Social Media Buttons - Between logo and cloud */}
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-2">
                 <a
                   href="https://t.me/miaotokensol"
                   target="_blank"
                   rel="noopener nofollow"
-                  className="w-7 h-7 rounded-lg flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-2 border-[var(--border-color)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-all"
+                  className="w-12 h-12 rounded-lg flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-2 border-[var(--border-color)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-all"
                 >
-                  <Send size={14} />
+                  <Send size={22} />
                 </a>
                 <a
                   href="https://x.com/miaoonsol"
                   target="_blank"
                   rel="noopener nofollow"
-                  className="w-7 h-7 rounded-lg flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-2 border-[var(--border-color)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-all"
+                  className="w-12 h-12 rounded-lg flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-2 border-[var(--border-color)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-all"
                 >
-                  <Twitter size={14} />
+                  <Twitter size={22} />
                 </a>
                 <a
-                  href="https://www.instagram.com/miaotoken/"
+                  href="https://www.instagram.com/miaodotarmy"
                   target="_blank"
                   rel="noopener nofollow"
-                  className="w-7 h-7 rounded-lg flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-2 border-[var(--border-color)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-all"
+                  className="w-12 h-12 rounded-lg flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-2 border-[var(--border-color)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-all"
                 >
-                  <Instagram size={14} />
+                  <Instagram size={22} />
                 </a>
                 <a
-                  href="https://www.tiktok.com/@miaoonsol"
+                  href="https://www.tiktok.com/@miaodotarmy"
                   target="_blank"
                   rel="noopener nofollow"
-                  className="w-7 h-7 rounded-lg flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-2 border-[var(--border-color)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-all"
+                  className="w-12 h-12 rounded-lg flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-2 border-[var(--border-color)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-all"
                 >
-                  <TikTokIcon size={14} />
+                  <TikTokIcon size={22} />
+                </a>
+                <a
+                  href="https://www.facebook.com/miaodotarmy"
+                  target="_blank"
+                  rel="noopener nofollow"
+                  className="w-12 h-12 rounded-lg flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-2 border-[var(--border-color)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-all"
+                >
+                  <FacebookIcon size={22} />
+                </a>
+                <a
+                  href="https://discord.gg/eEKKm9Sh"
+                  target="_blank"
+                  rel="noopener nofollow"
+                  className="w-12 h-12 rounded-lg flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-2 border-[var(--border-color)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-all"
+                  title="Discord"
+                >
+                  <DiscordIcon size={22} />
+                </a>
+                <a
+                  href="https://www.youtube.com/@miaodotarmy"
+                  target="_blank"
+                  rel="noopener nofollow"
+                  className="w-12 h-12 rounded-lg flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-2 border-[var(--border-color)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-all"
+                  title="YouTube"
+                >
+                  <YoutubeIcon size={22} />
                 </a>
               </div>
             </div>
@@ -564,15 +677,15 @@ const Hero: React.FC<HeroProps> = ({
                 style={{
                   opacity: 1,
                   WebkitTextStroke: isDark
-                    ? "2px rgba(0, 0, 0, 1)"
-                    : "2px rgba(255, 255, 255, 1)",
+                    ? "4px rgba(0, 0, 0, 1)"
+                    : "4px rgba(255, 255, 255, 1)",
                   textStroke: isDark
-                    ? "2px rgba(0, 0, 0, 1)"
-                    : "2px rgba(255, 255, 255, 1)",
+                    ? "4px rgba(0, 0, 0, 1)"
+                    : "4px rgba(255, 255, 255, 1)",
                   paintOrder: "stroke fill",
                   textShadow: isDark
-                    ? "3px 3px 6px rgba(0, 0, 0, 0.7)"
-                    : "3px 3px 6px rgba(0, 0, 0, 0.4)",
+                    ? "3px 3px 6px rgba(0, 0, 0, 0.9)"
+                    : "3px 3px 6px rgba(0, 0, 0, 0.6)",
                   letterSpacing: "0.5px",
                 }}
               >
@@ -615,22 +728,19 @@ const Hero: React.FC<HeroProps> = ({
                     maxWidth: "100%",
                   }}
                 >
-                  {/* Left half - Mint green/Seafoam (Swap Chart) */}
+                  {/* Button - Mint green/Seafoam (Swap Chart) - Completely rounded */}
                   <button
                     onClick={onSwapChartClick}
                     className="font-bold uppercase tracking-wide text-sm md:text-base lg:text-lg text-white transition-all relative overflow-hidden"
                     style={{
                       background: "#52D48E",
-                      borderRight: "3px solid var(--capsule-border)",
-                      borderTopLeftRadius: "9999px",
-                      borderBottomLeftRadius: "9999px",
+                      borderRadius: "9999px",
                       direction: "ltr",
                       padding: "16px 16px",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      width: "50%",
-                      flex: "1 1 50%",
+                      width: "100%",
                       minHeight: "100%",
                     }}
                     onMouseEnter={(e) => {
@@ -689,83 +799,6 @@ const Hero: React.FC<HeroProps> = ({
                       {t("hero.swapChart")}
                     </span>
                   </button>
-
-                  {/* Right half - White (Pump.Fun) */}
-                  <a
-                    href="https://pump.fun/coin/8xpdiZ5GrnAdxpf7DSyZ1YXZxx6itvvoXPHZ4K2Epump"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-bold uppercase tracking-wide text-sm md:text-base lg:text-lg text-gray-800 transition-all relative overflow-hidden"
-                    style={{
-                      background: "#ffffff",
-                      borderLeft: "3px solid var(--capsule-border)",
-                      borderTopRightRadius: "9999px",
-                      borderBottomRightRadius: "9999px",
-                      direction: "ltr",
-                      padding: "16px 16px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      width: "50%",
-                      flex: "1 1 50%",
-                      minHeight: "100%",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = "#e5e5e5";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = "#ffffff";
-                    }}
-                  >
-                    {/* Internal shadow from bottom to left and right sides */}
-                    <div
-                      className="absolute bottom-0 left-0 right-0 pointer-events-none"
-                      style={{
-                        height: "25%",
-                        background:
-                          "linear-gradient(to top, rgba(0, 0, 0, 0.12) 0%, transparent 100%)",
-                      }}
-                    />
-                    <div
-                      className="absolute bottom-0 left-0 pointer-events-none"
-                      style={{
-                        width: "100%",
-                        height: "25%",
-                        background:
-                          "linear-gradient(to right, rgba(0, 0, 0, 0.08) 0%, transparent 100%)",
-                      }}
-                    />
-                    <div
-                      className="absolute bottom-0 right-0 pointer-events-none"
-                      style={{
-                        width: "100%",
-                        height: "25%",
-                        background:
-                          "linear-gradient(to left, rgba(0, 0, 0, 0.08) 0%, transparent 100%)",
-                      }}
-                    />
-                    {/* Highlight effect on white side */}
-                    <div
-                      className="absolute top-1 right-1 w-14 h-14 rounded-full pointer-events-none opacity-20"
-                      style={{
-                        background:
-                          "radial-gradient(circle, rgba(255,255,255,0.8) 0%, transparent 70%)",
-                        transform: "translate(20%, -20%)",
-                      }}
-                    />
-                    <span
-                      className="relative z-10 text-center w-full"
-                      style={{
-                        padding: "0 8px",
-                        lineHeight: "1.2",
-                        wordBreak: "break-word",
-                        hyphens: "auto",
-                        display: "block",
-                      }}
-                    >
-                      {t("hero.pumpfunButton")}
-                    </span>
-                  </a>
                 </div>
               </div>
 
@@ -775,24 +808,24 @@ const Hero: React.FC<HeroProps> = ({
                 style={{ direction: "ltr" }}
               >
                 <button
-                  onClick={onToolsClick}
-                  className="px-3 py-2 sm:px-4 sm:py-2.5 md:px-5 rounded-xl font-bold text-xs sm:text-sm uppercase tracking-wide bg-[var(--bg-secondary)] text-[var(--text-primary)] border-2 border-b-4 border-[var(--btn-shadow)] hover:bg-[var(--bg-tertiary)] hover:border-[var(--duo-green)] active:border-b-2 active:translate-y-[2px] transition-all flex items-center gap-1 sm:gap-1.5"
+                  disabled
+                  className="px-3 py-2 sm:px-4 sm:py-2.5 md:px-5 rounded-xl font-bold text-xs sm:text-sm uppercase tracking-wide bg-gray-400 text-white border-2 border-b-4 border-gray-500 cursor-not-allowed opacity-50 flex items-center gap-1 sm:gap-1.5"
                   style={{ direction: "ltr" }}
                 >
                   <Wrench size={14} className="sm:w-4 sm:h-4" />
                   <span className="whitespace-nowrap">{t("nav.tools")}</span>
                 </button>
                 <button
-                  onClick={onGamesClick}
-                  className="px-3 py-2 sm:px-4 sm:py-2.5 md:px-5 rounded-xl font-bold text-xs sm:text-sm uppercase tracking-wide bg-[var(--bg-secondary)] text-[var(--text-primary)] border-2 border-b-4 border-[var(--btn-shadow)] hover:bg-[var(--bg-tertiary)] hover:border-[var(--duo-orange)] active:border-b-2 active:translate-y-[2px] transition-all flex items-center gap-1 sm:gap-1.5"
+                  disabled
+                  className="px-3 py-2 sm:px-4 sm:py-2.5 md:px-5 rounded-xl font-bold text-xs sm:text-sm uppercase tracking-wide bg-gray-400 text-white border-2 border-b-4 border-gray-500 cursor-not-allowed opacity-50 flex items-center gap-1 sm:gap-1.5"
                   style={{ direction: "ltr" }}
                 >
                   <Gamepad2 size={14} className="sm:w-4 sm:h-4" />
                   <span className="whitespace-nowrap">{t("nav.games")}</span>
                 </button>
                 <button
-                  onClick={onWhitepaperClick}
-                  className="px-3 py-2 sm:px-4 sm:py-2.5 md:px-5 rounded-xl font-bold text-xs sm:text-sm uppercase tracking-wide bg-[var(--bg-secondary)] text-[var(--text-primary)] border-2 border-b-4 border-[var(--btn-shadow)] hover:bg-[var(--bg-tertiary)] hover:border-[var(--duo-blue)] active:border-b-2 active:translate-y-[2px] transition-all flex items-center gap-1 sm:gap-1.5"
+                  disabled
+                  className="px-3 py-2 sm:px-4 sm:py-2.5 md:px-5 rounded-xl font-bold text-xs sm:text-sm uppercase tracking-wide bg-gray-400 text-white border-2 border-b-4 border-gray-500 cursor-not-allowed opacity-50 flex items-center gap-1 sm:gap-1.5"
                   style={{ direction: "ltr" }}
                 >
                   <FileText size={14} className="sm:w-4 sm:h-4" />
@@ -805,6 +838,15 @@ const Hero: React.FC<HeroProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Visual Novel Chat */}
+      {(isMounted && isChatOpen) && (
+        <VisualNovelChat
+          isOpen={isChatOpen}
+          onClose={() => setIsChatOpen(false)}
+          videoRef={season === "normal" ? videoRef : season === "fall" ? videoRefFall : videoRefWinter}
+        />
+      )}
     </section>
   );
 };

@@ -50,6 +50,7 @@ export const translations: Record<Language, Record<string, string>> = {
     "hero.games": "Jogos MIAO",
     "hero.playEarn": "Jogar & Ganhar",
     "hero.play": "JOGAR",
+    "hero.talkToMe": "Fala Comigo",
 
     // Tokenomics
     "tokenomics.title": "Tokenomics",
@@ -179,6 +180,13 @@ export const translations: Record<Language, Record<string, string>> = {
     "generator.generationsToday": "Gerações Hoje",
     "generator.used": "utilizadas",
     "generator.dailyLimit": "Limite diário atingido. Volta amanhã!",
+    "generator.generationType": "Tipo de Geração",
+    "generator.image": "Imagem",
+    "generator.video": "Vídeo",
+    "generator.generateImage": "Gerar Imagem",
+    "generator.generateVideo": "Gerar Vídeo",
+    "generator.generatingImage": "A gerar imagem...",
+    "generator.generatingVideo": "A gerar vídeo...",
     "generator.prompt": "Prompt (texto)",
     "generator.promptPlaceholder": "Escreve algo para gerar a imagem",
     "generator.promptHint": "Dica: Descreve ações, trajes ou cenários para o gato verde!",
@@ -206,16 +214,28 @@ export const translations: Record<Language, Record<string, string>> = {
     "generator.pleaseAuthenticate": "Por favor, autentica-te primeiro para gerar imagens.",
     "generator.authNotAvailable": "Autenticação não disponível. Por favor, recarrega a página.",
     "generator.generationFailed": "Falha ao gerar a imagem. Tenta novamente.",
+    "generator.quotaExceeded": "Quota diária atingida. Por favor, autentica-te com outra conta para continuar a gerar imagens.",
+    "generator.quotaExceededTitle": "⚠️ Créditos Gratuitos Diários Esgotados",
+    "generator.quotaExceededMessage": "A tua conta atual atingiu o limite de créditos gratuitos diários. Podes autenticar-te com outra conta para continuar a gerar.",
+    "generator.authenticateWithDifferentAccount": "Autenticar com Outra Conta",
     "generator.puterNotAvailable": "Puter.ai não está disponível",
     "generator.shareError": "Erro ao partilhar:",
     "generator.unknownError": "Falha desconhecida",
     "generator.downloadFailed": "Falha ao descarregar a imagem.",
 
     // NFT Section
-    "nft.title": "Cunhar NFT MIAO",
-    "nft.description": "Nascidos das sombras das guerras dos memes, os NFT $MIAO incorporam furtividade e energia. Possui um símbolo de poder nas ruas.",
-    "nft.mintV1": "CUNHAR V1",
-    "nft.mintV2": "CUNHAR V2",
+    "nft.title": "Coleção NFT MIAO",
+    "nft.description": "Em breve estará disponível uma nova e considerada única coleção de NFTs. Todo o dinheiro será totalmente revertido em queimas e para marketing, nada para os developers. Um pouco de paciência.",
+    "nft.comingSoon": "Em Breve",
+
+    // Disclaimer Banner
+    "disclaimer.message": "⚠️ AVISO IMPORTANTE: Nova Equipa de Desenvolvimento - Clica para mais informações",
+    "disclaimer.close": "Fechar",
+    "disclaimer.modalTitle": "Sair da Página",
+    "disclaimer.modalMessage": "Estás prestes a sair da página para ser redirecionado para um comunicado da nova equipa de desenvolvimento na página Notion.",
+    "disclaimer.modalNote": "O comunicado contém informações importantes sobre a nova equipa e mudanças no projeto.",
+    "disclaimer.cancel": "Cancelar",
+    "disclaimer.confirm": "Continuar",
 
     // Games Page
     "games.playHaveFun": "Jogar e Divertir-se",
@@ -305,6 +325,31 @@ export const translations: Record<Language, Record<string, string>> = {
     "community.contractRenouncedDesc": "Não podemos alterá-lo mesmo que quiséssemos.",
     "community.noTreasury": "Sem Tesouraria",
     "community.noTreasuryDesc": "Sem carteira dev. Sem taxa de marketing. Puro caos.",
+
+    // Chat
+    "chat.miao": "Miao",
+    "chat.invalidParams": "Parâmetros inválidos. Por favor, tenta novamente!",
+    "chat.timeout": "Tempo de espera esgotado. O serviço pode estar ocupado. Tenta novamente mais tarde!",
+    "chat.serviceUnavailable": "Serviço temporariamente indisponível. Tenta novamente mais tarde!",
+    "chat.noResponse": "Não foi possível gerar uma resposta. Tenta novamente!",
+    "chat.tired": "Miau... Estou um pouco cansado agora 😴. Tenta novamente mais tarde, sim? Preciso de descansar um bocado!",
+    "chat.genericError": "Desculpa, não consegui gerar uma resposta. Tenta novamente!",
+    "chat.waitingWorkers": "A aguardar workers disponíveis...",
+    "chat.inQueue": "Na fila",
+    "chat.thinking": "Miao está a pensar...",
+    "chat.voiceMode": "Modo Voz",
+    "chat.textMode": "Modo Texto",
+    "chat.speaking": "A falar...",
+    "chat.clickToSpeak": "Clique no microfone para falar...",
+    "chat.typeMessage": "Escreve uma mensagem...",
+    "chat.editOrSend": "Edita ou envia a mensagem transcrita",
+    "chat.transcribed": "Texto transcrito",
+    "chat.waitCatFinish": "Aguarda o gato terminar de falar",
+    "chat.startRecording": "Iniciar gravação de voz",
+    "chat.stopRecording": "Parar gravação",
+    "chat.networkError": "Erro de rede: Verifica a tua ligação à internet e tenta novamente.",
+    "chat.play": "Reproduzir áudio",
+    "chat.pause": "Pausar áudio",
   },
 
   en: {
@@ -346,6 +391,7 @@ export const translations: Record<Language, Record<string, string>> = {
     "hero.games": "MIAO Games",
     "hero.playEarn": "Play & Earn",
     "hero.play": "PLAY",
+    "hero.talkToMe": "Talk to Me",
 
     // Tokenomics
     "tokenomics.title": "Tokenomics",
@@ -450,7 +496,7 @@ export const translations: Record<Language, Record<string, string>> = {
 
     // About
     "about.text": "When dogs barked and frogs leapt, everyone thought the meme wars were done. Yet in the shadows, something patient lingered. Behind every bark or croak came a sharp, knowing $MIAO that no one could ignore.",
-    "about.typewriter": "The streets aren't safe $MIAO is already watching.",
+    "about.typewriter": "The streets aren't safe... $MIAO is already watching.",
 
     // Tokenomics - Roadmap
     "tokenomics.roadmapTitle": "Roadmap",
@@ -475,6 +521,13 @@ export const translations: Record<Language, Record<string, string>> = {
     "generator.generationsToday": "Generations Today",
     "generator.used": "used",
     "generator.dailyLimit": "Daily limit reached. Come back tomorrow!",
+    "generator.generationType": "Generation Type",
+    "generator.image": "Image",
+    "generator.video": "Video",
+    "generator.generateImage": "Generate Image",
+    "generator.generateVideo": "Generate Video",
+    "generator.generatingImage": "Generating image...",
+    "generator.generatingVideo": "Generating video...",
     "generator.prompt": "Prompt (text)",
     "generator.promptPlaceholder": "Write something to generate the image",
     "generator.promptHint": "Tip: Describe actions, outfits or scenarios for the green cat!",
@@ -502,16 +555,28 @@ export const translations: Record<Language, Record<string, string>> = {
     "generator.pleaseAuthenticate": "Please authenticate first to generate images.",
     "generator.authNotAvailable": "Authentication not available. Please reload the page.",
     "generator.generationFailed": "Failed to generate image. Please try again.",
+    "generator.quotaExceeded": "Daily quota reached. Please authenticate with another account to continue generating images.",
+    "generator.quotaExceededTitle": "⚠️ Daily Free Credits Exhausted",
+    "generator.quotaExceededMessage": "Your current account has reached the daily free credits limit. You can authenticate with another account to continue generating.",
+    "generator.authenticateWithDifferentAccount": "Authenticate with Another Account",
     "generator.puterNotAvailable": "Puter.ai is not available",
     "generator.shareError": "Error sharing:",
     "generator.unknownError": "Unknown failure",
     "generator.downloadFailed": "Failed to download image.",
 
     // NFT Section
-    "nft.title": "Mint MIAO NFT",
-    "nft.description": "Born from the shadows of the meme wars, the $MIAO NFTs embody stealth and energy. Own a symbol of power in the streets.",
-    "nft.mintV1": "MINT V1",
-    "nft.mintV2": "MINT V2",
+    "nft.title": "MIAO NFT Collection",
+    "nft.description": "Coming soon, a new and considered unique NFT collection will be available. All money will be fully reverted to burns and marketing, nothing for developers. A little patience.",
+    "nft.comingSoon": "Coming Soon",
+
+    // Disclaimer Banner
+    "disclaimer.message": "⚠️ IMPORTANT NOTICE: New Development Team - Click for more information",
+    "disclaimer.close": "Close",
+    "disclaimer.modalTitle": "Leave Page",
+    "disclaimer.modalMessage": "You are about to leave the page to be redirected to a statement from the new development team on the Notion page.",
+    "disclaimer.modalNote": "The statement contains important information about the new team and changes to the project.",
+    "disclaimer.cancel": "Cancel",
+    "disclaimer.confirm": "Continue",
 
     // Games Page
     "games.playHaveFun": "Play & Have Fun",
@@ -601,6 +666,31 @@ export const translations: Record<Language, Record<string, string>> = {
     "community.contractRenouncedDesc": "We can't change it even if we tried.",
     "community.noTreasury": "No Treasury",
     "community.noTreasuryDesc": "No dev wallet. No marketing tax. Pure chaos.",
+
+    // Chat
+    "chat.miao": "Miao",
+    "chat.invalidParams": "Invalid parameters. Please try again!",
+    "chat.timeout": "Request timed out. The service may be busy. Please try again later!",
+    "chat.serviceUnavailable": "Service temporarily unavailable. Please try again later!",
+    "chat.noResponse": "Could not generate a response. Please try again!",
+    "chat.tired": "Meow... I'm a bit tired right now 😴. Try again later, okay? I need to rest a bit!",
+    "chat.genericError": "Sorry, I couldn't generate a response. Please try again!",
+    "chat.waitingWorkers": "Waiting for available workers...",
+    "chat.inQueue": "In queue",
+    "chat.thinking": "Miao is thinking...",
+    "chat.voiceMode": "Voice Mode",
+    "chat.textMode": "Text Mode",
+    "chat.speaking": "Speaking...",
+    "chat.clickToSpeak": "Click microphone to speak...",
+    "chat.typeMessage": "Type a message...",
+    "chat.editOrSend": "Edit or send transcribed message",
+    "chat.transcribed": "Transcribed text",
+    "chat.waitCatFinish": "Wait for cat to finish speaking",
+    "chat.startRecording": "Start voice recording",
+    "chat.stopRecording": "Stop recording",
+    "chat.networkError": "Network error: Please check your internet connection and try again.",
+    "chat.play": "Play audio",
+    "chat.pause": "Pause audio",
   },
 
   es: {
@@ -642,6 +732,7 @@ export const translations: Record<Language, Record<string, string>> = {
     "hero.games": "Juegos MIAO",
     "hero.playEarn": "Jugar & Ganar",
     "hero.play": "JUGAR",
+    "hero.talkToMe": "Habla Conmigo",
 
     // Tokenomics
     "tokenomics.title": "Tokenomics",
@@ -746,7 +837,7 @@ export const translations: Record<Language, Record<string, string>> = {
 
     // About
     "about.text": "Cuando los perros ladraban y las ranas saltaban, todos pensaban que las guerras de memes habían terminado. Pero en las sombras, algo paciente acechaba. Detrás de cada ladrido o croar venía un agudo y perspicaz $MIAO que nadie podía ignorar.",
-    "about.typewriter": "Las calles no son seguras $MIAO ya está observando.",
+    "about.typewriter": "Las calles no son seguras... $MIAO ya está observando.",
 
     // Tokenomics - Roadmap
     "tokenomics.roadmapTitle": "Roadmap",
@@ -771,6 +862,13 @@ export const translations: Record<Language, Record<string, string>> = {
     "generator.generationsToday": "Generaciones Hoy",
     "generator.used": "utilizadas",
     "generator.dailyLimit": "Límite diario alcanzado. ¡Vuelve mañana!",
+    "generator.generationType": "Tipo de Generación",
+    "generator.image": "Imagen",
+    "generator.video": "Vídeo",
+    "generator.generateImage": "Generar Imagen",
+    "generator.generateVideo": "Generar Vídeo",
+    "generator.generatingImage": "Generando imagen...",
+    "generator.generatingVideo": "Generando vídeo...",
     "generator.prompt": "Prompt (texto)",
     "generator.promptPlaceholder": "Escribe algo para generar la imagen",
     "generator.promptHint": "Consejo: ¡Describe acciones, atuendos o escenarios para el gato verde!",
@@ -798,16 +896,28 @@ export const translations: Record<Language, Record<string, string>> = {
     "generator.pleaseAuthenticate": "Por favor, autentícate primero para generar imágenes.",
     "generator.authNotAvailable": "Autenticación no disponible. Por favor, recarga la página.",
     "generator.generationFailed": "Error al generar la imagen. Por favor, inténtalo de nuevo.",
+    "generator.quotaExceeded": "Cuota diaria alcanzada. Por favor, autentícate con otra cuenta para continuar generando imágenes.",
+    "generator.quotaExceededTitle": "⚠️ Créditos Gratuitos Diarios Agotados",
+    "generator.quotaExceededMessage": "Tu cuenta actual ha alcanzado el límite de créditos gratuitos diarios. Puedes autenticarte con otra cuenta para continuar generando.",
+    "generator.authenticateWithDifferentAccount": "Autenticarse con Otra Cuenta",
     "generator.puterNotAvailable": "Puter.ai no está disponible",
     "generator.shareError": "Error al compartir:",
     "generator.unknownError": "Fallo desconocido",
     "generator.downloadFailed": "Error al descargar la imagen.",
 
     // NFT Section
-    "nft.title": "Acuñar NFT MIAO",
-    "nft.description": "Nacidos de las sombras de las guerras de memes, los NFT $MIAO encarnan sigilo y energía. Posee un símbolo de poder en las calles.",
-    "nft.mintV1": "ACUÑAR V1",
-    "nft.mintV2": "ACUÑAR V2",
+    "nft.title": "Colección NFT MIAO",
+    "nft.description": "Próximamente estará disponible una nueva y considerada única colección de NFTs. Todo el dinero será totalmente revertido en quemas y para marketing, nada para los desarrolladores. Un poco de paciencia.",
+    "nft.comingSoon": "Próximamente",
+
+    // Disclaimer Banner
+    "disclaimer.message": "⚠️ AVISO IMPORTANTE: Nuevo Equipo de Desarrollo - Haz clic para más información",
+    "disclaimer.close": "Cerrar",
+    "disclaimer.modalTitle": "Salir de la Página",
+    "disclaimer.modalMessage": "Estás a punto de salir de la página para ser redirigido a un comunicado del nuevo equipo de desarrollo en la página Notion.",
+    "disclaimer.modalNote": "El comunicado contiene información importante sobre el nuevo equipo y cambios en el proyecto.",
+    "disclaimer.cancel": "Cancelar",
+    "disclaimer.confirm": "Continuar",
 
     // Games Page
     "games.playHaveFun": "Juega y Diviértete",
@@ -897,6 +1007,31 @@ export const translations: Record<Language, Record<string, string>> = {
     "community.contractRenouncedDesc": "No podemos cambiarlo aunque quisiéramos.",
     "community.noTreasury": "Sin Tesorería",
     "community.noTreasuryDesc": "Sin cartera dev. Sin impuesto marketing. Puro caos.",
+
+    // Chat
+    "chat.miao": "Miao",
+    "chat.invalidParams": "Parámetros inválidos. ¡Por favor, intenta de nuevo!",
+    "chat.timeout": "Tiempo de espera agotado. El servicio puede estar ocupado. ¡Intenta de nuevo más tarde!",
+    "chat.serviceUnavailable": "Servicio temporalmente no disponible. ¡Intenta de nuevo más tarde!",
+    "chat.noResponse": "No se pudo generar una respuesta. ¡Intenta de nuevo!",
+    "chat.tired": "Miau... Estoy un poco cansado ahora 😴. ¡Inténtalo de nuevo más tarde! Necesito descansar un poco.",
+    "chat.genericError": "Lo siento, no pude generar una respuesta. ¡Intenta de nuevo!",
+    "chat.waitingWorkers": "Esperando trabajadores disponibles...",
+    "chat.inQueue": "En cola",
+    "chat.thinking": "Miao está pensando...",
+    "chat.voiceMode": "Modo Voz",
+    "chat.textMode": "Modo Texto",
+    "chat.speaking": "Hablando...",
+    "chat.clickToSpeak": "Haz clic en el micrófono para hablar...",
+    "chat.typeMessage": "Escribe un mensaje...",
+    "chat.editOrSend": "Edita o envía el mensaje transcrito",
+    "chat.transcribed": "Texto transcrito",
+    "chat.waitCatFinish": "Espera a que el gato termine de hablar",
+    "chat.startRecording": "Iniciar grabación de voz",
+    "chat.stopRecording": "Detener grabación",
+    "chat.networkError": "Error de red: Por favor verifica tu conexión a internet e intenta de nuevo.",
+    "chat.play": "Reproducir audio",
+    "chat.pause": "Pausar audio",
   },
 
   fr: {
@@ -938,6 +1073,7 @@ export const translations: Record<Language, Record<string, string>> = {
     "hero.games": "Jeux MIAO",
     "hero.playEarn": "Jouer & Gagner",
     "hero.play": "JOUER",
+    "hero.talkToMe": "Parle-Moi",
 
     // Tokenomics
     "tokenomics.title": "Tokenomics",
@@ -1042,7 +1178,7 @@ export const translations: Record<Language, Record<string, string>> = {
 
     // About
     "about.text": "Quand les chiens aboyaient et les grenouilles sautaient, tout le monde pensait que les guerres des mèmes étaient terminées. Mais dans l'ombre, quelque chose de patient guettait. Derrière chaque aboiement ou coassement venait un $MIAO tranchant et perspicace que personne ne pouvait ignorer.",
-    "about.typewriter": "Les rues ne sont pas sûres $MIAO surveille déjà.",
+    "about.typewriter": "Les rues ne sont pas sûres... $MIAO surveille déjà.",
 
     // Tokenomics - Roadmap
     "tokenomics.roadmapTitle": "Feuille de Route",
@@ -1067,6 +1203,13 @@ export const translations: Record<Language, Record<string, string>> = {
     "generator.generationsToday": "Générations Aujourd'hui",
     "generator.used": "utilisées",
     "generator.dailyLimit": "Limite quotidienne atteinte. Revenez demain!",
+    "generator.generationType": "Type de Génération",
+    "generator.image": "Image",
+    "generator.video": "Vidéo",
+    "generator.generateImage": "Générer l'Image",
+    "generator.generateVideo": "Générer la Vidéo",
+    "generator.generatingImage": "Génération de l'image...",
+    "generator.generatingVideo": "Génération de la vidéo...",
     "generator.prompt": "Prompt (texte)",
     "generator.promptPlaceholder": "Écrivez quelque chose pour générer l'image",
     "generator.promptHint": "Astuce: Décrivez des actions, des tenues ou des scénarios pour le chat vert!",
@@ -1094,16 +1237,28 @@ export const translations: Record<Language, Record<string, string>> = {
     "generator.pleaseAuthenticate": "Veuillez vous authentifier d'abord pour générer des images.",
     "generator.authNotAvailable": "Authentification non disponible. Veuillez recharger la page.",
     "generator.generationFailed": "Échec de la génération d'image. Veuillez réessayer.",
+    "generator.quotaExceeded": "Quota quotidienne atteinte. Veuillez vous authentifier avec un autre compte pour continuer à générer des images.",
+    "generator.quotaExceededTitle": "⚠️ Crédits Gratuits Quotidiens Épuisés",
+    "generator.quotaExceededMessage": "Votre compte actuel a atteint la limite de crédits gratuits quotidiens. Vous pouvez vous authentifier avec un autre compte pour continuer à générer.",
+    "generator.authenticateWithDifferentAccount": "S'authentifier avec un Autre Compte",
     "generator.puterNotAvailable": "Puter.ai n'est pas disponible",
     "generator.shareError": "Erreur lors du partage:",
     "generator.unknownError": "Échec inconnu",
     "generator.downloadFailed": "Échec du téléchargement de l'image.",
 
     // NFT Section
-    "nft.title": "Créer NFT MIAO",
-    "nft.description": "Nés de l'ombre des guerres de mèmes, les NFT $MIAO incarnent la furtivité et l'énergie. Possédez un symbole de pouvoir dans les rues.",
-    "nft.mintV1": "CRÉER V1",
-    "nft.mintV2": "CRÉER V2",
+    "nft.title": "Collection NFT MIAO",
+    "nft.description": "Bientôt, une nouvelle collection de NFT considérée comme unique sera disponible. Tout l'argent sera entièrement reversé aux brûlures et au marketing, rien pour les développeurs. Un peu de patience.",
+    "nft.comingSoon": "Bientôt",
+
+    // Disclaimer Banner
+    "disclaimer.message": "⚠️ AVIS IMPORTANT: Nouvelle Équipe de Développement - Cliquez pour plus d'informations",
+    "disclaimer.close": "Fermer",
+    "disclaimer.modalTitle": "Quitter la Page",
+    "disclaimer.modalMessage": "Vous êtes sur le point de quitter la page pour être redirigé vers une déclaration de la nouvelle équipe de développement sur la page Notion.",
+    "disclaimer.modalNote": "La déclaration contient des informations importantes sur la nouvelle équipe et les changements du projet.",
+    "disclaimer.cancel": "Annuler",
+    "disclaimer.confirm": "Continuer",
 
     // Games Page
     "games.playHaveFun": "Jouer et S'Amuser",
@@ -1193,6 +1348,31 @@ export const translations: Record<Language, Record<string, string>> = {
     "community.contractRenouncedDesc": "Nous ne pouvons pas le changer même si nous essayions.",
     "community.noTreasury": "Pas de Trésorerie",
     "community.noTreasuryDesc": "Pas de portefeuille dev. Pas de taxe marketing. Pur chaos.",
+
+    // Chat
+    "chat.miao": "Miao",
+    "chat.invalidParams": "Paramètres invalides. Veuillez réessayer!",
+    "chat.timeout": "Délai d'attente expiré. Le service peut être occupé. Veuillez réessayer plus tard!",
+    "chat.serviceUnavailable": "Service temporairement indisponible. Veuillez réessayer plus tard!",
+    "chat.noResponse": "Impossible de générer une réponse. Veuillez réessayer!",
+    "chat.tired": "Miaou... Je suis un peu fatigué maintenant 😴. Réessaye plus tard, d'accord? J'ai besoin de me reposer un peu!",
+    "chat.genericError": "Désolé, je n'ai pas pu générer une réponse. Veuillez réessayer!",
+    "chat.waitingWorkers": "En attente de workers disponibles...",
+    "chat.inQueue": "En file d'attente",
+    "chat.thinking": "Miao réfléchit...",
+    "chat.voiceMode": "Mode Vocal",
+    "chat.textMode": "Mode Texte",
+    "chat.speaking": "Parle...",
+    "chat.clickToSpeak": "Cliquez sur le microphone pour parler...",
+    "chat.typeMessage": "Tapez un message...",
+    "chat.editOrSend": "Modifiez ou envoyez le message transcrit",
+    "chat.transcribed": "Texte transcrit",
+    "chat.waitCatFinish": "Attendez que le chat finisse de parler",
+    "chat.startRecording": "Démarrer l'enregistrement vocal",
+    "chat.stopRecording": "Arrêter l'enregistrement",
+    "chat.networkError": "Erreur réseau: Veuillez vérifier votre connexion internet et réessayer.",
+    "chat.play": "Lire l'audio",
+    "chat.pause": "Mettre en pause",
   },
 
   de: {
@@ -1339,7 +1519,7 @@ export const translations: Record<Language, Record<string, string>> = {
 
     // About
     "about.text": "Als die Hunde bellten und die Frösche sprangen, dachten alle, die Meme-Kriege seien vorbei. Doch im Schatten lauerte etwas Geduldiges. Hinter jedem Bellen oder Quaken kam ein scharfes, wissendes $MIAO, das niemand ignorieren konnte.",
-    "about.typewriter": "Die Straßen sind nicht sicher $MIAO beobachtet bereits.",
+    "about.typewriter": "Die Straßen sind nicht sicher... $MIAO beobachtet bereits.",
 
     // Tokenomics - Roadmap
     "tokenomics.roadmapTitle": "Roadmap",
@@ -1364,6 +1544,13 @@ export const translations: Record<Language, Record<string, string>> = {
     "generator.generationsToday": "Generationen Heute",
     "generator.used": "verwendet",
     "generator.dailyLimit": "Tageslimit erreicht. Komm morgen wieder!",
+    "generator.generationType": "Generierungstyp",
+    "generator.image": "Bild",
+    "generator.video": "Video",
+    "generator.generateImage": "Bild Generieren",
+    "generator.generateVideo": "Video Generieren",
+    "generator.generatingImage": "Bild wird generiert...",
+    "generator.generatingVideo": "Video wird generiert...",
     "generator.prompt": "Prompt (Text)",
     "generator.promptPlaceholder": "Schreibe etwas, um das Bild zu generieren",
     "generator.promptHint": "Tipp: Beschreibe Aktionen, Outfits oder Szenarien für die grüne Katze!",
@@ -1391,16 +1578,28 @@ export const translations: Record<Language, Record<string, string>> = {
     "generator.pleaseAuthenticate": "Bitte authentifiziere dich zuerst, um Bilder zu generieren.",
     "generator.authNotAvailable": "Authentifizierung nicht verfügbar. Bitte lade die Seite neu.",
     "generator.generationFailed": "Bildgenerierung fehlgeschlagen. Bitte versuche es erneut.",
+    "generator.quotaExceeded": "Tageslimit erreicht. Bitte authentifizieren Sie sich mit einem anderen Konto, um weiterhin Bilder zu generieren.",
+    "generator.quotaExceededTitle": "⚠️ Tägliche Kostenlose Credits Aufgebraucht",
+    "generator.quotaExceededMessage": "Ihr aktuelles Konto hat das tägliche Limit für kostenlose Credits erreicht. Sie können sich mit einem anderen Konto authentifizieren, um weiter zu generieren.",
+    "generator.authenticateWithDifferentAccount": "Mit Anderem Konto Authentifizieren",
     "generator.puterNotAvailable": "Puter.ai ist nicht verfügbar",
     "generator.shareError": "Fehler beim Teilen:",
     "generator.unknownError": "Unbekannter Fehler",
     "generator.downloadFailed": "Bild konnte nicht heruntergeladen werden.",
 
     // NFT Section
-    "nft.title": "MIAO NFT Prägen",
-    "nft.description": "Aus den Schatten der Meme-Kriege geboren, verkörpern die $MIAO NFTs Heimlichkeit und Energie. Besitze ein Symbol der Macht auf den Straßen.",
-    "nft.mintV1": "PRÄGEN V1",
-    "nft.mintV2": "PRÄGEN V2",
+    "nft.title": "MIAO NFT-Sammlung",
+    "nft.description": "Bald wird eine neue und als einzigartig geltende NFT-Sammlung verfügbar sein. Alles Geld wird vollständig für Verbrennungen und Marketing verwendet, nichts für Entwickler. Ein wenig Geduld.",
+    "nft.comingSoon": "Demnächst",
+
+    // Disclaimer Banner
+    "disclaimer.message": "⚠️ WICHTIGER HINWEIS: Neues Entwicklungsteam - Klicken Sie für weitere Informationen",
+    "disclaimer.close": "Schließen",
+    "disclaimer.modalTitle": "Seite Verlassen",
+    "disclaimer.modalMessage": "Sie sind dabei, die Seite zu verlassen, um zu einer Erklärung des neuen Entwicklungsteams auf der Notion-Seite weitergeleitet zu werden.",
+    "disclaimer.modalNote": "Die Erklärung enthält wichtige Informationen über das neue Team und Änderungen am Projekt.",
+    "disclaimer.cancel": "Abbrechen",
+    "disclaimer.confirm": "Fortfahren",
 
     // Games Page
     "games.playHaveFun": "Spielen & Spaß Haben",
@@ -1490,6 +1689,31 @@ export const translations: Record<Language, Record<string, string>> = {
     "community.contractRenouncedDesc": "Wir können es nicht ändern, selbst wenn wir es versuchen.",
     "community.noTreasury": "Keine Schatzkammer",
     "community.noTreasuryDesc": "Kein Dev-Wallet. Keine Marketing-Steuer. Reines Chaos.",
+
+    // Chat
+    "chat.miao": "Miao",
+    "chat.invalidParams": "Ungültige Parameter. Bitte versuche es erneut!",
+    "chat.timeout": "Zeitüberschreitung. Der Dienst kann beschäftigt sein. Bitte versuche es später erneut!",
+    "chat.serviceUnavailable": "Dienst vorübergehend nicht verfügbar. Bitte versuche es später erneut!",
+    "chat.noResponse": "Konnte keine Antwort generieren. Bitte versuche es erneut!",
+    "chat.tired": "Miau... Ich bin gerade ein bisschen müde 😴. Versuche es später noch einmal, okay? Ich muss mich ein bisschen ausruhen!",
+    "chat.genericError": "Entschuldigung, ich konnte keine Antwort generieren. Bitte versuche es erneut!",
+    "chat.waitingWorkers": "Warte auf verfügbare Worker...",
+    "chat.inQueue": "In Warteschlange",
+    "chat.thinking": "Miao denkt nach...",
+    "chat.voiceMode": "Sprachmodus",
+    "chat.textMode": "Textmodus",
+    "chat.speaking": "Spricht...",
+    "chat.clickToSpeak": "Klicke auf das Mikrofon zum Sprechen...",
+    "chat.typeMessage": "Nachricht eingeben...",
+    "chat.editOrSend": "Transkribierte Nachricht bearbeiten oder senden",
+    "chat.transcribed": "Transkribierter Text",
+    "chat.waitCatFinish": "Warte bis die Katze fertig gesprochen hat",
+    "chat.startRecording": "Sprachanalyse starten",
+    "chat.stopRecording": "Aufnahme stoppen",
+    "chat.networkError": "Netzwerkfehler: Bitte überprüfe deine Internetverbindung und versuche es erneut.",
+    "chat.play": "Audio abspielen",
+    "chat.pause": "Audio pausieren",
   },
 
   zh: {
@@ -1531,6 +1755,7 @@ export const translations: Record<Language, Record<string, string>> = {
     "hero.games": "MIAO 游戏",
     "hero.playEarn": "边玩边赚",
     "hero.play": "开玩",
+    "hero.talkToMe": "和我说话",
 
     // Tokenomics
     "tokenomics.title": "代币经济",
@@ -1634,7 +1859,7 @@ export const translations: Record<Language, Record<string, string>> = {
 
     // About
     "about.text": "当狗在叫，青蛙在跳，所有人都以为梗币战争结束了。然而在暗处，有什么东西在耐心等待。每一声吠叫或呱呱声背后，都传来一声尖锐而深知的$MIAO，没人能忽视。",
-    "about.typewriter": "街道不安全 $MIAO已经在观察。",
+    "about.typewriter": "街道不安全... $MIAO已经在观察。",
 
     // Tokenomics - Roadmap
     "tokenomics.roadmapTitle": "路线图",
@@ -1659,6 +1884,13 @@ export const translations: Record<Language, Record<string, string>> = {
     "generator.generationsToday": "今日生成",
     "generator.used": "已使用",
     "generator.dailyLimit": "达到每日限制。明天再来！",
+    "generator.generationType": "生成类型",
+    "generator.image": "图像",
+    "generator.video": "视频",
+    "generator.generateImage": "生成图像",
+    "generator.generateVideo": "生成视频",
+    "generator.generatingImage": "正在生成图像...",
+    "generator.generatingVideo": "正在生成视频...",
     "generator.prompt": "提示（文本）",
     "generator.promptPlaceholder": "写点什么来生成图像",
     "generator.promptHint": "提示：描述绿色猫的动作、服装或场景！",
@@ -1686,16 +1918,28 @@ export const translations: Record<Language, Record<string, string>> = {
     "generator.pleaseAuthenticate": "请先进行身份验证以生成图像。",
     "generator.authNotAvailable": "身份验证不可用。请重新加载页面。",
     "generator.generationFailed": "图像生成失败。请重试。",
+    "generator.quotaExceeded": "已达到每日配额。请使用其他账户登录以继续生成图像。",
+    "generator.quotaExceededTitle": "⚠️ 每日免费积分已用完",
+    "generator.quotaExceededMessage": "您当前的账户已达到每日免费积分限制。您可以使用其他账户登录以继续生成。",
+    "generator.authenticateWithDifferentAccount": "使用其他账户登录",
     "generator.puterNotAvailable": "Puter.ai 不可用",
     "generator.shareError": "分享错误：",
     "generator.unknownError": "未知错误",
     "generator.downloadFailed": "下载图像失败。",
 
     // NFT Section
-    "nft.title": "铸造MIAO NFT",
-    "nft.description": "从梗币战争的阴影中诞生，$MIAO NFT体现了隐秘和能量。在街道上拥有权力的象征。",
-    "nft.mintV1": "铸造V1",
-    "nft.mintV2": "铸造V2",
+    "nft.title": "MIAO NFT收藏",
+    "nft.description": "即将推出一个全新的、被认为是独特的NFT收藏。所有资金将完全用于销毁和营销，不用于开发人员。请稍加耐心。",
+    "nft.comingSoon": "即将推出",
+
+    // Disclaimer Banner
+    "disclaimer.message": "⚠️ 重要通知：新开发团队 - 点击了解更多信息",
+    "disclaimer.close": "关闭",
+    "disclaimer.modalTitle": "离开页面",
+    "disclaimer.modalMessage": "您即将离开页面，将被重定向到Notion页面上新开发团队的声明。",
+    "disclaimer.modalNote": "该声明包含有关新团队和项目变更的重要信息。",
+    "disclaimer.cancel": "取消",
+    "disclaimer.confirm": "继续",
 
     // Games Page
     "games.playHaveFun": "游戏与娱乐",
@@ -1785,6 +2029,31 @@ export const translations: Record<Language, Record<string, string>> = {
     "community.contractRenouncedDesc": "即使我们想改也改不了。",
     "community.noTreasury": "无金库",
     "community.noTreasuryDesc": "无开发钱包。无营销税。纯粹混乱。",
+
+    // Chat
+    "chat.miao": "Miao",
+    "chat.invalidParams": "参数无效。请重试！",
+    "chat.timeout": "请求超时。服务可能很忙。请稍后再试！",
+    "chat.serviceUnavailable": "服务暂时不可用。请稍后再试！",
+    "chat.noResponse": "无法生成响应。请重试！",
+    "chat.tired": "喵...我现在有点累了😴。稍后再试，好吗？我需要休息一下！",
+    "chat.genericError": "抱歉，我无法生成响应。请重试！",
+    "chat.waitingWorkers": "等待可用工作节点...",
+    "chat.inQueue": "排队中",
+    "chat.thinking": "Miao正在思考...",
+    "chat.voiceMode": "语音模式",
+    "chat.textMode": "文本模式",
+    "chat.speaking": "正在说话...",
+    "chat.clickToSpeak": "点击麦克风说话...",
+    "chat.typeMessage": "输入消息...",
+    "chat.editOrSend": "编辑或发送转录的消息",
+    "chat.transcribed": "转录文本",
+    "chat.waitCatFinish": "等待猫说完",
+    "chat.startRecording": "开始语音录制",
+    "chat.stopRecording": "停止录制",
+    "chat.networkError": "网络错误：请检查您的互联网连接并重试。",
+    "chat.play": "播放音频",
+    "chat.pause": "暂停音频",
   },
 
   ar: {
@@ -1826,6 +2095,7 @@ export const translations: Record<Language, Record<string, string>> = {
     "hero.games": "ألعاب MIAO",
     "hero.playEarn": "العب واربح",
     "hero.play": "العب",
+    "hero.talkToMe": "تحدث معي",
 
     // Tokenomics
     "tokenomics.title": "اقتصاد الرمز",
@@ -1954,6 +2224,13 @@ export const translations: Record<Language, Record<string, string>> = {
     "generator.generationsToday": "الأجيال اليوم",
     "generator.used": "مستخدمة",
     "generator.dailyLimit": "تم الوصول إلى الحد اليومي. عد غداً!",
+    "generator.generationType": "نوع التوليد",
+    "generator.image": "صورة",
+    "generator.video": "فيديو",
+    "generator.generateImage": "توليد الصورة",
+    "generator.generateVideo": "توليد الفيديو",
+    "generator.generatingImage": "جارٍ توليد الصورة...",
+    "generator.generatingVideo": "جارٍ توليد الفيديو...",
     "generator.prompt": "الموجه (نص)",
     "generator.promptPlaceholder": "اكتب شيئاً لتوليد الصورة",
     "generator.promptHint": "نصيحة: صف الإجراءات أو الملابس أو السيناريوهات للقط الأخضر!",
@@ -1981,16 +2258,28 @@ export const translations: Record<Language, Record<string, string>> = {
     "generator.pleaseAuthenticate": "يرجى المصادقة أولاً لإنشاء الصور.",
     "generator.authNotAvailable": "المصادقة غير متاحة. يرجى إعادة تحميل الصفحة.",
     "generator.generationFailed": "فشل إنشاء الصورة. يرجى المحاولة مرة أخرى.",
+    "generator.quotaExceeded": "تم الوصول إلى الحصة اليومية. يرجى المصادقة بحساب آخر للمتابعة في إنشاء الصور.",
+    "generator.quotaExceededTitle": "⚠️ تم استنفاد الرصيد المجاني اليومي",
+    "generator.quotaExceededMessage": "وصل حسابك الحالي إلى حد الرصيد المجاني اليومي. يمكنك المصادقة بحساب آخر للمتابعة في الإنشاء.",
+    "generator.authenticateWithDifferentAccount": "المصادقة بحساب آخر",
     "generator.puterNotAvailable": "Puter.ai غير متاح",
     "generator.shareError": "خطأ في المشاركة:",
     "generator.unknownError": "فشل غير معروف",
     "generator.downloadFailed": "فشل تحميل الصورة.",
 
     // NFT Section
-    "nft.title": "سك NFT MIAO",
-    "nft.description": "ولدت من ظلال حروب الميم، تجسد $MIAO NFT التخفي والطاقة. امتلك رمزاً للقوة في الشوارع.",
-    "nft.mintV1": "سك V1",
-    "nft.mintV2": "سك V2",
+    "nft.title": "مجموعة NFT MIAO",
+    "nft.description": "قريباً ستكون مجموعة NFT جديدة وفريدة من نوعها متاحة. سيتم تحويل جميع الأموال بالكامل إلى الحرق والتسويق، ولا شيء للمطورين. القليل من الصبر.",
+    "nft.comingSoon": "قريباً",
+
+    // Disclaimer Banner
+    "disclaimer.message": "⚠️ إشعار مهم: فريق التطوير الجديد - انقر للمزيد من المعلومات",
+    "disclaimer.close": "إغلاق",
+    "disclaimer.modalTitle": "مغادرة الصفحة",
+    "disclaimer.modalMessage": "أنت على وشك مغادرة الصفحة ليتم إعادة توجيهك إلى بيان من فريق التطوير الجديد في صفحة Notion.",
+    "disclaimer.modalNote": "يحتوي البيان على معلومات مهمة حول الفريق الجديد والتغييرات في المشروع.",
+    "disclaimer.cancel": "إلغاء",
+    "disclaimer.confirm": "متابعة",
 
     // Games Page
     "games.playHaveFun": "العب واستمتع",
@@ -2080,6 +2369,31 @@ export const translations: Record<Language, Record<string, string>> = {
     "community.contractRenouncedDesc": "لا يمكننا تغييره حتى لو حاولنا.",
     "community.noTreasury": "لا خزينة",
     "community.noTreasuryDesc": "لا محفظة مطور. لا ضريبة تسويق. فوضى نقية.",
+
+    // Chat
+    "chat.miao": "مياو",
+    "chat.invalidParams": "معاملات غير صالحة. يرجى المحاولة مرة أخرى!",
+    "chat.timeout": "انتهت مهلة الطلب. قد تكون الخدمة مشغولة. يرجى المحاولة مرة أخرى لاحقاً!",
+    "chat.serviceUnavailable": "الخدمة غير متاحة مؤقتاً. يرجى المحاولة مرة أخرى لاحقاً!",
+    "chat.noResponse": "تعذر إنشاء رد. يرجى المحاولة مرة أخرى!",
+    "chat.tired": "مياو... أنا متعب قليلاً الآن 😴. حاول مرة أخرى لاحقاً، حسناً؟ أحتاج للراحة قليلاً!",
+    "chat.genericError": "آسف، لم أتمكن من إنشاء رد. يرجى المحاولة مرة أخرى!",
+    "chat.waitingWorkers": "في انتظار العمال المتاحين...",
+    "chat.inQueue": "في قائمة الانتظار",
+    "chat.thinking": "مياو يفكر...",
+    "chat.voiceMode": "وضع الصوت",
+    "chat.textMode": "وضع النص",
+    "chat.speaking": "يتحدث...",
+    "chat.clickToSpeak": "انقر على الميكروفون للتحدث...",
+    "chat.typeMessage": "اكتب رسالة...",
+    "chat.editOrSend": "قم بتحرير أو إرسال الرسالة المكتوبة",
+    "chat.transcribed": "نص مكتوب",
+    "chat.waitCatFinish": "انتظر حتى ينتهي القط من الكلام",
+    "chat.startRecording": "بدء تسجيل الصوت",
+    "chat.stopRecording": "إيقاف التسجيل",
+    "chat.networkError": "خطأ في الشبكة: يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى.",
+    "chat.play": "تشغيل الصوت",
+    "chat.pause": "إيقاف الصوت",
   },
 }
 

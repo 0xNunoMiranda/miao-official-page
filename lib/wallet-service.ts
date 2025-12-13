@@ -19,10 +19,16 @@ declare global {
     phantom?: {
       solana?: {
         isPhantom?: boolean
-        connect: () => Promise<{ publicKey: { toString: () => string } }>
+        connect: (options?: { onlyIfTrusted?: boolean }) => Promise<{ publicKey: { toString: () => string } }>
         disconnect: () => Promise<void>
         connection: unknown
       }
+    }
+    solana?: {
+      isPhantom?: boolean
+      connect: (options?: { onlyIfTrusted?: boolean }) => Promise<{ publicKey: { toString: () => string } }>
+      disconnect: () => Promise<void>
+      isConnected?: boolean
     }
     solflare?: {
       isSolflare?: boolean
@@ -63,7 +69,8 @@ export function isWalletInstalled(walletType: WalletType): boolean {
   if (typeof window === "undefined") return false
   switch (walletType) {
     case "phantom":
-      return !!window.phantom?.solana?.isPhantom
+      // Phantom pode estar em window.solana ou window.phantom.solana
+      return !!(window.solana?.isPhantom || window.phantom?.solana?.isPhantom)
     case "solflare":
       return !!window.solflare?.isSolflare
     case "backpack":
@@ -101,8 +108,25 @@ export async function connectWallet(walletType: WalletType, timeoutMs = 30000): 
     const connectionPromise = (async () => {
       switch (walletType) {
         case "phantom": {
-          const resp = await window.phantom!.solana!.connect()
-          address = resp.publicKey.toString()
+          // Prioritize window.phantom.solana as it is specific to Phantom
+          const phantomProvider = window.phantom?.solana || (window.solana?.isPhantom ? window.solana : null)
+          
+          if (!phantomProvider) {
+            throw new Error("Phantom wallet not found")
+          }
+
+          try {
+            // Forçar popup mesmo em localhost usando onlyIfTrusted: false
+            const resp = await phantomProvider.connect({ onlyIfTrusted: false })
+            address = resp.publicKey.toString()
+          } catch (err: any) {
+            console.error("Phantom connection error:", err)
+            if (err?.code === 4001) {
+              throw new Error("User rejected the request")
+            }
+            const message = err instanceof Error ? err.message : (typeof err === 'object' && err?.message ? String(err.message) : String(err))
+            throw new Error(message || "Failed to connect to Phantom")
+          }
           break
         }
         case "solflare": {
@@ -159,7 +183,10 @@ export async function connectWallet(walletType: WalletType, timeoutMs = 30000): 
 
 export async function getSolBalance(address: string): Promise<number> {
   try {
-    const response = await fetch("https://api.mainnet-beta.solana.com", {
+    // Usar RPC alternativo se disponível, ou mainnet estável
+    const rpcUrl = process.env.NEXT_PUBLIC_SOLANA_RPC_URL || "https://api.mainnet.solana.com"
+    
+    const response = await fetch(rpcUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -169,9 +196,18 @@ export async function getSolBalance(address: string): Promise<number> {
         params: [address],
       }),
     })
+    
+    if (!response.ok) {
+      // Se der erro (403, etc), retorna 0 silenciosamente
+      console.warn(`[WALLET] Failed to get balance from RPC (${response.status}):`, response.statusText)
+      return 0
+    }
+    
     const data = await response.json()
     return (data.result?.value || 0) / 1e9
-  } catch {
+  } catch (error) {
+    // Falha silenciosamente - balance não é crítico para a conexão
+    console.warn('[WALLET] Error getting balance:', error instanceof Error ? error.message : 'Unknown error')
     return 0
   }
 }
@@ -179,9 +215,14 @@ export async function getSolBalance(address: string): Promise<number> {
 export async function disconnectWallet(walletType: WalletType): Promise<void> {
   try {
     switch (walletType) {
-      case "phantom":
-        await window.phantom?.solana?.disconnect()
+      case "phantom": {
+        // Phantom pode estar em window.solana ou window.phantom.solana
+        const phantomProvider = window.phantom?.solana || (window.solana?.isPhantom ? window.solana : null)
+        if (phantomProvider) {
+          await phantomProvider.disconnect()
+        }
         break
+      }
       case "solflare":
         await window.solflare?.disconnect()
         break
