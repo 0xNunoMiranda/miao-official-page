@@ -1,8 +1,8 @@
 // API Route para gerar texto com streaming de progresso usando Hugging Face
 import { generateTextWithHuggingFace } from "@/lib/huggingface-text-generator"
 
-// Configurar timeout de 30 minutos para esta rota
-export const maxDuration = 1800 // 30 minutos em segundos
+// Configurar timeout máximo permitido pelo plano Pro do Vercel
+export const maxDuration = 800 // Máximo permitido: 800 segundos (~13 minutos)
 
 // Blocked content patterns - filtro robusto para manter apenas conversas sobre gatos e memecoins
 const BLOCKED_CONTENT_PATTERNS = [
