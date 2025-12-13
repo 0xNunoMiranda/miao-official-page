@@ -643,7 +643,7 @@ const Hero: React.FC<HeroProps> = ({
                   <FacebookIcon size={22} />
                 </a>
                 <a
-                  href="https://discord.gg/eEKKm9Sh"
+                  href="https://discord.gg/J57VTQh2hX"
                   target="_blank"
                   rel="noopener nofollow"
                   className="w-12 h-12 rounded-lg flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-2 border-[var(--border-color)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-all"
