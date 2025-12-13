@@ -37,6 +37,24 @@ const TikTokIcon = ({ size = 20 }: { size?: number }) => (
   </svg>
 );
 
+const FacebookIcon = ({ size = 20 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+  </svg>
+);
+
+const DiscordIcon = ({ size = 20 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 512 512" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+    <path d="m386 137c-24-11-49.5-19-76.3-23.7c-.5 0-1 0-1.2.6c-3.3 5.9-7 13.5-9.5 19.5c-29-4.3-57.5-4.3-85.7 0c-2.6-6.2-6.3-13.7-10-19.5c-.3-.4-.7-.7-1.2-.6c-23 4.6-52.4 13-76 23.7c-.2 0-.4.2-.5.4c-49 73-62 143-55 213c0 .3.2.7.5 1c32 23.6 63 38 93.6 47.3c.5 0 1 0 1.3-.4c7.2-9.8 13.6-20.2 19.2-31.2c.3-.6 0-1.4-.7-1.6c-10-4-20-8.6-29.3-14c-.7-.4-.8-1.5 0-2c2-1.5 4-3 5.8-4.5c.3-.3.8-.3 1.2-.2c61.4 28 128 28 188 0c.4-.2.9-.1 1.2.1c1.9 1.6 3.8 3.1 5.8 4.6c.7.5.6 1.6 0 2c-9.3 5.5-19 10-29.3 14c-.7.3-1 1-.6 1.7c5.6 11 12.1 21.3 19 31c.3.4.8.6 1.3.4c30.6-9.5 61.7-23.8 93.8-47.3c.3-.2.5-.5.5-1c7.8-80.9-13.1-151-55.4-213c0-.2-.3-.4-.5-.4Zm-192 171c-19 0-34-17-34-38c0-21 15-38 34-38c19 0 34 17 34 38c0 21-15 38-34 38zm125 0c-19 0-34-17-34-38c0-21 15-38 34-38c19 0 34 17 34 38c0 21-15 38-34 38z"/>
+  </svg>
+);
+
+const YoutubeIcon = ({ size = 20 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+  </svg>
+);
+
 const TypewriterText = ({ text }: { text: string }) => {
   const [displayText, setDisplayText] = useState("");
   const [isTyping, setIsTyping] = useState(true);
@@ -601,7 +619,7 @@ const Hero: React.FC<HeroProps> = ({
                   <Twitter size={22} />
                 </a>
                 <a
-                  href="https://www.instagram.com/miaotoken/"
+                  href="https://www.instagram.com/miaodotarmy"
                   target="_blank"
                   rel="noopener nofollow"
                   className="w-12 h-12 rounded-lg flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-2 border-[var(--border-color)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-all"
@@ -609,12 +627,38 @@ const Hero: React.FC<HeroProps> = ({
                   <Instagram size={22} />
                 </a>
                 <a
-                  href="https://www.tiktok.com/@miaoonsol"
+                  href="https://www.tiktok.com/@miaodotarmy"
                   target="_blank"
                   rel="noopener nofollow"
                   className="w-12 h-12 rounded-lg flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-2 border-[var(--border-color)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-all"
                 >
                   <TikTokIcon size={22} />
+                </a>
+                <a
+                  href="https://www.facebook.com/miaodotarmy"
+                  target="_blank"
+                  rel="noopener nofollow"
+                  className="w-12 h-12 rounded-lg flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-2 border-[var(--border-color)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-all"
+                >
+                  <FacebookIcon size={22} />
+                </a>
+                <a
+                  href="https://discord.gg/eEKKm9Sh"
+                  target="_blank"
+                  rel="noopener nofollow"
+                  className="w-12 h-12 rounded-lg flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-2 border-[var(--border-color)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-all"
+                  title="Discord"
+                >
+                  <DiscordIcon size={22} />
+                </a>
+                <a
+                  href="https://www.youtube.com/@miaodotarmy"
+                  target="_blank"
+                  rel="noopener nofollow"
+                  className="w-12 h-12 rounded-lg flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-2 border-[var(--border-color)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-all"
+                  title="YouTube"
+                >
+                  <YoutubeIcon size={22} />
                 </a>
               </div>
             </div>
@@ -684,22 +728,19 @@ const Hero: React.FC<HeroProps> = ({
                     maxWidth: "100%",
                   }}
                 >
-                  {/* Left half - Mint green/Seafoam (Swap Chart) */}
+                  {/* Button - Mint green/Seafoam (Swap Chart) - Completely rounded */}
                   <button
                     onClick={onSwapChartClick}
                     className="font-bold uppercase tracking-wide text-sm md:text-base lg:text-lg text-white transition-all relative overflow-hidden"
                     style={{
                       background: "#52D48E",
-                      borderRight: "3px solid var(--capsule-border)",
-                      borderTopLeftRadius: "9999px",
-                      borderBottomLeftRadius: "9999px",
+                      borderRadius: "9999px",
                       direction: "ltr",
                       padding: "16px 16px",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      width: "50%",
-                      flex: "1 1 50%",
+                      width: "100%",
                       minHeight: "100%",
                     }}
                     onMouseEnter={(e) => {
@@ -758,83 +799,6 @@ const Hero: React.FC<HeroProps> = ({
                       {t("hero.swapChart")}
                     </span>
                   </button>
-
-                  {/* Right half - White (Pump.Fun) */}
-                  <a
-                    href="https://pump.fun/coin/8xpdiZ5GrnAdxpf7DSyZ1YXZxx6itvvoXPHZ4K2Epump"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-bold uppercase tracking-wide text-sm md:text-base lg:text-lg text-gray-800 transition-all relative overflow-hidden"
-                    style={{
-                      background: "#ffffff",
-                      borderLeft: "3px solid var(--capsule-border)",
-                      borderTopRightRadius: "9999px",
-                      borderBottomRightRadius: "9999px",
-                      direction: "ltr",
-                      padding: "16px 16px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      width: "50%",
-                      flex: "1 1 50%",
-                      minHeight: "100%",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = "#e5e5e5";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = "#ffffff";
-                    }}
-                  >
-                    {/* Internal shadow from bottom to left and right sides */}
-                    <div
-                      className="absolute bottom-0 left-0 right-0 pointer-events-none"
-                      style={{
-                        height: "25%",
-                        background:
-                          "linear-gradient(to top, rgba(0, 0, 0, 0.12) 0%, transparent 100%)",
-                      }}
-                    />
-                    <div
-                      className="absolute bottom-0 left-0 pointer-events-none"
-                      style={{
-                        width: "100%",
-                        height: "25%",
-                        background:
-                          "linear-gradient(to right, rgba(0, 0, 0, 0.08) 0%, transparent 100%)",
-                      }}
-                    />
-                    <div
-                      className="absolute bottom-0 right-0 pointer-events-none"
-                      style={{
-                        width: "100%",
-                        height: "25%",
-                        background:
-                          "linear-gradient(to left, rgba(0, 0, 0, 0.08) 0%, transparent 100%)",
-                      }}
-                    />
-                    {/* Highlight effect on white side */}
-                    <div
-                      className="absolute top-1 right-1 w-14 h-14 rounded-full pointer-events-none opacity-20"
-                      style={{
-                        background:
-                          "radial-gradient(circle, rgba(255,255,255,0.8) 0%, transparent 70%)",
-                        transform: "translate(20%, -20%)",
-                      }}
-                    />
-                    <span
-                      className="relative z-10 text-center w-full"
-                      style={{
-                        padding: "0 8px",
-                        lineHeight: "1.2",
-                        wordBreak: "break-word",
-                        hyphens: "auto",
-                        display: "block",
-                      }}
-                    >
-                      {t("hero.pumpfunButton")}
-                    </span>
-                  </a>
                 </div>
               </div>
 
@@ -844,24 +808,24 @@ const Hero: React.FC<HeroProps> = ({
                 style={{ direction: "ltr" }}
               >
                 <button
-                  onClick={onToolsClick}
-                  className="px-3 py-2 sm:px-4 sm:py-2.5 md:px-5 rounded-xl font-bold text-xs sm:text-sm uppercase tracking-wide bg-[var(--bg-secondary)] text-[var(--text-primary)] border-2 border-b-4 border-[var(--btn-shadow)] hover:bg-[var(--bg-tertiary)] hover:border-[var(--duo-green)] active:border-b-2 active:translate-y-[2px] transition-all flex items-center gap-1 sm:gap-1.5"
+                  disabled
+                  className="px-3 py-2 sm:px-4 sm:py-2.5 md:px-5 rounded-xl font-bold text-xs sm:text-sm uppercase tracking-wide bg-gray-400 text-white border-2 border-b-4 border-gray-500 cursor-not-allowed opacity-50 flex items-center gap-1 sm:gap-1.5"
                   style={{ direction: "ltr" }}
                 >
                   <Wrench size={14} className="sm:w-4 sm:h-4" />
                   <span className="whitespace-nowrap">{t("nav.tools")}</span>
                 </button>
                 <button
-                  onClick={onGamesClick}
-                  className="px-3 py-2 sm:px-4 sm:py-2.5 md:px-5 rounded-xl font-bold text-xs sm:text-sm uppercase tracking-wide bg-[var(--bg-secondary)] text-[var(--text-primary)] border-2 border-b-4 border-[var(--btn-shadow)] hover:bg-[var(--bg-tertiary)] hover:border-[var(--duo-orange)] active:border-b-2 active:translate-y-[2px] transition-all flex items-center gap-1 sm:gap-1.5"
+                  disabled
+                  className="px-3 py-2 sm:px-4 sm:py-2.5 md:px-5 rounded-xl font-bold text-xs sm:text-sm uppercase tracking-wide bg-gray-400 text-white border-2 border-b-4 border-gray-500 cursor-not-allowed opacity-50 flex items-center gap-1 sm:gap-1.5"
                   style={{ direction: "ltr" }}
                 >
                   <Gamepad2 size={14} className="sm:w-4 sm:h-4" />
                   <span className="whitespace-nowrap">{t("nav.games")}</span>
                 </button>
                 <button
-                  onClick={onWhitepaperClick}
-                  className="px-3 py-2 sm:px-4 sm:py-2.5 md:px-5 rounded-xl font-bold text-xs sm:text-sm uppercase tracking-wide bg-[var(--bg-secondary)] text-[var(--text-primary)] border-2 border-b-4 border-[var(--btn-shadow)] hover:bg-[var(--bg-tertiary)] hover:border-[var(--duo-blue)] active:border-b-2 active:translate-y-[2px] transition-all flex items-center gap-1 sm:gap-1.5"
+                  disabled
+                  className="px-3 py-2 sm:px-4 sm:py-2.5 md:px-5 rounded-xl font-bold text-xs sm:text-sm uppercase tracking-wide bg-gray-400 text-white border-2 border-b-4 border-gray-500 cursor-not-allowed opacity-50 flex items-center gap-1 sm:gap-1.5"
                   style={{ direction: "ltr" }}
                 >
                   <FileText size={14} className="sm:w-4 sm:h-4" />

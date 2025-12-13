@@ -4,6 +4,7 @@ import type React from "react";
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { LanguageProvider, useLanguage } from "@/lib/language-context";
+import DisclaimerBanner from "@/components/DisclaimerBanner";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import About from "@/components/About";
@@ -201,6 +202,7 @@ const AppContent: React.FC = () => {
 
   return (
     <>
+      <DisclaimerBanner />
       <Header
         walletState={walletState}
         onConnectClick={() => setIsWalletModalOpen(true)}

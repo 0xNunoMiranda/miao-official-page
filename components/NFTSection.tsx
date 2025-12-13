@@ -470,29 +470,23 @@ const NFTSection: React.FC<NFTSectionProps> = ({
                   {t("nft.title")}
                 </h3>
                 <p
-                  className="text-sm font-medium leading-relaxed mb-4"
+                  className="text-sm md:text-base font-medium leading-relaxed mb-4"
                   style={{ color: "var(--text-secondary)" }}
                 >
                   {t("nft.description")}
                 </p>
 
-                <div className="flex flex-col sm:flex-row gap-2">
-                  <a
-                    href="https://launchmynft.io/sol/20841"
-                    target="_blank"
-                    rel="noopener nofollow"
-                    className="flex-1 text-sm font-bold py-2.5 px-5 text-center uppercase tracking-wide rounded-xl bg-(--brand) text-white border-[3px] border-(--btn-shadow) shadow hover:shadow-lg hover:-translate-y-0.5 active:translate-x-1 active:translate-y-1 transition-all"
-                  >
-                    {t("nft.mintV1")}
-                  </a>
-                  <a
-                    href="https://launchmynft.io/sol/20841"
-                    target="_blank"
-                    rel="noopener nofollow"
-                    className="flex-1 text-sm font-bold py-2.5 px-5 text-center uppercase tracking-wide rounded-xl bg-(--bg-tertiary) text-(--text-primary) border-[3px] border-(--btn-shadow) shadow hover:shadow-lg hover:-translate-y-0.5 active:translate-x-1 active:translate-y-1 transition-all"
-                  >
-                    {t("nft.mintV2")}
-                  </a>
+                <div className="flex items-center justify-center py-4 px-6 rounded-xl bg-(--bg-tertiary) border-[3px] border-(--border-color)">
+                  <div className="text-center">
+                    <p className="text-lg md:text-xl font-black uppercase tracking-wide mb-2" style={{ color: "var(--brand)" }}>
+                      {t("nft.comingSoon")}
+                    </p>
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-(--brand) animate-pulse"></div>
+                      <div className="w-2 h-2 rounded-full bg-(--brand) animate-pulse" style={{ animationDelay: "0.2s" }}></div>
+                      <div className="w-2 h-2 rounded-full bg-(--brand) animate-pulse" style={{ animationDelay: "0.4s" }}></div>
+                    </div>
+                  </div>
                 </div>
               </div>
 

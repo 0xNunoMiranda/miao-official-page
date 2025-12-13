@@ -510,8 +510,65 @@ const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false, se
       }
     } catch (error: any) {
       console.error("Erro ao autenticar com outra conta:", error)
+      console.error("Tipo do erro:", typeof error)
       console.error("Stack trace:", error?.stack)
-      setError(error?.message || "Erro ao autenticar com outra conta. Por favor, tenta novamente.")
+      console.error("Propriedades do erro:", Object.keys(error || {}))
+      
+      // Tentar extrair mensagem de erro de várias formas
+      let errorMessage = "Erro ao autenticar com outra conta. Por favor, tenta novamente."
+      
+      if (error instanceof Error) {
+        errorMessage = error.message || error.name || errorMessage
+      } else if (typeof error === "string") {
+        errorMessage = error
+      } else if (error && typeof error === "object") {
+        // Tentar todas as propriedades possíveis
+        errorMessage = error.message 
+          || error.error 
+          || error.errorMessage 
+          || error.msg 
+          || error.description
+          || error.reason
+          || error.details
+          || error.code
+          || error.status
+          || errorMessage
+        
+        // Se ainda não tem mensagem, verificar se é um erro vazio
+        if (!errorMessage || errorMessage === "Erro ao autenticar com outra conta. Por favor, tenta novamente.") {
+          try {
+            const errorStr = JSON.stringify(error)
+            console.error("String do erro:", errorStr)
+            
+            if (errorStr === "{}" || errorStr.trim() === "" || errorStr === "null" || errorStr === "undefined") {
+              // Erro vazio - pode ser que o usuário cancelou o popup ou foi bloqueado
+              errorMessage = "Autenticação cancelada ou popup bloqueado. Por favor, permite popups e tenta novamente."
+            } else if (errorStr.includes("auth") || errorStr.includes("sign") || errorStr.includes("login") || errorStr.includes("unauthorized")) {
+              errorMessage = "Erro de autenticação. Por favor, tenta novamente."
+            } else if (errorStr.includes("popup") || errorStr.includes("blocked") || errorStr.includes("cancel")) {
+              errorMessage = "Popup de autenticação bloqueado ou cancelado. Por favor, permite popups e tenta novamente."
+            } else if (errorStr.includes("network") || errorStr.includes("fetch") || errorStr.includes("CORS")) {
+              errorMessage = "Erro de conexão. Por favor, verifica a tua ligação à internet e tenta novamente."
+            } else {
+              errorMessage = `Erro ao autenticar: ${errorStr.substring(0, 150)}`
+            }
+          } catch (e) {
+            console.error("Erro ao processar objeto de erro:", e)
+            // Se o erro é vazio, provavelmente foi cancelado ou bloqueado
+            errorMessage = "Autenticação cancelada ou popup bloqueado. Por favor, permite popups e tenta novamente."
+          }
+        }
+      } else if (error !== null && error !== undefined) {
+        errorMessage = String(error)
+      }
+      
+      // Garantir que temos uma mensagem útil
+      if (!errorMessage || errorMessage.trim() === "" || errorMessage === "{}") {
+        errorMessage = "Autenticação cancelada ou popup bloqueado. Por favor, permite popups e tenta novamente."
+      }
+      
+      console.error("Mensagem de erro final:", errorMessage)
+      setError(errorMessage)
       setPuterAuthenticated(false)
     } finally {
       setCheckingAuth(false)
@@ -545,6 +602,20 @@ const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false, se
       console.log("Chamando puter.auth.signIn()...")
       // Chamar signIn() - abre popup de autenticação
       // IMPORTANTE: signIn() deve ser chamado em resposta a uma ação do usuário (como um clique)
+      
+      // Verificar se popups estão bloqueados antes de tentar
+      try {
+        const testPopup = window.open("", "_blank", "width=1,height=1")
+        if (!testPopup || testPopup.closed || typeof testPopup.closed === "undefined") {
+          console.warn("Popups podem estar bloqueados pelo navegador")
+          // Não bloquear, apenas avisar - alguns navegadores permitem popups de autenticação mesmo se outros estão bloqueados
+        } else {
+          testPopup.close()
+        }
+      } catch (e) {
+        console.warn("Não foi possível verificar bloqueio de popups:", e)
+      }
+      
       await window.puter.auth.signIn()
       console.log("signIn() retornou")
       
@@ -582,8 +653,65 @@ const CatGenerator: React.FC<CatGeneratorProps> = ({ isChristmasMode = false, se
       }
     } catch (error: any) {
       console.error("Erro ao autenticar com Puter:", error)
+      console.error("Tipo do erro:", typeof error)
       console.error("Stack trace:", error?.stack)
-      setError(error?.message || "Erro ao autenticar com Puter. Por favor, tenta novamente.")
+      console.error("Propriedades do erro:", Object.keys(error || {}))
+      
+      // Tentar extrair mensagem de erro de várias formas
+      let errorMessage = "Erro ao autenticar com Puter. Por favor, tenta novamente."
+      
+      if (error instanceof Error) {
+        errorMessage = error.message || error.name || errorMessage
+      } else if (typeof error === "string") {
+        errorMessage = error
+      } else if (error && typeof error === "object") {
+        // Tentar todas as propriedades possíveis
+        errorMessage = error.message 
+          || error.error 
+          || error.errorMessage 
+          || error.msg 
+          || error.description
+          || error.reason
+          || error.details
+          || error.code
+          || error.status
+          || errorMessage
+        
+        // Se ainda não tem mensagem, verificar se é um erro vazio
+        if (!errorMessage || errorMessage === "Erro ao autenticar com Puter. Por favor, tenta novamente.") {
+          try {
+            const errorStr = JSON.stringify(error)
+            console.error("String do erro:", errorStr)
+            
+            if (errorStr === "{}" || errorStr.trim() === "" || errorStr === "null" || errorStr === "undefined") {
+              // Erro vazio - pode ser que o usuário cancelou o popup ou foi bloqueado
+              errorMessage = "Autenticação cancelada ou popup bloqueado. Por favor, permite popups e tenta novamente."
+            } else if (errorStr.includes("auth") || errorStr.includes("sign") || errorStr.includes("login") || errorStr.includes("unauthorized")) {
+              errorMessage = "Erro de autenticação. Por favor, tenta novamente."
+            } else if (errorStr.includes("popup") || errorStr.includes("blocked") || errorStr.includes("cancel")) {
+              errorMessage = "Popup de autenticação bloqueado ou cancelado. Por favor, permite popups e tenta novamente."
+            } else if (errorStr.includes("network") || errorStr.includes("fetch") || errorStr.includes("CORS")) {
+              errorMessage = "Erro de conexão. Por favor, verifica a tua ligação à internet e tenta novamente."
+            } else {
+              errorMessage = `Erro ao autenticar: ${errorStr.substring(0, 150)}`
+            }
+          } catch (e) {
+            console.error("Erro ao processar objeto de erro:", e)
+            // Se o erro é vazio, provavelmente foi cancelado ou bloqueado
+            errorMessage = "Autenticação cancelada ou popup bloqueado. Por favor, permite popups e tenta novamente."
+          }
+        }
+      } else if (error !== null && error !== undefined) {
+        errorMessage = String(error)
+      }
+      
+      // Garantir que temos uma mensagem útil
+      if (!errorMessage || errorMessage.trim() === "" || errorMessage === "{}") {
+        errorMessage = "Autenticação cancelada ou popup bloqueado. Por favor, permite popups e tenta novamente."
+      }
+      
+      console.error("Mensagem de erro final:", errorMessage)
+      setError(errorMessage)
       setPuterAuthenticated(false)
     } finally {
       setCheckingAuth(false)

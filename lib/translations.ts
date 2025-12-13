@@ -224,10 +224,18 @@ export const translations: Record<Language, Record<string, string>> = {
     "generator.downloadFailed": "Falha ao descarregar a imagem.",
 
     // NFT Section
-    "nft.title": "Cunhar NFT MIAO",
-    "nft.description": "Nascidos das sombras das guerras dos memes, os NFT $MIAO incorporam furtividade e energia. Possui um símbolo de poder nas ruas.",
-    "nft.mintV1": "CUNHAR V1",
-    "nft.mintV2": "CUNHAR V2",
+    "nft.title": "Coleção NFT MIAO",
+    "nft.description": "Em breve estará disponível uma nova e considerada única coleção de NFTs. Todo o dinheiro será totalmente revertido em queimas e para marketing, nada para os developers. Um pouco de paciência.",
+    "nft.comingSoon": "Em Breve",
+
+    // Disclaimer Banner
+    "disclaimer.message": "⚠️ AVISO IMPORTANTE: Nova Equipa de Desenvolvimento - Clica para mais informações",
+    "disclaimer.close": "Fechar",
+    "disclaimer.modalTitle": "Sair da Página",
+    "disclaimer.modalMessage": "Estás prestes a sair da página para ser redirecionado para um comunicado da nova equipa de desenvolvimento na página Notion.",
+    "disclaimer.modalNote": "O comunicado contém informações importantes sobre a nova equipa e mudanças no projeto.",
+    "disclaimer.cancel": "Cancelar",
+    "disclaimer.confirm": "Continuar",
 
     // Games Page
     "games.playHaveFun": "Jogar e Divertir-se",
@@ -488,7 +496,7 @@ export const translations: Record<Language, Record<string, string>> = {
 
     // About
     "about.text": "When dogs barked and frogs leapt, everyone thought the meme wars were done. Yet in the shadows, something patient lingered. Behind every bark or croak came a sharp, knowing $MIAO that no one could ignore.",
-    "about.typewriter": "The streets aren't safe $MIAO is already watching.",
+    "about.typewriter": "The streets aren't safe... $MIAO is already watching.",
 
     // Tokenomics - Roadmap
     "tokenomics.roadmapTitle": "Roadmap",
@@ -557,10 +565,18 @@ export const translations: Record<Language, Record<string, string>> = {
     "generator.downloadFailed": "Failed to download image.",
 
     // NFT Section
-    "nft.title": "Mint MIAO NFT",
-    "nft.description": "Born from the shadows of the meme wars, the $MIAO NFTs embody stealth and energy. Own a symbol of power in the streets.",
-    "nft.mintV1": "MINT V1",
-    "nft.mintV2": "MINT V2",
+    "nft.title": "MIAO NFT Collection",
+    "nft.description": "Coming soon, a new and considered unique NFT collection will be available. All money will be fully reverted to burns and marketing, nothing for developers. A little patience.",
+    "nft.comingSoon": "Coming Soon",
+
+    // Disclaimer Banner
+    "disclaimer.message": "⚠️ IMPORTANT NOTICE: New Development Team - Click for more information",
+    "disclaimer.close": "Close",
+    "disclaimer.modalTitle": "Leave Page",
+    "disclaimer.modalMessage": "You are about to leave the page to be redirected to a statement from the new development team on the Notion page.",
+    "disclaimer.modalNote": "The statement contains important information about the new team and changes to the project.",
+    "disclaimer.cancel": "Cancel",
+    "disclaimer.confirm": "Continue",
 
     // Games Page
     "games.playHaveFun": "Play & Have Fun",
@@ -821,7 +837,7 @@ export const translations: Record<Language, Record<string, string>> = {
 
     // About
     "about.text": "Cuando los perros ladraban y las ranas saltaban, todos pensaban que las guerras de memes habían terminado. Pero en las sombras, algo paciente acechaba. Detrás de cada ladrido o croar venía un agudo y perspicaz $MIAO que nadie podía ignorar.",
-    "about.typewriter": "Las calles no son seguras $MIAO ya está observando.",
+    "about.typewriter": "Las calles no son seguras... $MIAO ya está observando.",
 
     // Tokenomics - Roadmap
     "tokenomics.roadmapTitle": "Roadmap",
@@ -890,10 +906,18 @@ export const translations: Record<Language, Record<string, string>> = {
     "generator.downloadFailed": "Error al descargar la imagen.",
 
     // NFT Section
-    "nft.title": "Acuñar NFT MIAO",
-    "nft.description": "Nacidos de las sombras de las guerras de memes, los NFT $MIAO encarnan sigilo y energía. Posee un símbolo de poder en las calles.",
-    "nft.mintV1": "ACUÑAR V1",
-    "nft.mintV2": "ACUÑAR V2",
+    "nft.title": "Colección NFT MIAO",
+    "nft.description": "Próximamente estará disponible una nueva y considerada única colección de NFTs. Todo el dinero será totalmente revertido en quemas y para marketing, nada para los desarrolladores. Un poco de paciencia.",
+    "nft.comingSoon": "Próximamente",
+
+    // Disclaimer Banner
+    "disclaimer.message": "⚠️ AVISO IMPORTANTE: Nuevo Equipo de Desarrollo - Haz clic para más información",
+    "disclaimer.close": "Cerrar",
+    "disclaimer.modalTitle": "Salir de la Página",
+    "disclaimer.modalMessage": "Estás a punto de salir de la página para ser redirigido a un comunicado del nuevo equipo de desarrollo en la página Notion.",
+    "disclaimer.modalNote": "El comunicado contiene información importante sobre el nuevo equipo y cambios en el proyecto.",
+    "disclaimer.cancel": "Cancelar",
+    "disclaimer.confirm": "Continuar",
 
     // Games Page
     "games.playHaveFun": "Juega y Diviértete",
@@ -1154,7 +1178,7 @@ export const translations: Record<Language, Record<string, string>> = {
 
     // About
     "about.text": "Quand les chiens aboyaient et les grenouilles sautaient, tout le monde pensait que les guerres des mèmes étaient terminées. Mais dans l'ombre, quelque chose de patient guettait. Derrière chaque aboiement ou coassement venait un $MIAO tranchant et perspicace que personne ne pouvait ignorer.",
-    "about.typewriter": "Les rues ne sont pas sûres $MIAO surveille déjà.",
+    "about.typewriter": "Les rues ne sont pas sûres... $MIAO surveille déjà.",
 
     // Tokenomics - Roadmap
     "tokenomics.roadmapTitle": "Feuille de Route",
@@ -1223,10 +1247,18 @@ export const translations: Record<Language, Record<string, string>> = {
     "generator.downloadFailed": "Échec du téléchargement de l'image.",
 
     // NFT Section
-    "nft.title": "Créer NFT MIAO",
-    "nft.description": "Nés de l'ombre des guerres de mèmes, les NFT $MIAO incarnent la furtivité et l'énergie. Possédez un symbole de pouvoir dans les rues.",
-    "nft.mintV1": "CRÉER V1",
-    "nft.mintV2": "CRÉER V2",
+    "nft.title": "Collection NFT MIAO",
+    "nft.description": "Bientôt, une nouvelle collection de NFT considérée comme unique sera disponible. Tout l'argent sera entièrement reversé aux brûlures et au marketing, rien pour les développeurs. Un peu de patience.",
+    "nft.comingSoon": "Bientôt",
+
+    // Disclaimer Banner
+    "disclaimer.message": "⚠️ AVIS IMPORTANT: Nouvelle Équipe de Développement - Cliquez pour plus d'informations",
+    "disclaimer.close": "Fermer",
+    "disclaimer.modalTitle": "Quitter la Page",
+    "disclaimer.modalMessage": "Vous êtes sur le point de quitter la page pour être redirigé vers une déclaration de la nouvelle équipe de développement sur la page Notion.",
+    "disclaimer.modalNote": "La déclaration contient des informations importantes sur la nouvelle équipe et les changements du projet.",
+    "disclaimer.cancel": "Annuler",
+    "disclaimer.confirm": "Continuer",
 
     // Games Page
     "games.playHaveFun": "Jouer et S'Amuser",
@@ -1487,7 +1519,7 @@ export const translations: Record<Language, Record<string, string>> = {
 
     // About
     "about.text": "Als die Hunde bellten und die Frösche sprangen, dachten alle, die Meme-Kriege seien vorbei. Doch im Schatten lauerte etwas Geduldiges. Hinter jedem Bellen oder Quaken kam ein scharfes, wissendes $MIAO, das niemand ignorieren konnte.",
-    "about.typewriter": "Die Straßen sind nicht sicher $MIAO beobachtet bereits.",
+    "about.typewriter": "Die Straßen sind nicht sicher... $MIAO beobachtet bereits.",
 
     // Tokenomics - Roadmap
     "tokenomics.roadmapTitle": "Roadmap",
@@ -1556,10 +1588,18 @@ export const translations: Record<Language, Record<string, string>> = {
     "generator.downloadFailed": "Bild konnte nicht heruntergeladen werden.",
 
     // NFT Section
-    "nft.title": "MIAO NFT Prägen",
-    "nft.description": "Aus den Schatten der Meme-Kriege geboren, verkörpern die $MIAO NFTs Heimlichkeit und Energie. Besitze ein Symbol der Macht auf den Straßen.",
-    "nft.mintV1": "PRÄGEN V1",
-    "nft.mintV2": "PRÄGEN V2",
+    "nft.title": "MIAO NFT-Sammlung",
+    "nft.description": "Bald wird eine neue und als einzigartig geltende NFT-Sammlung verfügbar sein. Alles Geld wird vollständig für Verbrennungen und Marketing verwendet, nichts für Entwickler. Ein wenig Geduld.",
+    "nft.comingSoon": "Demnächst",
+
+    // Disclaimer Banner
+    "disclaimer.message": "⚠️ WICHTIGER HINWEIS: Neues Entwicklungsteam - Klicken Sie für weitere Informationen",
+    "disclaimer.close": "Schließen",
+    "disclaimer.modalTitle": "Seite Verlassen",
+    "disclaimer.modalMessage": "Sie sind dabei, die Seite zu verlassen, um zu einer Erklärung des neuen Entwicklungsteams auf der Notion-Seite weitergeleitet zu werden.",
+    "disclaimer.modalNote": "Die Erklärung enthält wichtige Informationen über das neue Team und Änderungen am Projekt.",
+    "disclaimer.cancel": "Abbrechen",
+    "disclaimer.confirm": "Fortfahren",
 
     // Games Page
     "games.playHaveFun": "Spielen & Spaß Haben",
@@ -1819,7 +1859,7 @@ export const translations: Record<Language, Record<string, string>> = {
 
     // About
     "about.text": "当狗在叫，青蛙在跳，所有人都以为梗币战争结束了。然而在暗处，有什么东西在耐心等待。每一声吠叫或呱呱声背后，都传来一声尖锐而深知的$MIAO，没人能忽视。",
-    "about.typewriter": "街道不安全 $MIAO已经在观察。",
+    "about.typewriter": "街道不安全... $MIAO已经在观察。",
 
     // Tokenomics - Roadmap
     "tokenomics.roadmapTitle": "路线图",
@@ -1888,10 +1928,18 @@ export const translations: Record<Language, Record<string, string>> = {
     "generator.downloadFailed": "下载图像失败。",
 
     // NFT Section
-    "nft.title": "铸造MIAO NFT",
-    "nft.description": "从梗币战争的阴影中诞生，$MIAO NFT体现了隐秘和能量。在街道上拥有权力的象征。",
-    "nft.mintV1": "铸造V1",
-    "nft.mintV2": "铸造V2",
+    "nft.title": "MIAO NFT收藏",
+    "nft.description": "即将推出一个全新的、被认为是独特的NFT收藏。所有资金将完全用于销毁和营销，不用于开发人员。请稍加耐心。",
+    "nft.comingSoon": "即将推出",
+
+    // Disclaimer Banner
+    "disclaimer.message": "⚠️ 重要通知：新开发团队 - 点击了解更多信息",
+    "disclaimer.close": "关闭",
+    "disclaimer.modalTitle": "离开页面",
+    "disclaimer.modalMessage": "您即将离开页面，将被重定向到Notion页面上新开发团队的声明。",
+    "disclaimer.modalNote": "该声明包含有关新团队和项目变更的重要信息。",
+    "disclaimer.cancel": "取消",
+    "disclaimer.confirm": "继续",
 
     // Games Page
     "games.playHaveFun": "游戏与娱乐",
@@ -2220,10 +2268,18 @@ export const translations: Record<Language, Record<string, string>> = {
     "generator.downloadFailed": "فشل تحميل الصورة.",
 
     // NFT Section
-    "nft.title": "سك NFT MIAO",
-    "nft.description": "ولدت من ظلال حروب الميم، تجسد $MIAO NFT التخفي والطاقة. امتلك رمزاً للقوة في الشوارع.",
-    "nft.mintV1": "سك V1",
-    "nft.mintV2": "سك V2",
+    "nft.title": "مجموعة NFT MIAO",
+    "nft.description": "قريباً ستكون مجموعة NFT جديدة وفريدة من نوعها متاحة. سيتم تحويل جميع الأموال بالكامل إلى الحرق والتسويق، ولا شيء للمطورين. القليل من الصبر.",
+    "nft.comingSoon": "قريباً",
+
+    // Disclaimer Banner
+    "disclaimer.message": "⚠️ إشعار مهم: فريق التطوير الجديد - انقر للمزيد من المعلومات",
+    "disclaimer.close": "إغلاق",
+    "disclaimer.modalTitle": "مغادرة الصفحة",
+    "disclaimer.modalMessage": "أنت على وشك مغادرة الصفحة ليتم إعادة توجيهك إلى بيان من فريق التطوير الجديد في صفحة Notion.",
+    "disclaimer.modalNote": "يحتوي البيان على معلومات مهمة حول الفريق الجديد والتغييرات في المشروع.",
+    "disclaimer.cancel": "إلغاء",
+    "disclaimer.confirm": "متابعة",
 
     // Games Page
     "games.playHaveFun": "العب واستمتع",

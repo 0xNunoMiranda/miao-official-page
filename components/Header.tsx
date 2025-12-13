@@ -29,6 +29,24 @@ const TikTokIcon = ({ size = 16 }: { size?: number }) => (
   </svg>
 );
 
+const FacebookIcon = ({ size = 16 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+  </svg>
+);
+
+const DiscordIcon = ({ size = 16 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 512 512" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+    <path d="m386 137c-24-11-49.5-19-76.3-23.7c-.5 0-1 0-1.2.6c-3.3 5.9-7 13.5-9.5 19.5c-29-4.3-57.5-4.3-85.7 0c-2.6-6.2-6.3-13.7-10-19.5c-.3-.4-.7-.7-1.2-.6c-23 4.6-52.4 13-76 23.7c-.2 0-.4.2-.5.4c-49 73-62 143-55 213c0 .3.2.7.5 1c32 23.6 63 38 93.6 47.3c.5 0 1 0 1.3-.4c7.2-9.8 13.6-20.2 19.2-31.2c.3-.6 0-1.4-.7-1.6c-10-4-20-8.6-29.3-14c-.7-.4-.8-1.5 0-2c2-1.5 4-3 5.8-4.5c.3-.3.8-.3 1.2-.2c61.4 28 128 28 188 0c.4-.2.9-.1 1.2.1c1.9 1.6 3.8 3.1 5.8 4.6c.7.5.6 1.6 0 2c-9.3 5.5-19 10-29.3 14c-.7.3-1 1-.6 1.7c5.6 11 12.1 21.3 19 31c.3.4.8.6 1.3.4c30.6-9.5 61.7-23.8 93.8-47.3c.3-.2.5-.5.5-1c7.8-80.9-13.1-151-55.4-213c0-.2-.3-.4-.5-.4Zm-192 171c-19 0-34-17-34-38c0-21 15-38 34-38c19 0 34 17 34 38c0 21-15 38-34 38zm125 0c-19 0-34-17-34-38c0-21 15-38 34-38c19 0 34 17 34 38c0 21-15 38-34 38z"/>
+  </svg>
+);
+
+const YoutubeIcon = ({ size = 16 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+  </svg>
+);
+
 interface HeaderProps {
   walletState?: WalletState;
   onConnectClick?: () => void;
@@ -111,9 +129,12 @@ const Header: React.FC<HeaderProps> = ({
   return (
     <>
       <nav
-        className={`fixed w-full z-50 top-0 transition-all duration-300 overflow-visible ${
+        className={`fixed w-full z-50 transition-all duration-300 overflow-visible ${
           scrolled ? "backdrop-blur-md shadow-lg" : "bg-transparent"
         }`}
+        style={{
+          top: "var(--disclaimer-banner-height, 0px)",
+        }}
         style={
           scrolled
             ? {
@@ -351,33 +372,24 @@ const Header: React.FC<HeaderProps> = ({
               ))}
 
               <button
-                onClick={() => {
-                  setIsOpen(false);
-                  onToolsClick?.();
-                }}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-lg font-bold text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] transition-all"
+                disabled
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-lg font-bold text-gray-400 cursor-not-allowed opacity-50"
                 style={{ direction: "ltr", textAlign: "left" }}
               >
                 <Wrench size={20} />
                 {t("nav.tools")}
               </button>
               <button
-                onClick={() => {
-                  setIsOpen(false);
-                  onGamesClick?.();
-                }}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-lg font-bold text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] transition-all"
+                disabled
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-lg font-bold text-gray-400 cursor-not-allowed opacity-50"
                 style={{ direction: "ltr", textAlign: "left" }}
               >
                 <Gamepad2 size={20} />
                 {t("nav.games")}
               </button>
               <button
-                onClick={() => {
-                  setIsOpen(false);
-                  onWhitepaperClick?.();
-                }}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-lg font-bold text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] transition-all"
+                disabled
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-lg font-bold text-gray-400 cursor-not-allowed opacity-50"
                 style={{ direction: "ltr", textAlign: "left" }}
               >
                 <FileText size={20} />
@@ -462,7 +474,7 @@ const Header: React.FC<HeaderProps> = ({
               {/* Version */}
               <div className="px-4 py-2 border-t-2 border-[var(--border-color)]">
                 <p className="text-xs font-medium text-[var(--text-secondary)] text-center">
-                  v1.1.0
+                  v1.2.0
                 </p>
               </div>
 
@@ -485,7 +497,7 @@ const Header: React.FC<HeaderProps> = ({
                   <Twitter size={26} />
                 </a>
                 <a
-                  href="https://www.instagram.com/miaotoken/"
+                  href="https://www.instagram.com/miaodotarmy"
                   target="_blank"
                   rel="noopener nofollow"
                   className="w-14 h-14 rounded-lg flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-2 border-[var(--border-color)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-all"
@@ -493,12 +505,38 @@ const Header: React.FC<HeaderProps> = ({
                   <Instagram size={26} />
                 </a>
                 <a
-                  href="https://www.tiktok.com/@miaoonsol"
+                  href="https://www.tiktok.com/@miaodotarmy"
                   target="_blank"
                   rel="noopener nofollow"
                   className="w-14 h-14 rounded-lg flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-2 border-[var(--border-color)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-all"
                 >
                   <TikTokIcon size={26} />
+                </a>
+                <a
+                  href="https://www.facebook.com/miaodotarmy"
+                  target="_blank"
+                  rel="noopener nofollow"
+                  className="w-14 h-14 rounded-lg flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-2 border-[var(--border-color)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-all"
+                >
+                  <FacebookIcon size={26} />
+                </a>
+                <a
+                  href="https://discord.gg/eEKKm9Sh"
+                  target="_blank"
+                  rel="noopener nofollow"
+                  className="w-14 h-14 rounded-lg flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-2 border-[var(--border-color)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-all"
+                  title="Discord"
+                >
+                  <DiscordIcon size={26} />
+                </a>
+                <a
+                  href="https://www.youtube.com/@miaodotarmy"
+                  target="_blank"
+                  rel="noopener nofollow"
+                  className="w-14 h-14 rounded-lg flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-2 border-[var(--border-color)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-all"
+                  title="YouTube"
+                >
+                  <YoutubeIcon size={26} />
                 </a>
               </div>
             </div>

@@ -583,64 +583,78 @@ const Tokenomics: React.FC<TokenomicsProps> = ({
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     className={isMobile ? "" : "animate-path-dash"}
+                    style={{ 
+                      vectorEffect: "non-scaling-stroke",
+                    }}
                   />
                 </svg>
 
-                {roadmapItemsWithNFTImages.map((item, i) => (
-                  <div
-                    key={i}
-                    className={`absolute flex flex-col items-center gap-2 z-10 ${
-                      isMobile ? "" : "roadmap-float"
-                    }`}
-                    style={{
-                      left: `${(item.x / 1000) * 100}%`,
-                      top: `${(item.y / 400) * 100}%`,
-                      transform: "translate(-50%, -50%)",
-                      animationDelay: isMobile ? "0s" : `${i * 0.4}s`,
-                      willChange: isMobile ? "auto" : "transform",
-                    }}
-                  >
-                    {/* Label above for items at y=200 or y=60, below for y=280 */}
-                    {(item.y === 200 || item.y === 60) && (
-                      <span className="font-black text-sm text-[var(--text-primary)] bg-[var(--bg-primary)] px-4 py-1.5 rounded-full border-2 border-[var(--border-color)] whitespace-nowrap mb-1.5">
-                        {item.label}
-                      </span>
-                    )}
-
-                    {/* Avatar */}
+                {roadmapItemsWithNFTImages.map((item, i) => {
+                  const isLastItem = i === roadmapItemsWithNFTImages.length - 1;
+                  // Para o último item (y=60), o avatar precisa estar alinhado com a linha
+                  // Como o label está acima, precisamos ajustar o transform para compensar
+                  // O label tem aproximadamente 2rem de altura (32px) + margin-bottom 0.5rem (8px) = ~40px
+                  // O avatar tem 4rem de altura (64px), então precisamos ajustar o top em ~20px para cima
+                  const transformValue = isLastItem && item.y === 60 
+                    ? "translate(-50%, calc(-50% - 20px))" 
+                    : "translate(-50%, -50%)";
+                  
+                  return (
                     <div
-                      className="w-16 h-16 rounded-full border-4 overflow-hidden bg-[var(--bg-primary)] shadow-lg z-10"
-                      style={{ borderColor: item.color }}
+                      key={i}
+                      className={`absolute flex flex-col items-center z-10 ${
+                        isMobile ? "" : "roadmap-float"
+                      }`}
+                      style={{
+                        left: `${(item.x / 1000) * 100}%`,
+                        top: `${(item.y / 400) * 100}%`,
+                        transform: transformValue,
+                        animationDelay: isMobile ? "0s" : `${i * 0.4}s`,
+                        willChange: isMobile ? "auto" : "transform",
+                      }}
                     >
-                      <img
-                        src={item.img || "/placeholder.svg"}
-                        alt={item.label}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          // Se falhar, tenta um ID NFT aleatório do range válido (1-100)
-                          if (target.src !== "/placeholder.svg") {
-                            const randomId =
-                              NFT_IDS[
-                                Math.floor(Math.random() * NFT_IDS.length)
-                              ];
-                            target.src = `${NFT_BASE_URL}/${randomId}`;
-                          }
-                        }}
-                        loading="lazy"
-                        decoding="async"
-                        fetchPriority={i < 3 ? "high" : "low"}
-                      />
-                    </div>
+                      {/* Label above for items at y=200 or y=60, below for y=280 */}
+                      {(item.y === 200 || item.y === 60) && (
+                        <span className="font-black text-sm text-[var(--text-primary)] bg-[var(--bg-primary)] px-4 py-1.5 rounded-full border-2 border-[var(--border-color)] whitespace-nowrap mb-1.5">
+                          {item.label}
+                        </span>
+                      )}
 
-                    {/* Label below for items at y=280 */}
-                    {item.y === 280 && (
-                      <span className="font-black text-sm text-[var(--text-primary)] bg-[var(--bg-primary)] px-4 py-1.5 rounded-full border-2 border-[var(--border-color)] whitespace-nowrap mt-1.5">
-                        {item.label}
-                      </span>
-                    )}
-                  </div>
-                ))}
+                      {/* Avatar - alinhado com a linha tracejada */}
+                      <div
+                        className="w-16 h-16 rounded-full border-4 overflow-hidden bg-[var(--bg-primary)] shadow-lg z-10"
+                        style={{ borderColor: item.color }}
+                      >
+                        <img
+                          src={item.img || "/placeholder.svg"}
+                          alt={item.label}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            // Se falhar, tenta um ID NFT aleatório do range válido (1-100)
+                            if (target.src !== "/placeholder.svg") {
+                              const randomId =
+                                NFT_IDS[
+                                  Math.floor(Math.random() * NFT_IDS.length)
+                                ];
+                              target.src = `${NFT_BASE_URL}/${randomId}`;
+                            }
+                          }}
+                          loading="lazy"
+                          decoding="async"
+                          fetchPriority={i < 3 ? "high" : "low"}
+                        />
+                      </div>
+
+                      {/* Label below for items at y=280 */}
+                      {item.y === 280 && (
+                        <span className="font-black text-sm text-[var(--text-primary)] bg-[var(--bg-primary)] px-4 py-1.5 rounded-full border-2 border-[var(--border-color)] whitespace-nowrap mt-1.5">
+                          {item.label}
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>

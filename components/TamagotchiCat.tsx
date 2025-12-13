@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { Utensils, Moon, Gamepad2, BookOpen, BarChart3 } from "lucide-react"
 import { useLanguage } from "../lib/language-context"
 
@@ -34,10 +34,16 @@ interface TamagotchiCatProps {
 export default function TamagotchiCat({ isChatMode = false, emotion }: TamagotchiCatProps) {
   const { t } = useLanguage()
   const [currentEmotion, setCurrentEmotion] = useState(0)
+  const [previousEmotion, setPreviousEmotion] = useState<number | null>(null)
+  const [isTransitioning, setIsTransitioning] = useState(false)
+  const [previousOpacity, setPreviousOpacity] = useState(1)
   const [isPaused, setIsPaused] = useState(false)
   const [showStats, setShowStats] = useState(false)
   const [isLoaded, setIsLoaded] = useState(false)
+  const [isMounted, setIsMounted] = useState(false)
   const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set([0]))
+  const imageRef = useRef<HTMLImageElement>(null)
+  const chatImageRef = useRef<HTMLImageElement>(null)
   const [stats, setStats] = useState<Stats>({
     hunger: 80,
     energy: 70,
@@ -46,9 +52,27 @@ export default function TamagotchiCat({ isChatMode = false, emotion }: Tamagotch
   })
 
   useEffect(() => {
+    setIsMounted(true)
     const timer = setTimeout(() => setIsLoaded(true), 100)
     return () => clearTimeout(timer)
   }, [])
+
+  // Aplicar animação após montagem para evitar problemas de hidratação
+  useEffect(() => {
+    if (isMounted && imageRef.current) {
+      imageRef.current.style.animation = 'cat-vertical-float 3s ease-in-out infinite'
+      imageRef.current.style.willChange = 'opacity'
+      imageRef.current.style.imageRendering = 'auto'
+    }
+  }, [isMounted])
+
+  useEffect(() => {
+    if (isMounted && chatImageRef.current) {
+      chatImageRef.current.style.animation = 'cat-vertical-float 3s ease-in-out infinite'
+      chatImageRef.current.style.willChange = 'opacity'
+      chatImageRef.current.style.imageRendering = 'auto'
+    }
+  }, [isMounted])
 
   // Preload images - carregar todas as imagens de emoção
   useEffect(() => {
@@ -92,9 +116,57 @@ export default function TamagotchiCat({ isChatMode = false, emotion }: Tamagotch
           return true
         }
         
-        // Mudança direta sem transição complexa - apenas atualizar o estado
-        // A transição CSS cuidará do fade suave
-        setCurrentEmotion(newIndex)
+        // Pré-carregar a nova imagem para garantir que está pronta
+        const newImageSrc = catEmotions[newIndex]?.src || "/images/header-cat.png"
+        const preloadImage = new Image()
+        preloadImage.src = newImageSrc
+        
+        // Função para iniciar a transição quando a imagem estiver pronta
+        const startTransition = () => {
+          // Guardar a emoção anterior para fazer crossfade
+          const oldEmotion = currentEmotion
+          setPreviousEmotion(oldEmotion)
+          setPreviousOpacity(1) // Começar visível
+          setIsTransitioning(true)
+          
+          // Aguardar um frame para garantir que ambas as imagens sejam renderizadas
+          requestAnimationFrame(() => {
+            // Atualizar a emoção atual
+            setCurrentEmotion(newIndex)
+            
+            // Aguardar mais um frame para iniciar a transição
+            requestAnimationFrame(() => {
+              // Pequeno delay adicional para garantir renderização
+              setTimeout(() => {
+                // Iniciar fade out da imagem anterior e fade in da nova
+                setPreviousOpacity(0) // Fade out da anterior
+                
+                // Após a transição CSS completar, remover a imagem anterior
+                setTimeout(() => {
+                  setIsTransitioning(false)
+                  setPreviousEmotion(null)
+                  setPreviousOpacity(1) // Reset para próxima transição
+                }, 500) // Duração da transição CSS (500ms)
+              }, 50) // Pequeno delay para garantir que ambas estão renderizadas
+            })
+          })
+        }
+        
+        // Se a imagem já está carregada, iniciar transição imediatamente
+        if (preloadImage.complete) {
+          startTransition()
+        } else {
+          // Aguardar a imagem carregar antes de iniciar transição
+          preloadImage.onload = () => {
+            startTransition()
+          }
+          preloadImage.onerror = () => {
+            // Mesmo se falhar, tentar transição com fallback
+            console.warn(`[TamagotchiCat] Failed to preload image: ${newImageSrc}, proceeding anyway`)
+            startTransition()
+          }
+        }
+        
         return true
       }
     }
@@ -178,25 +250,40 @@ export default function TamagotchiCat({ isChatMode = false, emotion }: Tamagotch
 
     const interval = setInterval(() => {
       const nextIndex = (currentEmotion + 1) % catEmotions.length
-      // Preload da próxima imagem antes de mudar para evitar flicker
+      
+      // Verificar se a próxima imagem está carregada
       if (loadedImages.has(nextIndex)) {
-        // Garantir que a imagem está realmente carregada no cache do navegador
-        const img = new Image()
-        img.src = catEmotions[nextIndex].src
-        img.onload = () => {
-          // Quando a imagem estiver carregada, fazer a mudança
-          changeEmotion(nextIndex)
+        // Pré-carregar a imagem para garantir que está pronta
+        const nextImageSrc = catEmotions[nextIndex].src
+        const preloadImg = new Image()
+        preloadImg.src = nextImageSrc
+        
+        // Função para mudar após garantir que está carregada
+        const changeAfterLoad = () => {
+          // Pequeno delay para garantir que não há transição em andamento
+          if (!isTransitioning) {
+            changeEmotion(nextIndex)
+          }
         }
-        // Se já está no cache, mudar imediatamente
-        if (img.complete) {
-          changeEmotion(nextIndex)
+        
+        // Se já está carregada, mudar imediatamente
+        if (preloadImg.complete) {
+          changeAfterLoad()
+        } else {
+          // Aguardar carregar antes de mudar
+          preloadImg.onload = changeAfterLoad
+          preloadImg.onerror = () => {
+            // Mesmo se falhar, tentar mudar (pode estar no cache)
+            console.warn(`[TamagotchiCat] Preload failed for ${nextImageSrc}, proceeding anyway`)
+            changeAfterLoad()
+          }
         }
       }
-      // If not loaded, wait for next interval (image will be loaded by then)
+      // Se não está carregada, esperar pelo próximo intervalo
     }, 5000)
 
     return () => clearInterval(interval)
-  }, [currentEmotion, isPaused, isChatMode, showStats, changeEmotion, loadedImages])
+  }, [currentEmotion, isPaused, isChatMode, showStats, changeEmotion, loadedImages, isTransitioning])
 
   const handleFeed = () => {
     setIsPaused(true)
@@ -312,34 +399,65 @@ export default function TamagotchiCat({ isChatMode = false, emotion }: Tamagotch
             position: 'relative',
           }}
         >
-          <img
-            src={currentImageSrc}
-            alt={`Miao ${emotionName}`}
-            className="relative w-full h-full transition-opacity duration-300 ease-in-out"
-            key={`chat-emotion-${emotionIndex}`}
-            onLoad={() => {
-              console.log(`[TamagotchiCat] Image loaded successfully: ${currentImageSrc} (emotion: ${emotionName})`)
-            }}
-            onError={(e) => {
-              // Fallback se a imagem não carregar
-              console.warn(`[TamagotchiCat] Failed to load image: ${currentImageSrc}, using fallback`)
-              const target = e.target as HTMLImageElement
-              target.src = "/images/header-cat.png"
-            }}
-            style={{ 
-              filter: 'drop-shadow(0 8px 20px rgba(0,0,0,0.3))',
-              animation: 'cat-vertical-float 3s ease-in-out infinite',
-              objectFit: 'contain',
-              objectPosition: 'center bottom',
-              width: 'auto',
-              height: 'auto',
-              maxWidth: '100%',
-              maxHeight: '100%',
-              position: 'relative',
-              opacity: 1,
-            }}
-            draggable={false}
-          />
+          {/* Container para crossfade */}
+          <div className="relative w-full h-full" style={{ position: 'relative' }} suppressHydrationWarning>
+            {/* Imagem anterior (fade out) */}
+            {isMounted && previousEmotion !== null && isTransitioning && (
+              <img
+                src={catEmotions[previousEmotion]?.src || "/images/header-cat.png"}
+                alt={`Miao ${catEmotions[previousEmotion]?.name || 'cat'}`}
+                className="absolute inset-0 w-full h-full transition-opacity duration-500 ease-in-out"
+                style={{ 
+                  filter: 'drop-shadow(0 8px 20px rgba(0,0,0,0.3))',
+                  animation: 'cat-vertical-float 3s ease-in-out infinite',
+                  objectFit: 'contain',
+                  objectPosition: 'center bottom',
+                  width: 'auto',
+                  height: 'auto',
+                  maxWidth: '100%',
+                  maxHeight: '100%',
+                  position: 'absolute',
+                  opacity: previousOpacity, // Controlado pelo estado
+                  pointerEvents: 'none',
+                  zIndex: 1,
+                  willChange: 'opacity',
+                  imageRendering: 'auto',
+                }}
+                draggable={false}
+                aria-hidden="true"
+              />
+            )}
+            {/* Imagem atual (fade in) */}
+            <img
+              ref={chatImageRef}
+              src={currentImageSrc}
+              alt={`Miao ${emotionName}`}
+              className="relative w-full h-full transition-opacity duration-500 ease-in-out"
+              onLoad={() => {
+                console.log(`[TamagotchiCat] Image loaded successfully: ${currentImageSrc} (emotion: ${emotionName})`)
+              }}
+              onError={(e) => {
+                // Fallback se a imagem não carregar
+                console.warn(`[TamagotchiCat] Failed to load image: ${currentImageSrc}, using fallback`)
+                const target = e.target as HTMLImageElement
+                target.src = "/images/header-cat.png"
+              }}
+              style={{ 
+                filter: 'drop-shadow(0 8px 20px rgba(0,0,0,0.3))',
+                objectFit: 'contain',
+                objectPosition: 'center bottom',
+                width: 'auto',
+                height: 'auto',
+                maxWidth: '100%',
+                maxHeight: '100%',
+                position: 'relative',
+                opacity: isMounted && previousEmotion !== null && isTransitioning ? 1 - previousOpacity : 1,
+                zIndex: 2,
+              }}
+              draggable={false}
+              suppressHydrationWarning
+            />
+          </div>
           {/* Gradient na parte inferior para esconder suavemente as pernas - vai até o input do chat - escuro mesmo no light mode */}
           <div 
             className="absolute bottom-0 left-0 right-0 pointer-events-none"
@@ -405,24 +523,58 @@ export default function TamagotchiCat({ isChatMode = false, emotion }: Tamagotch
             filter: 'blur(8px)',
           }}
         />
-        <img
-          src={catEmotions[currentEmotion]?.src || "/images/header-cat.png"}
-          alt={`Miao ${catEmotions[currentEmotion]?.name || 'cat'}`}
-          className="relative w-full max-w-[200px] sm:max-w-[280px] md:max-w-[350px] lg:max-w-[450px] xl:max-w-[550px] h-auto object-contain mx-auto transition-opacity duration-300 ease-in-out"
-          key={`emotion-${currentEmotion}`}
-          onError={(e) => {
-            // Fallback se a imagem não carregar
-            console.warn(`[TamagotchiCat] Failed to load image: ${catEmotions[currentEmotion]?.src}, using fallback`)
-            const target = e.target as HTMLImageElement
-            target.src = "/images/header-cat.png"
-          }}
-          style={{ 
-            maxHeight: 'calc(100vh - 200px)',
-            animation: 'cat-vertical-float 3s ease-in-out infinite',
-            opacity: 1,
-          }}
-          draggable={false}
-        />
+        {/* Container para crossfade - usar position relative para manter layout */}
+        <div 
+          className="relative w-full" 
+          style={{ minHeight: '200px', position: 'relative' }}
+          suppressHydrationWarning
+        >
+          {/* Imagem anterior (fade out) - só renderizar durante transição */}
+          {isMounted && previousEmotion !== null && isTransitioning && (
+            <img
+              src={catEmotions[previousEmotion]?.src || "/images/header-cat.png"}
+              alt={`Miao ${catEmotions[previousEmotion]?.name || 'cat'}`}
+              className="absolute inset-0 w-full max-w-[200px] sm:max-w-[280px] md:max-w-[350px] lg:max-w-[450px] xl:max-w-[550px] h-auto object-contain mx-auto transition-opacity duration-500 ease-in-out"
+              style={{ 
+                maxHeight: 'calc(100vh - 200px)',
+                animation: 'cat-vertical-float 3s ease-in-out infinite',
+                opacity: previousOpacity, // Controlado pelo estado
+                pointerEvents: 'none',
+                zIndex: 1,
+                willChange: 'opacity',
+                imageRendering: 'auto',
+              }}
+              draggable={false}
+              aria-hidden="true"
+            />
+          )}
+          {/* Imagem atual (fade in) */}
+          <img
+            ref={imageRef}
+            src={catEmotions[currentEmotion]?.src || "/images/header-cat.png"}
+            alt={`Miao ${catEmotions[currentEmotion]?.name || 'cat'}`}
+            className="relative w-full max-w-[200px] sm:max-w-[280px] md:max-w-[350px] lg:max-w-[450px] xl:max-w-[550px] h-auto object-contain mx-auto transition-opacity duration-500 ease-in-out"
+            onError={(e) => {
+              // Fallback se a imagem não carregar
+              console.warn(`[TamagotchiCat] Failed to load image: ${catEmotions[currentEmotion]?.src}, using fallback`)
+              const target = e.target as HTMLImageElement
+              target.src = "/images/header-cat.png"
+            }}
+            onLoad={() => {
+              // Quando a nova imagem carregar, garantir que está visível se não estiver em transição
+              if (!isTransitioning || previousEmotion === null) {
+                // Forçar atualização se necessário
+              }
+            }}
+            style={{ 
+              maxHeight: 'calc(100vh - 200px)',
+              opacity: isMounted && previousEmotion !== null && isTransitioning ? 1 - previousOpacity : 1,
+              zIndex: 2,
+            }}
+            draggable={false}
+            suppressHydrationWarning
+          />
+        </div>
       </div>
 
       <div 
